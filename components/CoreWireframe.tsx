@@ -107,7 +107,7 @@ export default function CoreWireframe() {
 
       {/* 와이어프레임 엣지 — 코어보다 크므로 선이 잘리지 않음 */}
       <lineSegments geometry={edgesGeo}>
-        <lineBasicMaterial color="#e8ebef" transparent opacity={0.7} />
+        <lineBasicMaterial color="#7a7d80" transparent opacity={0.7} />
       </lineSegments>
 
       {/* 꼭짓점 원 */}
