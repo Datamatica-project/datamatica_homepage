@@ -6,6 +6,9 @@ export default function VehicleScrollSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [rotation, setRotation] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1000,
+  );
   const prevTranslateXRef = useRef(0);
 
   // 바퀴 크기 (px)
@@ -55,11 +58,27 @@ export default function VehicleScrollSection() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Resize handler — windowWidth state 갱신 후 스크롤 위치도 재계산
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+
+      // progress 기반으로 translateX 기준점 재동기화
+      if (sectionRef.current) {
+        const newContainerWidth = window.innerWidth * 2;
+        const newViewportWidth = window.innerWidth;
+        prevTranslateXRef.current =
+          -progress * (newContainerWidth - newViewportWidth);
+      }
+    };
+
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => window.removeEventListener("resize", handleResize);
+  }, [progress]);
+
   // Calculate transforms
-  const containerWidth =
-    typeof window !== "undefined" ? window.innerWidth * 2 : 2000;
-  const viewportWidth =
-    typeof window !== "undefined" ? window.innerWidth : 1000;
+  const containerWidth = windowWidth * 2;
+  const viewportWidth = windowWidth;
   const translateX = -progress * (containerWidth - viewportWidth);
 
   // Background sketch opacity (fade out during transition)
@@ -93,8 +112,8 @@ export default function VehicleScrollSection() {
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: `
-              linear-gradient(to right, #ccc 1px, transparent 1px),
-              linear-gradient(to bottom, #ccc 1px, transparent 1px)
+              linear-gradient(to right, #cccccc76 1px, transparent 1px),
+              linear-gradient(to bottom, #cccccc76 1px, transparent 1px)
             `,
             backgroundSize: "60px 60px",
           }}
@@ -186,26 +205,25 @@ export default function VehicleScrollSection() {
         >
           {/* Top view sketch (left) */}
           <div
-            className="absolute left-4 top-1/2 -translate-y-1/2"
-            style={{ width: "280px", height: "450px" }}
+            className="absolute left-[200px] bottom-[100px]"
+            style={{ width: "400px" }}
           >
             <img
               src="/car/top_view.png"
               alt="Top View Sketch"
-              className="w-full h-full object-contain opacity-40"
-              style={{ transform: "rotate(-90deg)" }}
+              className="w-full h-full object-contain opacity-30"
             />
           </div>
 
           {/* Front view sketch (right) */}
           <div
-            className="absolute right-4 top-1/2 -translate-y-1/2"
-            style={{ width: "300px", height: "300px" }}
+            className="absolute right-[200px] bottom-[200px]"
+            style={{ width: "350px" }}
           >
             <img
               src="/car/front_view.png"
               alt="Front View Sketch"
-              className="w-full h-full object-contain opacity-40"
+              className="w-full h-full object-contain opacity-30"
             />
           </div>
         </div>
@@ -237,7 +255,7 @@ export default function VehicleScrollSection() {
                   left: "0px", // 좌우 위치
                   bottom: "15px", // 상하 위치
                   background:
-                    "radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 40%, transparent 70%)",
+                    "radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0, 0, 0, 0.443) 40%, transparent 80%)",
                   borderRadius: "50%",
                   filter: "blur(10px)", // 블러 정도
                   zIndex: 0,
