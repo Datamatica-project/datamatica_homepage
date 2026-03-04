@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useMemo, useCallback } from "react";
+import { useRef, useEffect, useMemo, useCallback, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -24,6 +24,7 @@ const LOOK_AT = new THREE.Vector3(0, 2, -150);
 const FOG_NEAR = 120;
 const FOG_FAR = 800;
 const FOG_COLOR = 0x5a2048; // 수평선 안쪽 어두운 보라 (CSS 그라데이션 중간과 매칭)
+const TITLE_Z = -10; // 타이틀 월드 Z 좌표
 
 // --------------------
 // Types & Data
@@ -31,11 +32,11 @@ const FOG_COLOR = 0x5a2048; // 수평선 안쪽 어두운 보라 (CSS 그라데�
 type HeightFn = (x: number, z: number) => number;
 
 const TECH_NODES = [
-  { name: "DATA LABELING", x: -14, z: -120 },
-  { name: "HD MAP", x: 20, z: -230 },
-  { name: "AUTONOMOUS DRIVING", x: -10, z: -360 },
-  { name: "DIGITAL TWIN", x: 24, z: -490 },
-  { name: "SMART HEALTHCARE", x: -20, z: -620 },
+  { name: "DATA LABELING", code: "SYS.01 / LABEL.STREAM", x: -14, z: -60 },
+  { name: "HD MAP", code: "SYS.02 / MAP.SYNC", x: 20, z: -120 },
+  { name: "AUTONOMOUS DRIVING", code: "SYS.03 / AUTO.DRIVE", x: -10, z: -190 },
+  { name: "DIGITAL TWIN", code: "SYS.04 / TWIN.SYNC", x: 24, z: -260 },
+  { name: "SMART HEALTHCARE", code: "SYS.05 / HEALTH.AI", x: -20, z: -330 },
 ] as const;
 
 // --------------------
@@ -106,6 +107,40 @@ function createTile(initialWorldZ: number): Tile {
 }
 
 // --------------------
+// HeightMap 타입 / 샘플러
+// --------------------
+type HMapData = { pixels: Uint8ClampedArray; width: number; height: number };
+
+const HMAP_DEPTH = 800; // Z world units per image tile
+const HMAP_SCALE = 14; // heightmap amplitude (world units)
+const MAP_HEIGHT = 35;
+const CURVE = 1.8;
+const MAP_WORLD_LEN = 800; // heightmap 1장이 커버하는 Z 월드 길이
+
+/** 바이리니어 보간으로 [0,1] UV → 밝기 [0,1] 반환 */
+function sampleHMap(hmap: HMapData, u: number, v: number): number {
+  const { pixels: px, width: w, height: h } = hmap;
+  const fx = Math.max(0, Math.min(1, u)) * (w - 1);
+  const fy = Math.max(0, Math.min(1, v)) * (h - 1);
+  const x0 = Math.floor(fx),
+    x1 = Math.min(x0 + 1, w - 1);
+  const y0 = Math.floor(fy),
+    y1 = Math.min(y0 + 1, h - 1);
+  const tx = fx - x0,
+    ty = fy - y0;
+  const r00 = px[(y0 * w + x0) * 4] / 255;
+  const r10 = px[(y0 * w + x1) * 4] / 255;
+  const r01 = px[(y1 * w + x0) * 4] / 255;
+  const r11 = px[(y1 * w + x1) * 4] / 255;
+  return (
+    r00 * (1 - tx) * (1 - ty) +
+    r10 * tx * (1 - ty) +
+    r01 * (1 - tx) * ty +
+    r11 * tx * ty
+  );
+}
+
+// --------------------
 // Height field (simplex-noise 기반)
 // --------------------
 function mulberry32(seed: number) {
@@ -118,9 +153,9 @@ function mulberry32(seed: number) {
   };
 }
 
-function makeHeightFn() {
-  const rng = mulberry32(123456);
-  const noise2D = createNoise2D();
+function makeHeightFn(hmap?: HMapData) {
+  const rng = mulberry32(19);
+  const noise2D = createNoise2D(rng);
   const n = (x: number, z: number, f: number) => noise2D(x * f, z * f);
   const fbm = (x: number, z: number, f: number, oct = 4) => {
     let amp = 1,
@@ -148,7 +183,19 @@ function makeHeightFn() {
     const mask = smoothstep(0.12, 0.55, region);
     const ridge = Math.pow(ridged(wx, wz, 0.018, 5), 2.2);
     const flatBase = THREE.MathUtils.clamp(base, -2.2, 2.2);
-    return flatBase + mask * ridge * 18.0;
+
+    if (!hmap) {
+      // heightmap 미로드 시 기존 noise 그대로 (fallback)
+      return flatBase + mask * ridge * 18.0;
+    }
+
+    // heightmap + contrast curve → 대형 지형 형상
+    const u = x / WIDTH + 0.5;
+    const v = (((-zWorld / MAP_WORLD_LEN) % 1) + 1) % 1;
+    let map = sampleHMap(hmap, u, v); // 0~1
+    map = Math.pow(map, CURVE);
+    const baseHeight = map * MAP_HEIGHT;
+    return baseHeight;
   };
 }
 
@@ -210,6 +257,89 @@ function updateTile(tile: Tile, newWorldZ: number, heightAt: HeightFn) {
 }
 
 // --------------------
+// TitleBillboard (3D 월드 공간 타이틀)
+// --------------------
+function TitleBillboard() {
+  const { camera } = useThree();
+  const innerRef = useRef<HTMLDivElement>(null);
+
+  useFrame(() => {
+    if (!innerRef.current) return;
+    // camera.z - TITLE_Z: 양수 = 카메라가 타이틀 앞, 음수 = 통과 후
+    const dist = camera.position.z - TITLE_Z;
+    // dist 25 이상: 완전히 보임 / dist 0 이하: 완전히 사라짐
+    const opacity = Math.max(0, Math.min(1, (dist - 0) / 25));
+    innerRef.current.style.opacity = String(opacity);
+  });
+
+  return (
+    <Html position={[0, 7, TITLE_Z]} center distanceFactor={55}>
+      <div
+        ref={innerRef}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "8px",
+          pointerEvents: "none",
+          userSelect: "none",
+          textAlign: "center",
+          backgroundColor: "rgba(0,0,0,0.1)",
+          padding: "10px 20px",
+          borderRadius: "5px",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255,255,255,0.1)",
+        }}
+      >
+        <p
+          style={{
+            color: "rgba(255,255,255,0.4)",
+            fontSize: "10px",
+            letterSpacing: "0.45em",
+            textTransform: "uppercase",
+            fontFamily: "noto sans kr",
+            margin: 0,
+            whiteSpace: "nowrap",
+            fontWeight: "normal",
+          }}
+        >
+          Vector Graphic
+        </p>
+        <h1
+          style={{
+            color: "white",
+            fontSize: "58px",
+            fontWeight: "bold",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            lineHeight: 1,
+            textShadow: "0 0 30px rgba(255,100,150,0.7)",
+            margin: 0,
+            whiteSpace: "nowrap",
+          }}
+        >
+          DATAMATICA
+        </h1>
+        <p
+          style={{
+            color: "rgba(255,255,255,0.4)",
+            fontSize: "10px",
+            letterSpacing: "0.45em",
+            textTransform: "uppercase",
+            fontFamily: "noto sans kr",
+            margin: 0,
+            whiteSpace: "nowrap",
+            fontWeight: "normal",
+          }}
+        >
+          Visualization
+        </p>
+      </div>
+    </Html>
+  );
+}
+
+// --------------------
 // Stars
 // --------------------
 function Stars() {
@@ -250,40 +380,58 @@ function Stars() {
 // --------------------
 // DataBeacon
 // --------------------
-const BEAM_H = 22;
+const BEAM_H = 11;
 
 function DataBeacon({
   x,
   z,
   name,
+  code,
   heightAt,
   phase = 0,
 }: {
   x: number;
   z: number;
   name: string;
+  code: string;
   heightAt: HeightFn;
   phase?: number;
 }) {
   const y = heightAt(x, z);
 
-  const beamGeo = useMemo(
-    () => new THREE.CylinderGeometry(0.05, 0.7, BEAM_H, 8, 1, true),
+  // 가느다란 흰색 코어 빔
+  const coreGeo = useMemo(
+    () => new THREE.CylinderGeometry(0.04, 0.04, BEAM_H, 8),
     [],
   );
-  const dotGeo = useMemo(() => new THREE.SphereGeometry(0.5, 12, 12), []);
+  // 넓은 소프트 글로우 (아래 넓고 위로 좁아짐)
+  const glowGeo = useMemo(
+    () => new THREE.CylinderGeometry(0.02, 0.45, BEAM_H, 8, 1, true),
+    [],
+  );
   const ringGeo = useMemo(() => {
-    const g = new THREE.RingGeometry(0.9, 2.2, 32);
+    const g = new THREE.RingGeometry(0.7, 2.0, 32);
     g.rotateX(-Math.PI / 2);
     return g;
   }, []);
 
-  const mat = useMemo(
+  const coreMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: 0x00ddff,
+        color: 0xffffff,
         transparent: true,
-        opacity: 0.4,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      }),
+    [],
+  );
+  const glowMat = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: 0x88ccff,
+        transparent: true,
+        opacity: 0.18,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         side: THREE.DoubleSide,
@@ -292,32 +440,68 @@ function DataBeacon({
   );
 
   useFrame(({ clock }) => {
-    mat.opacity = 0.28 + Math.sin(clock.elapsedTime * 1.6 + phase) * 0.14;
+    const t = Math.sin(clock.elapsedTime * 1.6 + phase);
+    coreMat.opacity = 0.65 + t * 0.2;
+    glowMat.opacity = 0.1 + t * 0.06;
   });
 
   return (
     <group position={[x, y, z]}>
-      <mesh geometry={beamGeo} material={mat} position={[0, BEAM_H / 2, 0]} />
-      <mesh geometry={dotGeo} material={mat} />
-      <mesh geometry={ringGeo} material={mat} />
-      <Html position={[0, BEAM_H + 2, 0]} center distanceFactor={80}>
+      <mesh geometry={coreGeo} material={coreMat} position={[0, BEAM_H / 2, 0]} />
+      <mesh geometry={glowGeo} material={glowMat} position={[0, BEAM_H / 2, 0]} />
+      <mesh geometry={ringGeo} material={coreMat} />
+      <Html position={[0, BEAM_H + 1.5, 0]} center distanceFactor={80}>
         <div
           style={{
-            color: "rgba(255,255,255,0.88)",
-            fontSize: "8.5px",
-            letterSpacing: "0.25em",
-            fontFamily: "monospace",
-            whiteSpace: "nowrap",
-            textTransform: "uppercase",
-            textShadow: "0 0 10px rgba(0,220,255,0.9)",
+            display: "flex",
+            pointerEvents: "none",
             userSelect: "none",
-            padding: "3px 9px",
-            border: "1px solid rgba(0,200,255,0.3)",
-            background: "rgba(0,0,0,0.55)",
-            backdropFilter: "blur(2px)",
           }}
         >
-          {name}
+          {/* 왼쪽 오렌지 액센트 바 */}
+          <div
+            style={{
+              width: "3px",
+              background: "#ff6a3d",
+              flexShrink: 0,
+            }}
+          />
+          {/* 텍스트 영역 */}
+          <div
+            style={{
+              background: "rgba(0,0,8,0.82)",
+              padding: "5px 10px",
+              border: "1px solid rgba(255,100,50,0.25)",
+              borderLeft: "none",
+            }}
+          >
+            <p
+              style={{
+                color: "#ff6a3d",
+                fontSize: "8px",
+                fontFamily: "monospace",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                margin: 0,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {name}
+            </p>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.92)",
+                fontSize: "11px",
+                fontFamily: "monospace",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                margin: "3px 0 0",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {code}
+            </p>
+          </div>
         </div>
       </Html>
     </group>
@@ -331,8 +515,29 @@ function TerrainScene() {
   const { camera, scene } = useThree();
   const scrollY = useRef(0);
   const groupRefs = useRef<THREE.Group[]>([]);
-  const heightAt = useMemo(() => makeHeightFn(), []);
   const circleTex = useMemo(() => createCircleTexture(), []);
+
+  // heightMap.png 비동기 로드 → 픽셀 데이터 추출
+  const [hmapData, setHmapData] = useState<HMapData | null>(null);
+  useEffect(() => {
+    const img = new Image();
+    img.src = "/heightMap.png";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0);
+      const { data } = ctx.getImageData(0, 0, img.width, img.height);
+      setHmapData({ pixels: data, width: img.width, height: img.height });
+    };
+  }, []);
+
+  // hmapData 로드 완료 시 heightAt 재생성 → tiles 자동 재갱신
+  const heightAt = useMemo(
+    () => makeHeightFn(hmapData ?? undefined),
+    [hmapData],
+  );
 
   // 솔리드 flat-shaded 지형 (조명 반사 핵심)
   const solidMat = useMemo(
@@ -445,6 +650,7 @@ function TerrainScene() {
       {/* 하늘 요소 */}
       <Stars />
       <SunriseGlow />
+      <TitleBillboard />
 
       {/* 지형 타일 */}
       {tiles.map((tile, i) => (
@@ -471,6 +677,7 @@ function TerrainScene() {
           x={node.x}
           z={node.z}
           name={node.name}
+          code={node.code}
           heightAt={heightAt}
           phase={(i * Math.PI * 2) / TECH_NODES.length}
         />
@@ -509,14 +716,6 @@ export default function Terrain() {
         <TerrainScene />
 
         <EffectComposer>
-          <Bloom
-            intensity={0.22}
-            luminanceThreshold={0.45}
-            luminanceSmoothing={0.9}
-          />
-
-          <Noise opacity={0.04} />
-
           <Vignette eskil={false} offset={0.1} darkness={0.8} />
         </EffectComposer>
       </Canvas>
@@ -537,19 +736,6 @@ export default function Terrain() {
           mixBlendMode: "overlay",
         }}
       />
-
-      {/* 타이틀 오버레이 */}
-      <div className="absolute inset-0 flex flex-col items-center justify-start pt-14 pointer-events-none select-none">
-        <p className="text-white/40 text-xs tracking-[0.45em] uppercase mb-3">
-          Vector Graphic
-        </p>
-        <h1 className="text-white text-6xl font-bold tracking-[0.15em] uppercase leading-none drop-shadow-lg">
-          DATAMATICA
-        </h1>
-        <p className="text-white/40 text-xs tracking-[0.45em] uppercase mt-3">
-          Visualization
-        </p>
-      </div>
     </div>
   );
 }
