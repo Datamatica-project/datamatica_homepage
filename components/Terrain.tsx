@@ -12,6 +12,7 @@ import {
   Vignette,
 } from "@react-three/postprocessing";
 import SunriseGlow from "./SunriseGlow";
+import { DataBeacon } from "./DataBeacon";
 
 const SEG_LEN = 600;
 const WIDTH = 220;
@@ -32,11 +33,42 @@ const TITLE_Z = -10; // 타이틀 월드 Z 좌표
 type HeightFn = (x: number, z: number) => number;
 
 const TECH_NODES = [
-  { name: "DATA LABELING", code: "SYS.01 / LABEL.STREAM", x: -14, z: -60 },
-  { name: "HD MAP", code: "SYS.02 / MAP.SYNC", x: 20, z: -120 },
-  { name: "AUTONOMOUS DRIVING", code: "SYS.03 / AUTO.DRIVE", x: -10, z: -190 },
-  { name: "DIGITAL TWIN", code: "SYS.04 / TWIN.SYNC", x: 24, z: -260 },
-  { name: "SMART HEALTHCARE", code: "SYS.05 / HEALTH.AI", x: -20, z: -330 },
+  {
+    name: "DATA LABELING",
+    code: "SYS.01 / LABEL.STREAM",
+    x: -14,
+    z: -50,
+    yOffset: -7,
+  },
+  { name: "HD MAP", code: "SYS.02 / MAP.SYNC", x: 20, z: -80, yOffset: -3 },
+  {
+    name: "AUTONOMOUS DRIVING",
+    code: "SYS.03 / AUTO.DRIVE",
+    x: -10,
+    z: -110,
+    yOffset: -4,
+  },
+  {
+    name: "DIGITAL TWIN",
+    code: "SYS.04 / TWIN.SYNC",
+    x: 24,
+    z: -140,
+    yOffset: -3,
+  },
+  {
+    name: "SMART HEALTHCARE",
+    code: "SYS.05 / HEALTH.AI",
+    x: -20,
+    z: -170,
+    yOffset: -5,
+  },
+  {
+    name: "SAFETY MONITORING",
+    code: "SYS.06 / SAFETY.MONITOR",
+    x: 10,
+    z: -200,
+    yOffset: -7.5,
+  },
 ] as const;
 
 // --------------------
@@ -378,137 +410,6 @@ function Stars() {
 }
 
 // --------------------
-// DataBeacon
-// --------------------
-const BEAM_H = 11;
-
-function DataBeacon({
-  x,
-  z,
-  name,
-  code,
-  heightAt,
-  phase = 0,
-}: {
-  x: number;
-  z: number;
-  name: string;
-  code: string;
-  heightAt: HeightFn;
-  phase?: number;
-}) {
-  const y = heightAt(x, z);
-
-  // 가느다란 흰색 코어 빔
-  const coreGeo = useMemo(
-    () => new THREE.CylinderGeometry(0.04, 0.04, BEAM_H, 8),
-    [],
-  );
-  // 넓은 소프트 글로우 (아래 넓고 위로 좁아짐)
-  const glowGeo = useMemo(
-    () => new THREE.CylinderGeometry(0.02, 0.45, BEAM_H, 8, 1, true),
-    [],
-  );
-  const ringGeo = useMemo(() => {
-    const g = new THREE.RingGeometry(0.7, 2.0, 32);
-    g.rotateX(-Math.PI / 2);
-    return g;
-  }, []);
-
-  const coreMat = useMemo(
-    () =>
-      new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.85,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      }),
-    [],
-  );
-  const glowMat = useMemo(
-    () =>
-      new THREE.MeshBasicMaterial({
-        color: 0x88ccff,
-        transparent: true,
-        opacity: 0.18,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-      }),
-    [],
-  );
-
-  useFrame(({ clock }) => {
-    const t = Math.sin(clock.elapsedTime * 1.6 + phase);
-    coreMat.opacity = 0.65 + t * 0.2;
-    glowMat.opacity = 0.1 + t * 0.06;
-  });
-
-  return (
-    <group position={[x, y, z]}>
-      <mesh geometry={coreGeo} material={coreMat} position={[0, BEAM_H / 2, 0]} />
-      <mesh geometry={glowGeo} material={glowMat} position={[0, BEAM_H / 2, 0]} />
-      <mesh geometry={ringGeo} material={coreMat} />
-      <Html position={[0, BEAM_H + 1.5, 0]} center distanceFactor={80}>
-        <div
-          style={{
-            display: "flex",
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-        >
-          {/* 왼쪽 오렌지 액센트 바 */}
-          <div
-            style={{
-              width: "3px",
-              background: "#ff6a3d",
-              flexShrink: 0,
-            }}
-          />
-          {/* 텍스트 영역 */}
-          <div
-            style={{
-              background: "rgba(0,0,8,0.82)",
-              padding: "5px 10px",
-              border: "1px solid rgba(255,100,50,0.25)",
-              borderLeft: "none",
-            }}
-          >
-            <p
-              style={{
-                color: "#ff6a3d",
-                fontSize: "8px",
-                fontFamily: "monospace",
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                margin: 0,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {name}
-            </p>
-            <p
-              style={{
-                color: "rgba(255,255,255,0.92)",
-                fontSize: "11px",
-                fontFamily: "monospace",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                margin: "3px 0 0",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {code}
-            </p>
-          </div>
-        </div>
-      </Html>
-    </group>
-  );
-}
-
-// --------------------
 // Main scene
 // --------------------
 function TerrainScene() {
@@ -521,7 +422,8 @@ function TerrainScene() {
   const [hmapData, setHmapData] = useState<HMapData | null>(null);
   useEffect(() => {
     const img = new Image();
-    img.src = "/heightMap.png";
+    img.src = "/heightMap3.png";
+
     img.onload = () => {
       const canvas = document.createElement("canvas");
       canvas.width = img.width;
@@ -679,6 +581,7 @@ function TerrainScene() {
           name={node.name}
           code={node.code}
           heightAt={heightAt}
+          yOffset={node.yOffset}
           phase={(i * Math.PI * 2) / TECH_NODES.length}
         />
       ))}
