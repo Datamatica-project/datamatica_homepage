@@ -11,6 +11,7 @@ import {
   Noise,
   Vignette,
 } from "@react-three/postprocessing";
+import SunriseGlow from "./SunriseGlow";
 
 const SEG_LEN = 600;
 const WIDTH = 220;
@@ -247,32 +248,6 @@ function Stars() {
 }
 
 // --------------------
-// Horizon Glow — 수평선 핑크 빛
-// --------------------
-function HorizonGlow() {
-  const geo = useMemo(() => new THREE.PlaneGeometry(800, 18), []);
-  const mat = useMemo(
-    () =>
-      new THREE.MeshBasicMaterial({
-        color: 0xff4a6e,
-        opacity: 0.35,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-      }),
-    [],
-  );
-
-  // 미세한 숨쉬기 애니메이션
-  useFrame(({ clock }) => {
-    mat.opacity = 0.22 + Math.sin(clock.elapsedTime * 0.35) * 0.05;
-  });
-
-  return <mesh geometry={geo} material={mat} position={[0, 5, -320]} />;
-}
-
-// --------------------
 // DataBeacon
 // --------------------
 const BEAM_H = 22;
@@ -441,27 +416,6 @@ function TerrainScene() {
     recycleIfNeeded(camera.position.z);
   });
 
-  function HorizonVolume() {
-    const geo = useMemo(
-      () => new THREE.CylinderGeometry(200, 500, 180, 64, 1, true),
-      [],
-    );
-
-    const mat = useMemo(
-      () =>
-        new THREE.MeshBasicMaterial({
-          color: 0xff4a6e,
-          transparent: true,
-          opacity: 0.08,
-          side: THREE.BackSide,
-          depthWrite: false,
-        }),
-      [],
-    );
-
-    return <mesh geometry={geo} material={mat} position={[0, 60, -420]} />;
-  }
-
   return (
     <>
       {/* 전체 기저 조명: 어두운 파랑으로 지형 윤곽 살림 */}
@@ -490,7 +444,7 @@ function TerrainScene() {
 
       {/* 하늘 요소 */}
       <Stars />
-      <HorizonGlow />
+      <SunriseGlow />
 
       {/* 지형 타일 */}
       {tiles.map((tile, i) => (
@@ -556,7 +510,7 @@ export default function Terrain() {
 
         <EffectComposer>
           <Bloom
-            intensity={0.16}
+            intensity={0.22}
             luminanceThreshold={0.45}
             luminanceSmoothing={0.9}
           />
