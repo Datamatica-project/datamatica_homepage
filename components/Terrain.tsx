@@ -12,8 +12,8 @@ import {
   Vignette,
 } from "@react-three/postprocessing";
 import SunriseGlow from "./SunriseGlow";
-import DataCore from "./DataCore";
 import { DataBeacon } from "./DataBeacon";
+import { GlobeParticlesScene } from "./GlobeParticles";
 
 const SEG_LEN = 600;
 const WIDTH = 220;
@@ -343,7 +343,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
           userSelect: "none",
           textAlign: "center",
           backgroundColor: isDark ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)",
-          padding: "10px 20px",
+          padding: "clamp(8px, 2vw, 10px) clamp(12px, 4vw, 20px)",
           borderRadius: "5px",
           backdropFilter: "blur(5px)",
           border: "1px solid rgba(255,255,255,0.1)",
@@ -353,7 +353,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
         <p
           style={{
             color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
-            fontSize: "10px",
+            fontSize: "clamp(8px, 2.5vw, 10px)",
             letterSpacing: "0.45em",
             textTransform: "uppercase",
             fontFamily: "noto sans kr",
@@ -368,7 +368,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
         <h1
           style={{
             color: isDark ? "white" : "#D94A52",
-            fontSize: "58px",
+            fontSize: "clamp(28px, 10vw, 58px)",
             fontWeight: "bold",
             letterSpacing: "0.15em",
             textTransform: "uppercase",
@@ -384,7 +384,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
         <p
           style={{
             color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
-            fontSize: "10px",
+            fontSize: "clamp(8px, 2.5vw, 10px)",
             letterSpacing: "0.45em",
             textTransform: "uppercase",
             fontFamily: "noto sans kr",
@@ -404,36 +404,61 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
 // --------------------
 // Stars
 // --------------------
-function Stars() {
+// 글로브와 동일한 5색 그라디언트 (X 위치 기반)
+const STAR_COLORS = [
+  new THREE.Color(0x4139fb),
+  new THREE.Color(0xba73ef),
+  new THREE.Color(0xfb23c5),
+  new THREE.Color(0xfd3d79),
+  new THREE.Color(0xfe6a54),
+];
+function starGradientColor(x: number, range: number): THREE.Color {
+  const t = THREE.MathUtils.clamp(x / range + 0.5, 0, 1);
+  const s = t * 4;
+  const i = Math.min(Math.floor(s), 3);
+  return STAR_COLORS[i].clone().lerp(STAR_COLORS[i + 1], s - i);
+}
+
+function Stars({ isDark }: { isDark: boolean }) {
   const geo = useMemo(() => {
     const n = 500;
-    const arr = new Float32Array(n * 3);
-    // 고정 시드 RNG
+    const pos = new Float32Array(n * 3);
+    const col = new Float32Array(n * 3);
     let s = 99991;
     const rng = () => {
       s = (s * 16807) % 2147483647;
       return (s - 1) / 2147483646;
     };
+    const tmp = new THREE.Color();
     for (let i = 0; i < n; i++) {
-      arr[i * 3] = (rng() - 0.5) * 800;
-      arr[i * 3 + 1] = rng() * 180 + 10; // 하늘 위쪽
-      arr[i * 3 + 2] = (rng() - 0.5) * 800;
+      const x = (rng() - 0.5) * 800;
+      const y = rng() * 180 + 10;
+      const z = (rng() - 0.5) * 800;
+      pos[i * 3] = x;
+      pos[i * 3 + 1] = y;
+      pos[i * 3 + 2] = z;
+      tmp.copy(starGradientColor(x, 400));
+      col[i * 3] = tmp.r;
+      col[i * 3 + 1] = tmp.g;
+      col[i * 3 + 2] = tmp.b;
     }
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(arr, 3));
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    g.setAttribute("color", new THREE.BufferAttribute(col, 3));
     return g;
   }, []);
 
   const mat = useMemo(
     () =>
       new THREE.PointsMaterial({
-        color: 0xffffff,
-        opacity: 0.5,
+        color: isDark ? 0xffffff : 0xffffff,
+        vertexColors: !isDark,
+        opacity: isDark ? 0.5 : 0.85,
         size: 1.2,
         sizeAttenuation: true,
         transparent: true,
       }),
-    [],
+    [isDark],
   );
 
   return <points geometry={geo} material={mat} />;
@@ -630,8 +655,9 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
       light4Ref.current.intensity = 0.6 + (0.4 - 0.6) * t;
     }
 
-    // 카메라 스크롤
-    const targetZ = CAM_Z_BASE - scrollY.current * SCROLL_SPEED;
+    // 카메라 스크롤 (원 등장 지점인 500vh에서 고정)
+    const cappedScroll = Math.min(scrollY.current, 5.0 * window.innerHeight);
+    const targetZ = CAM_Z_BASE - cappedScroll * SCROLL_SPEED;
     camera.position.z += (targetZ - camera.position.z) * 0.1;
     recycleIfNeeded(camera.position.z);
   });
@@ -670,8 +696,14 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
       />
 
       {/* 하늘 요소 */}
-      <Stars />
-      {isDark ? <SunriseGlow /> : <DataCore />}
+      <Stars isDark={isDark} />
+      {isDark ? (
+        <SunriseGlow />
+      ) : (
+        <group position={[0, 66, -300]} scale={[18, 18, 18]}>
+          <GlobeParticlesScene />
+        </group>
+      )}
       <TitleBillboard isDark={isDark} />
 
       {/* 지형 타일 */}
@@ -736,7 +768,6 @@ export default function Terrain() {
   const [themeProgress, setThemeProgress] = useState(0); // 0 = 다크, 1 = 라이트
   const tpRef = useRef(0);
   const rafRef = useRef<number | undefined>(undefined);
-
   // CSS/Vignette용 themeProgress RAF 애니메이션
   useEffect(() => {
     const target = isDark ? 0 : 1;
@@ -762,7 +793,10 @@ export default function Terrain() {
   const vignetteDarkness = 0.8 + (0.12 - 0.8) * themeProgress;
 
   return (
-    <div className="relative w-full h-screen overflow-hidden" style={{ background: DARK_BG }}>
+    <div
+      className="relative w-full h-screen overflow-hidden"
+      style={{ background: DARK_BG }}
+    >
       {/* 라이트 모드 배경 (opacity로 크로스페이드) */}
       <div
         style={{
@@ -824,7 +858,8 @@ export default function Terrain() {
           cursor: "pointer",
           backdropFilter: "blur(8px)",
           fontFamily: "monospace",
-          transition: "background 0.5s ease, border-color 0.5s ease, color 0.5s ease",
+          transition:
+            "background 0.5s ease, border-color 0.5s ease, color 0.5s ease",
         }}
       >
         {isDark ? "◑ LIGHT" : "◐ DARK"}
