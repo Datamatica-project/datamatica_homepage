@@ -95,7 +95,7 @@ export function DataBeacon({
         >
           <div
             style={{
-              background: "transparent",
+              background: "rgba(0, 0, 0, 0.1)",
               padding: "5px 10px",
               borderLeft: "none",
               backdropFilter: "blur(10px)",
@@ -105,7 +105,7 @@ export function DataBeacon({
           >
             <p
               style={{
-                color: "#ff6a3d",
+                color: "#D94A52",
                 fontSize: "12px",
                 fontFamily: "var(--font-bebas-neue), sans-serif",
                 letterSpacing: "0.15em",
@@ -135,4 +135,3 @@ export function DataBeacon({
     </group>
   );
 }
-

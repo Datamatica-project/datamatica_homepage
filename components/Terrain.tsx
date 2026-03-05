@@ -12,6 +12,7 @@ import {
   Vignette,
 } from "@react-three/postprocessing";
 import SunriseGlow from "./SunriseGlow";
+import DataCore from "./DataCore";
 import { DataBeacon } from "./DataBeacon";
 
 const SEG_LEN = 600;
@@ -24,7 +25,7 @@ const CAM_Z_BASE = 15;
 const LOOK_AT = new THREE.Vector3(0, 2, -150);
 const FOG_NEAR = 120;
 const FOG_FAR = 800;
-const FOG_COLOR = 0x5a2048; // 수평선 안쪽 어두운 보라 (CSS 그라데이션 중간과 매칭)
+const FOG_COLOR = 0x021012; // 다크 틸
 const TITLE_Z = -10; // 타이틀 월드 Z 좌표
 
 // --------------------
@@ -83,6 +84,31 @@ const smoothstep = (e0: number, e1: number, x: number) => {
 // --------------------
 // Texture for Points
 // --------------------
+function createGlowTexture(size = 64): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  ctx.clearRect(0, 0, size, size);
+  const gradient = ctx.createRadialGradient(
+    size / 2,
+    size / 2,
+    0,
+    size / 2,
+    size / 2,
+    size / 2,
+  );
+  gradient.addColorStop(0, "rgba(255,255,255,1)");
+  gradient.addColorStop(0.35, "rgba(255,255,255,0.7)");
+  gradient.addColorStop(0.7, "rgba(255,255,255,0.2)");
+  gradient.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  return tex;
+}
+
 function createCircleTexture(size = 64): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = size;
@@ -291,7 +317,7 @@ function updateTile(tile: Tile, newWorldZ: number, heightAt: HeightFn) {
 // --------------------
 // TitleBillboard (3D 월드 공간 타이틀)
 // --------------------
-function TitleBillboard() {
+function TitleBillboard({ isDark }: { isDark: boolean }) {
   const { camera } = useThree();
   const innerRef = useRef<HTMLDivElement>(null);
 
@@ -316,16 +342,16 @@ function TitleBillboard() {
           pointerEvents: "none",
           userSelect: "none",
           textAlign: "center",
-          backgroundColor: "rgba(0,0,0,0.1)",
+          backgroundColor: isDark ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)",
           padding: "10px 20px",
           borderRadius: "5px",
-          backdropFilter: "blur(10px)",
+          backdropFilter: "blur(5px)",
           border: "1px solid rgba(255,255,255,0.1)",
         }}
       >
         <p
           style={{
-            color: "rgba(255,255,255,0.4)",
+            color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
             fontSize: "10px",
             letterSpacing: "0.45em",
             textTransform: "uppercase",
@@ -339,7 +365,7 @@ function TitleBillboard() {
         </p>
         <h1
           style={{
-            color: "white",
+            color: isDark ? "white" : "#D94A52",
             fontSize: "58px",
             fontWeight: "bold",
             letterSpacing: "0.15em",
@@ -354,7 +380,7 @@ function TitleBillboard() {
         </h1>
         <p
           style={{
-            color: "rgba(255,255,255,0.4)",
+            color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
             fontSize: "10px",
             letterSpacing: "0.45em",
             textTransform: "uppercase",
@@ -412,11 +438,12 @@ function Stars() {
 // --------------------
 // Main scene
 // --------------------
-function TerrainScene() {
+function TerrainScene({ isDark }: { isDark: boolean }) {
   const { camera, scene } = useThree();
   const scrollY = useRef(0);
   const groupRefs = useRef<THREE.Group[]>([]);
   const circleTex = useMemo(() => createCircleTexture(), []);
+  const glowTex = useMemo(() => createGlowTexture(), []);
 
   // heightMap.png 비동기 로드 → 픽셀 데이터 추출
   const [hmapData, setHmapData] = useState<HMapData | null>(null);
@@ -445,7 +472,7 @@ function TerrainScene() {
   const solidMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: 0x2b4a88, // 밝혀진 네이비 블루
+        color: 0x0a1118, // 거의 검정 실루엣
         flatShading: true,
         metalness: 0.1,
         roughness: 0.6,
@@ -457,9 +484,9 @@ function TerrainScene() {
   const lineMat = useMemo(
     () =>
       new THREE.LineBasicMaterial({
-        color: 0x1a3060,
+        color: 0x00bbcc,
         transparent: true,
-        opacity: 0.15,
+        opacity: 0.45,
       }),
     [],
   );
@@ -468,7 +495,7 @@ function TerrainScene() {
   const ptMat = useMemo(
     () =>
       new THREE.PointsMaterial({
-        color: 0xc04070,
+        color: 0x00ccff,
         size: 0.38,
         sizeAttenuation: true,
         map: circleTex,
@@ -498,6 +525,22 @@ function TerrainScene() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [camera, scene]);
+
+  // 다크/라이트 모드 색상 전환
+  useEffect(() => {
+    solidMat.color.set(isDark ? 0x0a1118 : 0xd0dae6);
+    lineMat.color.set(isDark ? 0x00bbcc : 0xc7d1e0);
+    lineMat.opacity = isDark ? 0.45 : 0.5;
+    lineMat.blending = isDark ? THREE.NormalBlending : THREE.AdditiveBlending;
+    lineMat.needsUpdate = true;
+    ptMat.color.set(isDark ? 0x00ccff : 0xd94a52);
+    ptMat.map = isDark ? circleTex : glowTex;
+    ptMat.blending = isDark ? THREE.NormalBlending : THREE.AdditiveBlending;
+    ptMat.needsUpdate = true;
+    if (scene.fog instanceof THREE.Fog) {
+      scene.fog.color.set(isDark ? 0x021012 : 0xf2f5f8);
+    }
+  }, [isDark, solidMat, lineMat, ptMat, scene]);
 
   const recycleIfNeeded = useCallback(
     (cz: number) => {
@@ -531,28 +574,32 @@ function TerrainScene() {
 
       <directionalLight
         color={0xffffff}
-        intensity={1.5}
+        intensity={isDark ? 1.7 : 1.2}
         position={[40, 80, 60]}
       />
 
-      <directionalLight color={0xc03060} intensity={3} position={[0, 20, 80]} />
+      <directionalLight
+        color={isDark ? 0xd94a52 : 0xe6eaf0}
+        intensity={isDark ? 1.8 : 1.0}
+        position={[0, 20, 80]}
+      />
 
       <directionalLight
-        color={0x1a2a60}
-        intensity={0.5}
+        color={isDark ? 0x1a2a60 : 0xdce3ea}
+        intensity={isDark ? 0.7 : 0.5}
         position={[-80, 40, 0]}
       />
 
       <directionalLight
-        color={0xff4a6e}
-        intensity={0.5}
+        color={isDark ? 0xd94a52 : 0xe6eaf0}
+        intensity={isDark ? 0.6 : 0.4}
         position={[-40, 30, -200]}
       />
 
       {/* 하늘 요소 */}
       <Stars />
-      <SunriseGlow />
-      <TitleBillboard />
+      {isDark ? <SunriseGlow /> : <DataCore />}
+      <TitleBillboard isDark={isDark} />
 
       {/* 지형 타일 */}
       {tiles.map((tile, i) => (
@@ -593,21 +640,31 @@ function TerrainScene() {
 // Export
 // --------------------
 export default function Terrain() {
+  const [isDark, setIsDark] = useState(true);
+
   return (
     <div
       className="relative w-full h-screen overflow-hidden"
       style={{
         // 레퍼런스: 상단 어두운 네이비 → 중단 보라 → 하단 핑크 노을
-        background: `linear-gradient(
-          to bottom,
-          #040810  0%,
-          #080f22 22%,
-          #130828 48%,
-          #3e153a 68%,
-          #88204a 82%,
-          #c83056 91%,
-          #e84c6e 100%
-        )`,
+        background: isDark
+          ? `linear-gradient(
+              to bottom,
+              #041818  0%,
+              #071c22 20%,
+              #0e1030 40%,
+              #260840 60%,
+              #5a1a5a 75%,
+              #9a2066 85%,
+              #cc3070 100%
+            )`
+          : `linear-gradient(
+              to bottom,
+              #f8fafc  0%,
+              #edf1f5 30%,
+              #e3e9f0 70%,
+              #dce3ea 100%
+            )`,
       }}
     >
       {/* alpha:true → Canvas 배경 투명, CSS 그라데이션 비침 */}
@@ -616,20 +673,51 @@ export default function Terrain() {
         gl={{ antialias: true, alpha: true }}
         style={{ background: "transparent" }}
       >
-        <TerrainScene />
+        <TerrainScene isDark={isDark} />
 
         <EffectComposer>
-          <Vignette eskil={false} offset={0.1} darkness={0.8} />
+          <Vignette
+            eskil={false}
+            offset={isDark ? 0.1 : 0.6}
+            darkness={isDark ? 0.8 : 0.12}
+          />
         </EffectComposer>
       </Canvas>
 
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            "radial-gradient(circle at center, transparent 50%, rgba(0,0,0,0.6) 100%)",
+          background: isDark
+            ? "radial-gradient(circle at center, transparent 50%, rgba(0,0,0,0.6) 100%)"
+            : "radial-gradient(circle at center, transparent 72%, rgba(220,226,232,0.32) 100%)",
         }}
       />
+
+      {/* 다크/라이트 모드 토글 버튼 */}
+      <button
+        onClick={() => setIsDark((v) => !v)}
+        style={{
+          position: "absolute",
+          top: "20px",
+          right: "20px",
+          zIndex: 100,
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          padding: "8px 16px",
+          background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+          border: `1px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"}`,
+          borderRadius: "20px",
+          color: isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)",
+          fontSize: "12px",
+          letterSpacing: "0.1em",
+          cursor: "pointer",
+          backdropFilter: "blur(8px)",
+          fontFamily: "monospace",
+        }}
+      >
+        {isDark ? "◑ LIGHT" : "◐ DARK"}
+      </button>
 
       <div
         className="absolute inset-0 pointer-events-none"
