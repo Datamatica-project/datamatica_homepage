@@ -86,45 +86,21 @@ export function DataBeacon({
       />
       <mesh geometry={ringGeo} material={coreMat} />
       <Html position={[0, BEAM_H + 1.5, 0]} center distanceFactor={80}>
-        <div
-          style={{
-            display: "flex",
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-        >
-          <div
-            style={{
-              background: "rgba(0, 0, 0, 0.1)",
-              padding: "5px 10px",
-              borderLeft: "none",
-              backdropFilter: "blur(10px)",
-              borderRadius: "5px",
-              border: "1px solid rgba(255,255,255,0.1)",
-            }}
-          >
+        <div className="flex pointer-events-none select-none">
+          <div className="bg-black/10 py-[5px] px-[10px] backdrop-blur-[10px] rounded-[5px] border border-white/10 border-1-0">
             <p
+              className="text-[#ffffff] text-[12px] tracking-[0.15em] uppercase m-0 whitespace-nowrap"
               style={{
-                color: "#D94A52",
-                fontSize: "12px",
-                fontFamily: "var(--font-bebas-neue), sans-serif",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                margin: 0,
-                whiteSpace: "nowrap",
+                fontFamily: "var(--font-a2z), sans-serif",
+                fontWeight: "700",
               }}
             >
               {name}
             </p>
             <p
+              className="text-[rgba(255,255,255,0.92)] text-[10px] tracking-[0.10em] uppercase mt-[3px] mb-0 mx-0 whitespace-nowrap"
               style={{
-                color: "rgba(255,255,255,0.92)",
-                fontSize: "10px",
                 fontFamily: "noto sans kr",
-                letterSpacing: "0.10em",
-                textTransform: "uppercase",
-                margin: "3px 0 0",
-                whiteSpace: "nowrap",
               }}
             >
               {code}
