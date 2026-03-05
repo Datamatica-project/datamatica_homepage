@@ -347,6 +347,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
           borderRadius: "5px",
           backdropFilter: "blur(5px)",
           border: "1px solid rgba(255,255,255,0.1)",
+          transition: "background-color 0.7s ease",
         }}
       >
         <p
@@ -359,6 +360,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             margin: 0,
             whiteSpace: "nowrap",
             fontWeight: "normal",
+            transition: "color 0.7s ease",
           }}
         >
           Vector Graphic
@@ -374,6 +376,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             textShadow: "0 0 30px rgba(255,100,150,0.7)",
             margin: 0,
             whiteSpace: "nowrap",
+            transition: "color 0.7s ease",
           }}
         >
           DATAMATICA
@@ -388,6 +391,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             margin: 0,
             whiteSpace: "nowrap",
             fontWeight: "normal",
+            transition: "color 0.7s ease",
           }}
         >
           Visualization
@@ -445,6 +449,36 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
   const circleTex = useMemo(() => createCircleTexture(), []);
   const glowTex = useMemo(() => createGlowTexture(), []);
 
+  // 테마 전환 진행값: 0 = 다크, 1 = 라이트
+  const progressRef = useRef(0);
+
+  // 색상 쌍 (lerp용)
+  const C = useMemo(
+    () => ({
+      solidDark: new THREE.Color(0x0a1118),
+      solidLight: new THREE.Color(0xd0dae6),
+      lineDark: new THREE.Color(0x00bbcc),
+      lineLight: new THREE.Color(0xc7d1e0),
+      ptDark: new THREE.Color(0x00ccff),
+      ptLight: new THREE.Color(0xd94a52),
+      fogDark: new THREE.Color(0x021012),
+      fogLight: new THREE.Color(0xf2f5f8),
+      l2Dark: new THREE.Color(0xd94a52),
+      l2Light: new THREE.Color(0xe6eaf0),
+      l3Dark: new THREE.Color(0x1a2a60),
+      l3Light: new THREE.Color(0xdce3ea),
+      l4Dark: new THREE.Color(0xd94a52),
+      l4Light: new THREE.Color(0xe6eaf0),
+    }),
+    [],
+  );
+
+  // 조명 ref
+  const light1Ref = useRef<THREE.DirectionalLight>(null);
+  const light2Ref = useRef<THREE.DirectionalLight>(null);
+  const light3Ref = useRef<THREE.DirectionalLight>(null);
+  const light4Ref = useRef<THREE.DirectionalLight>(null);
+
   // heightMap.png 비동기 로드 → 픽셀 데이터 추출
   const [hmapData, setHmapData] = useState<HMapData | null>(null);
   useEffect(() => {
@@ -472,7 +506,7 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
   const solidMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: 0x0a1118, // 거의 검정 실루엣
+        color: 0x0a1118, // 초기값: 다크
         flatShading: true,
         metalness: 0.1,
         roughness: 0.6,
@@ -484,7 +518,7 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
   const lineMat = useMemo(
     () =>
       new THREE.LineBasicMaterial({
-        color: 0x00bbcc,
+        color: 0x00bbcc, // 초기값: 다크
         transparent: true,
         opacity: 0.45,
       }),
@@ -495,7 +529,7 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
   const ptMat = useMemo(
     () =>
       new THREE.PointsMaterial({
-        color: 0x00ccff,
+        color: 0x00ccff, // 초기값: 다크
         size: 0.38,
         sizeAttenuation: true,
         map: circleTex,
@@ -526,22 +560,6 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, [camera, scene]);
 
-  // 다크/라이트 모드 색상 전환
-  useEffect(() => {
-    solidMat.color.set(isDark ? 0x0a1118 : 0xd0dae6);
-    lineMat.color.set(isDark ? 0x00bbcc : 0xc7d1e0);
-    lineMat.opacity = isDark ? 0.45 : 0.5;
-    lineMat.blending = isDark ? THREE.NormalBlending : THREE.AdditiveBlending;
-    lineMat.needsUpdate = true;
-    ptMat.color.set(isDark ? 0x00ccff : 0xd94a52);
-    ptMat.map = isDark ? circleTex : glowTex;
-    ptMat.blending = isDark ? THREE.NormalBlending : THREE.AdditiveBlending;
-    ptMat.needsUpdate = true;
-    if (scene.fog instanceof THREE.Fog) {
-      scene.fog.color.set(isDark ? 0x021012 : 0xf2f5f8);
-    }
-  }, [isDark, solidMat, lineMat, ptMat, scene]);
-
   const recycleIfNeeded = useCallback(
     (cz: number) => {
       let frontMost = Infinity;
@@ -561,6 +579,58 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
   );
 
   useFrame(() => {
+    // 테마 진행값 lerp
+    const target = isDark ? 0 : 1;
+    progressRef.current += (target - progressRef.current) * 0.06;
+    const t = progressRef.current;
+
+    // 머티리얼 색상 lerp
+    solidMat.color.lerpColors(C.solidDark, C.solidLight, t);
+    lineMat.color.lerpColors(C.lineDark, C.lineLight, t);
+    lineMat.opacity = 0.45 + (0.5 - 0.45) * t;
+    ptMat.color.lerpColors(C.ptDark, C.ptLight, t);
+
+    // blending 전환 (중간 지점에서 스위치)
+    const blendTarget = t < 0.5 ? THREE.NormalBlending : THREE.AdditiveBlending;
+    if (lineMat.blending !== blendTarget) {
+      lineMat.blending = blendTarget;
+      lineMat.needsUpdate = true;
+    }
+    if (ptMat.blending !== blendTarget) {
+      ptMat.blending = blendTarget;
+      ptMat.needsUpdate = true;
+    }
+
+    // 텍스처 전환 (중간 지점에서 스위치)
+    const mapTarget = t < 0.5 ? circleTex : glowTex;
+    if (ptMat.map !== mapTarget) {
+      ptMat.map = mapTarget;
+      ptMat.needsUpdate = true;
+    }
+
+    // 안개 색상 lerp
+    if (scene.fog instanceof THREE.Fog) {
+      scene.fog.color.lerpColors(C.fogDark, C.fogLight, t);
+    }
+
+    // 조명 강도/색상 lerp
+    if (light1Ref.current) {
+      light1Ref.current.intensity = 1.7 + (1.2 - 1.7) * t;
+    }
+    if (light2Ref.current) {
+      light2Ref.current.color.lerpColors(C.l2Dark, C.l2Light, t);
+      light2Ref.current.intensity = 1.8 + (1.0 - 1.8) * t;
+    }
+    if (light3Ref.current) {
+      light3Ref.current.color.lerpColors(C.l3Dark, C.l3Light, t);
+      light3Ref.current.intensity = 0.7 + (0.5 - 0.7) * t;
+    }
+    if (light4Ref.current) {
+      light4Ref.current.color.lerpColors(C.l4Dark, C.l4Light, t);
+      light4Ref.current.intensity = 0.6 + (0.4 - 0.6) * t;
+    }
+
+    // 카메라 스크롤
     const targetZ = CAM_Z_BASE - scrollY.current * SCROLL_SPEED;
     camera.position.z += (targetZ - camera.position.z) * 0.1;
     recycleIfNeeded(camera.position.z);
@@ -570,29 +640,32 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
     <>
       {/* 전체 기저 조명: 어두운 파랑으로 지형 윤곽 살림 */}
       <ambientLight intensity={0.7} />
-      {/* 위에서 내리는 채움광: 평평한 면들이 어둡지 않도록 */}
 
       <directionalLight
+        ref={light1Ref}
         color={0xffffff}
-        intensity={isDark ? 1.7 : 1.2}
+        intensity={1.7}
         position={[40, 80, 60]}
       />
 
       <directionalLight
-        color={isDark ? 0xd94a52 : 0xe6eaf0}
-        intensity={isDark ? 1.8 : 1.0}
+        ref={light2Ref}
+        color={0xd94a52}
+        intensity={1.8}
         position={[0, 20, 80]}
       />
 
       <directionalLight
-        color={isDark ? 0x1a2a60 : 0xdce3ea}
-        intensity={isDark ? 0.7 : 0.5}
+        ref={light3Ref}
+        color={0x1a2a60}
+        intensity={0.7}
         position={[-80, 40, 0]}
       />
 
       <directionalLight
-        color={isDark ? 0xd94a52 : 0xe6eaf0}
-        intensity={isDark ? 0.6 : 0.4}
+        ref={light4Ref}
+        color={0xd94a52}
+        intensity={0.6}
         position={[-40, 30, -200]}
       />
 
@@ -636,50 +709,85 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
   );
 }
 
+const DARK_BG = `linear-gradient(
+  to bottom,
+  #041818  0%,
+  #071c22 20%,
+  #0e1030 40%,
+  #260840 60%,
+  #5a1a5a 75%,
+  #9a2066 85%,
+  #cc3070 100%
+)`;
+
+const LIGHT_BG = `linear-gradient(
+  to bottom,
+  #f8fafc  0%,
+  #edf1f5 30%,
+  #e3e9f0 70%,
+  #dce3ea 100%
+)`;
+
 // --------------------
 // Export
 // --------------------
 export default function Terrain() {
   const [isDark, setIsDark] = useState(true);
+  const [themeProgress, setThemeProgress] = useState(0); // 0 = 다크, 1 = 라이트
+  const tpRef = useRef(0);
+  const rafRef = useRef<number | undefined>(undefined);
+
+  // CSS/Vignette용 themeProgress RAF 애니메이션
+  useEffect(() => {
+    const target = isDark ? 0 : 1;
+    const step = () => {
+      const diff = target - tpRef.current;
+      if (Math.abs(diff) > 0.001) {
+        tpRef.current += diff * 0.06;
+        setThemeProgress(tpRef.current);
+        rafRef.current = requestAnimationFrame(step);
+      } else {
+        tpRef.current = target;
+        setThemeProgress(target);
+      }
+    };
+    if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(step);
+    return () => {
+      if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current);
+    };
+  }, [isDark]);
+
+  const vignetteOffset = 0.1 + (0.6 - 0.1) * themeProgress;
+  const vignetteDarkness = 0.8 + (0.12 - 0.8) * themeProgress;
 
   return (
-    <div
-      className="relative w-full h-screen overflow-hidden"
-      style={{
-        // 레퍼런스: 상단 어두운 네이비 → 중단 보라 → 하단 핑크 노을
-        background: isDark
-          ? `linear-gradient(
-              to bottom,
-              #041818  0%,
-              #071c22 20%,
-              #0e1030 40%,
-              #260840 60%,
-              #5a1a5a 75%,
-              #9a2066 85%,
-              #cc3070 100%
-            )`
-          : `linear-gradient(
-              to bottom,
-              #f8fafc  0%,
-              #edf1f5 30%,
-              #e3e9f0 70%,
-              #dce3ea 100%
-            )`,
-      }}
-    >
+    <div className="relative w-full h-screen overflow-hidden" style={{ background: DARK_BG }}>
+      {/* 라이트 모드 배경 (opacity로 크로스페이드) */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: LIGHT_BG,
+          opacity: themeProgress,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+
       {/* alpha:true → Canvas 배경 투명, CSS 그라데이션 비침 */}
       <Canvas
         camera={{ position: [0, CAM_Y, CAM_Z_BASE], fov: 70 }}
         gl={{ antialias: true, alpha: true }}
-        style={{ background: "transparent" }}
+        style={{ background: "transparent", position: "relative", zIndex: 1 }}
       >
         <TerrainScene isDark={isDark} />
 
         <EffectComposer>
           <Vignette
             eskil={false}
-            offset={isDark ? 0.1 : 0.6}
-            darkness={isDark ? 0.8 : 0.12}
+            offset={vignetteOffset}
+            darkness={vignetteDarkness}
           />
         </EffectComposer>
       </Canvas>
@@ -687,9 +795,11 @@ export default function Terrain() {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
+          zIndex: 2,
           background: isDark
             ? "radial-gradient(circle at center, transparent 50%, rgba(0,0,0,0.6) 100%)"
             : "radial-gradient(circle at center, transparent 72%, rgba(220,226,232,0.32) 100%)",
+          transition: "background 0.7s ease",
         }}
       />
 
@@ -714,6 +824,7 @@ export default function Terrain() {
           cursor: "pointer",
           backdropFilter: "blur(8px)",
           fontFamily: "monospace",
+          transition: "background 0.5s ease, border-color 0.5s ease, color 0.5s ease",
         }}
       >
         {isDark ? "◑ LIGHT" : "◐ DARK"}
@@ -722,6 +833,7 @@ export default function Terrain() {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
+          zIndex: 3,
           backgroundImage:
             "repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 3px)",
           mixBlendMode: "overlay",
