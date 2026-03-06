@@ -735,6 +735,7 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
           heightAt={heightAt}
           yOffset={node.yOffset}
           phase={(i * Math.PI * 2) / TECH_NODES.length}
+          isDark={isDark}
         />
       ))}
     </>
