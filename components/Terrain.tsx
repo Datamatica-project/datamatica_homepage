@@ -35,40 +35,40 @@ type HeightFn = (x: number, z: number) => number;
 
 const TECH_NODES = [
   {
-    name: "DATA LABELING",
-    code: "SYS.01 / LABEL.STREAM",
-    x: -14,
+    name: "데이터 라벨링",
+    code: "SYS.01 / Data Annotation",
+    x: -9,
     z: -50,
-    yOffset: -7,
+    yOffset: -5,
   },
-  { name: "HD MAP", code: "SYS.02 / MAP.SYNC", x: 20, z: -80, yOffset: -3 },
+  { name: "정밀 지도", code: "SYS.02 / HD MAP", x: 10, z: -80, yOffset: -5 },
   {
-    name: "AUTONOMOUS DRIVING",
-    code: "SYS.03 / AUTO.DRIVE",
+    name: "자율 주행",
+    code: "SYS.03 / Autonomous Mobility",
     x: -10,
     z: -110,
     yOffset: -4,
   },
   {
-    name: "DIGITAL TWIN",
-    code: "SYS.04 / TWIN.SYNC",
-    x: 24,
+    name: "디지털 트윈",
+    code: "SYS.04 / Digital Twin",
+    x: 10,
     z: -140,
-    yOffset: -3,
+    yOffset: -5,
   },
   {
-    name: "SMART HEALTHCARE",
-    code: "SYS.05 / HEALTH.AI",
-    x: -20,
+    name: "스마트 헬스 케어",
+    code: "SYS.05 / Smart Healthcare",
+    x: -10,
     z: -170,
     yOffset: -5,
   },
   {
-    name: "SAFETY MONITORING",
-    code: "SYS.06 / SAFETY.MONITOR",
+    name: "안전 모니터링",
+    code: "SYS.06 / Smart Safety System",
     x: 10,
     z: -200,
-    yOffset: -7.5,
+    yOffset: -5,
   },
 ] as const;
 
@@ -96,7 +96,7 @@ function createGlowTexture(size = 64): THREE.CanvasTexture {
     0,
     size / 2,
     size / 2,
-    size / 2,
+    size / 2
   );
   gradient.addColorStop(0, "rgba(255,255,255,1)");
   gradient.addColorStop(0.35, "rgba(255,255,255,0.7)");
@@ -307,7 +307,7 @@ function updateTile(tile: Tile, newWorldZ: number, heightAt: HeightFn) {
   }
 
   const linePos = tile.lineGeo.getAttribute(
-    "position",
+    "position"
   ) as THREE.BufferAttribute;
   linePos.needsUpdate = true;
   tile.lineGeo.computeBoundingSphere();
@@ -363,13 +363,14 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             transition: "color 0.7s ease",
           }}
         >
-          Vector Graphic
+          {/* Public Data · AI · Digital Infrastructure */}
+          인공지능 통합 솔루션 구축 기업
         </p>
         <h1
           style={{
             color: isDark ? "white" : "#D94A52",
             fontSize: "clamp(28px, 10vw, 58px)",
-            fontWeight: "bold",
+            fontWeight: "300",
             letterSpacing: "0.15em",
             textTransform: "uppercase",
             lineHeight: 1,
@@ -377,6 +378,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             margin: 0,
             whiteSpace: "nowrap",
             transition: "color 0.7s ease",
+            fontFamily: "var(--font-a2z), sans-serif",
           }}
         >
           DATAMATICA
@@ -394,7 +396,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             transition: "color 0.7s ease",
           }}
         >
-          Visualization
+          (주)데이터메티카
         </p>
       </div>
     </Html>
@@ -458,7 +460,7 @@ function Stars({ isDark }: { isDark: boolean }) {
         sizeAttenuation: true,
         transparent: true,
       }),
-    [isDark],
+    [isDark]
   );
 
   return <points geometry={geo} material={mat} />;
@@ -495,7 +497,7 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
       l4Dark: new THREE.Color(0xd94a52),
       l4Light: new THREE.Color(0xe6eaf0),
     }),
-    [],
+    []
   );
 
   // 조명 ref
@@ -524,7 +526,7 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
   // hmapData 로드 완료 시 heightAt 재생성 → tiles 자동 재갱신
   const heightAt = useMemo(
     () => makeHeightFn(hmapData ?? undefined),
-    [hmapData],
+    [hmapData]
   );
 
   // 솔리드 flat-shaded 지형 (조명 반사 핵심)
@@ -536,7 +538,7 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
         metalness: 0.1,
         roughness: 0.6,
       }),
-    [],
+    []
   );
 
   // 격자 선 (은은한 오버레이)
@@ -547,7 +549,7 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
         transparent: true,
         opacity: 0.45,
       }),
-    [],
+    []
   );
 
   // 데이터 점: 분홍 계열
@@ -563,12 +565,12 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
         depthWrite: false,
         opacity: 0.6,
       }),
-    [circleTex],
+    [circleTex]
   );
 
   const tiles = useMemo(() => {
     const t = Array.from({ length: N_TILES }, (_, i) =>
-      createTile(-i * SEG_LEN),
+      createTile(-i * SEG_LEN)
     );
     for (const tile of t) updateTile(tile, tile.worldZ, heightAt);
     return t;
@@ -600,7 +602,7 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
         }
       }
     },
-    [tiles, heightAt],
+    [tiles, heightAt]
   );
 
   useFrame(() => {
