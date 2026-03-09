@@ -12,7 +12,7 @@ const PROJECTS = [
     image: "/business/AM.png",
   },
   {
-    tab: "인공지능 데이터 구축",
+    tab: "라벨링 서비스",
     name: "AI 학습용 고품질 데이터 구축 솔루션",
     image: "/business/Labeling.png",
   },

@@ -119,11 +119,14 @@ export default function OurNews() {
               <button
                 key={year}
                 onClick={() => setActiveYear(activeYear === year ? null : year)}
-                className={`shrink-0 text-right text-[13px] md:text-[18px] px-[12px] py-[3px] transition-all ${
-                  activeYear === year
-                    ? "text-main font-medium md:text-[22px] border-l-[5px] border-main"
-                    : "text-description hover:text-normal-text font-regular"
-                }`}
+                className={`shrink-0 transition-all
+                  text-[13px] px-[16px] py-[6px] rounded-full border
+                  md:text-[18px] md:px-[12px] md:py-[3px] md:rounded-none md:border-0 md:border-l-0 md:text-right
+                  ${
+                    activeYear === year
+                      ? "bg-main text-white border-main md:bg-transparent md:text-main md:font-medium md:text-[22px] md:border-l-[5px] md:border-main"
+                      : "bg-white text-description border-[#d8d8d8] md:bg-transparent md:border-0 hover:text-normal-text"
+                  }`}
               >
                 {year}년
               </button>
@@ -145,7 +148,7 @@ export default function OurNews() {
             />
 
             {/* 슬라이드 좌우 버튼 */}
-            <div className="flex gap-[12px] mt-[20px]">
+            <div className="hidden md:flex gap-[12px] mt-[20px]">
               <button
                 onClick={slideLeft}
                 className="w-[40px] h-[40px] rounded-full border border-[#d0d0d0] flex items-center justify-center hover:bg-[#f0f0f0] transition-colors cursor-pointer"

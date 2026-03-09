@@ -42,7 +42,7 @@ export default function ContactUs() {
     <section className="max-w-[1000px] mx-auto px-[24px] mt-[60px] md:mt-[120px] pb-[60px] md:pb-[120px]">
       <div className="flex flex-col gap-[40px] md:flex-row md:gap-[80px] items-start">
         {/* 좌측: 타이틀 + 연락처 */}
-        <div className="shrink-0 ">
+        <div className="shrink-0 text-center md:text-left w-full md:w-auto">
           <SectionTitle
             subtitle="Contact Us"
             title={
@@ -54,9 +54,9 @@ export default function ContactUs() {
             description="프로젝트, 기술 협력, 파트너십 관련 상담을 진행합니다."
           />
 
-          <div className="mt-[40px] flex flex-col gap-[20px]">
+          <div className="mt-[40px] flex flex-col gap-[20px] items-center md:items-start">
             <div>
-              <div className="flex items-center gap-[8px] text-[14px] text-description">
+              <div className="flex items-center justify-center md:justify-start gap-[8px] text-[14px] text-description">
                 <Envelope size={16} />
                 이메일 (E-mail)
               </div>
@@ -69,7 +69,7 @@ export default function ContactUs() {
             </div>
 
             <div>
-              <div className="flex items-center gap-[8px] text-[14px] text-description">
+              <div className="flex items-center justify-center md:justify-start gap-[8px] text-[14px] text-description">
                 <Telephone size={16} />
                 전화번호 (Phone number)
               </div>

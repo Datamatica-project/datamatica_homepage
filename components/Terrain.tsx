@@ -338,12 +338,13 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "8px",
+          gap: "clamp(4px, 1.5vw, 8px)",
           pointerEvents: "none",
           userSelect: "none",
           textAlign: "center",
+          maxWidth: "90vw",
           backgroundColor: isDark ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)",
-          padding: "clamp(8px, 2vw, 10px) clamp(12px, 4vw, 20px)",
+          padding: "clamp(6px, 1.5vw, 10px) clamp(10px, 3vw, 20px)",
           borderRadius: "5px",
           backdropFilter: "blur(5px)",
           border: "1px solid rgba(255,255,255,0.1)",
@@ -353,8 +354,8 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
         <p
           style={{
             color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
-            fontSize: "clamp(8px, 2.5vw, 10px)",
-            letterSpacing: "0.45em",
+            fontSize: "clamp(6px, 1.8vw, 10px)",
+            letterSpacing: "clamp(0.15em, 0.8vw, 0.45em)",
             textTransform: "uppercase",
             fontFamily: "noto sans kr",
             margin: 0,
@@ -363,15 +364,14 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             transition: "color 0.7s ease",
           }}
         >
-          {/* Public Data · AI · Digital Infrastructure */}
           인공지능 통합 솔루션 구축 기업
         </p>
         <h1
           style={{
             color: isDark ? "white" : "#D94A52",
-            fontSize: "clamp(28px, 10vw, 58px)",
+            fontSize: "clamp(20px, 8vw, 58px)",
             fontWeight: "300",
-            letterSpacing: "0.15em",
+            letterSpacing: "clamp(0.05em, 0.5vw, 0.15em)",
             textTransform: "uppercase",
             lineHeight: 1,
             textShadow: "0 0 30px rgba(255,100,150,0.7)",
@@ -386,8 +386,8 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
         <p
           style={{
             color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
-            fontSize: "clamp(8px, 2.5vw, 10px)",
-            letterSpacing: "0.45em",
+            fontSize: "clamp(6px, 1.8vw, 10px)",
+            letterSpacing: "clamp(0.15em, 0.8vw, 0.45em)",
             textTransform: "uppercase",
             fontFamily: "noto sans kr",
             margin: 0,

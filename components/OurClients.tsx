@@ -58,7 +58,7 @@ function CountUpStat({
   const count = useCountUp(target, started);
 
   return (
-    <div>
+    <div className="text-center md:text-left">
       <p className="text-[26px] md:text-[36px] font-bold text-normal-text leading-tight">
         {count}
         {suffix}
@@ -88,7 +88,7 @@ export default function OurClients() {
   return (
     <div className="mt-[60px] md:mt-[120px] pb-[60px] md:pb-[120px]">
       <div className="max-w-[1000px] mx-auto px-[24px]">
-        <div className="flex flex-col gap-[32px] md:flex-row md:gap-[60px] items-center">
+        <div className="flex flex-col-reverse gap-[32px] md:flex-row md:gap-[60px] items-center">
           {/* 좌측: 이미지 */}
           <div className="relative w-full md:w-[480px] md:shrink-0 aspect-4/3 rounded-[12px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
             <Image
@@ -100,7 +100,7 @@ export default function OurClients() {
           </div>
 
           {/* 우측: 타이틀 + 통계 */}
-          <div className="flex-1">
+          <div className="flex-1 text-center md:text-left">
             <SectionTitle
               subtitle="Our clients"
               title={
@@ -119,7 +119,7 @@ export default function OurClients() {
             />
 
             {/* 통계 수치: 뷰포트 진입 시 카운트업 */}
-            <div ref={statsRef} className="flex gap-[24px] md:gap-[40px] mt-[28px] md:mt-[40px]">
+            <div ref={statsRef} className="flex justify-center md:justify-start gap-[24px] md:gap-[40px] mt-[28px] md:mt-[40px]">
               {STATS.map((stat) => (
                 <CountUpStat
                   key={stat.label}
