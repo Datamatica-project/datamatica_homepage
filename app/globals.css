@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Custom Fonts */
 @font-face {
   font-family: "BodoniXT";
@@ -46,5 +48,14 @@ body {
   }
   to {
     transform: scaleX(1);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }

@@ -766,8 +766,7 @@ const LIGHT_BG = `linear-gradient(
 // --------------------
 // Export
 // --------------------
-export default function Terrain() {
-  const [isDark, setIsDark] = useState(true);
+export default function Terrain({ isDark }: { isDark: boolean }) {
   const [themeProgress, setThemeProgress] = useState(0); // 0 = 다크, 1 = 라이트
   const tpRef = useRef(0);
   const rafRef = useRef<number | undefined>(undefined);
@@ -839,34 +838,6 @@ export default function Terrain() {
           transition: "background 0.7s ease",
         }}
       />
-
-      {/* 다크/라이트 모드 토글 버튼 */}
-      <button
-        onClick={() => setIsDark((v) => !v)}
-        style={{
-          position: "absolute",
-          top: "20px",
-          right: "20px",
-          zIndex: 100,
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "8px 16px",
-          background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
-          border: `1px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"}`,
-          borderRadius: "20px",
-          color: isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)",
-          fontSize: "12px",
-          letterSpacing: "0.1em",
-          cursor: "pointer",
-          backdropFilter: "blur(8px)",
-          fontFamily: "monospace",
-          transition:
-            "background 0.5s ease, border-color 0.5s ease, color 0.5s ease",
-        }}
-      >
-        {isDark ? "◑ LIGHT" : "◐ DARK"}
-      </button>
 
       <div
         className="absolute inset-0 pointer-events-none"
