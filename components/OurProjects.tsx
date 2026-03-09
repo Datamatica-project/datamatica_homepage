@@ -75,7 +75,7 @@ export default function OurProjects() {
           </button>
         )}
 
-        <div className="flex-1 overflow-hidden border-b border-[#e0e0e0]">
+        <div className="flex-1 overflow-hidden border-b border-[#e0e0e0] dark:border-[#2a2a2a]">
           <div
             className="flex transition-transform duration-400 ease-out"
             style={{

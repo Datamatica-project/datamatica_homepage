@@ -112,7 +112,7 @@ export default function LogoMarquee() {
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full mt-[40px] md:mt-[80px] bg-white p-[20px] md:p-[30px]">
+    <div ref={containerRef} className="w-full mt-[40px] md:mt-[80px] bg-white dark:bg-[#1a1a1b] p-[20px] md:p-[30px]">
       <p className="text-center text-[14px] md:text-[18px] text-normal-text mb-[24px] md:mb-[30px] font-medium">
         주요 협력 기관
       </p>

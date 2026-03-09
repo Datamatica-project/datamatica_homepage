@@ -90,7 +90,7 @@ export default function OurClients() {
       <div className="max-w-[1000px] mx-auto px-[24px]">
         <div className="flex flex-col-reverse gap-[32px] md:flex-row md:gap-[60px] items-center">
           {/* 좌측: 이미지 */}
-          <div className="relative w-full md:w-[480px] md:shrink-0 aspect-4/3 rounded-[12px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
+          <div className="relative w-full md:w-[480px] md:shrink-0 aspect-4/3 rounded-[12px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.5)]">
             <Image
               src="/ourClient/ourClient.jpg"
               alt="Our Clients"
@@ -105,7 +105,7 @@ export default function OurClients() {
               subtitle="Our clients"
               title={
                 <>
-                  산업을 선도하는{" "}
+                  산업을 선도하는
                   <span className="text-main font-bold">파트너십</span>
                 </>
               }
@@ -119,7 +119,10 @@ export default function OurClients() {
             />
 
             {/* 통계 수치: 뷰포트 진입 시 카운트업 */}
-            <div ref={statsRef} className="flex justify-center md:justify-start gap-[24px] md:gap-[40px] mt-[28px] md:mt-[40px]">
+            <div
+              ref={statsRef}
+              className="flex justify-center md:justify-start gap-[24px] md:gap-[40px] mt-[28px] md:mt-[40px]"
+            >
               {STATS.map((stat) => (
                 <CountUpStat
                   key={stat.label}

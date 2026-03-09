@@ -14,6 +14,15 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --normal-text: #121212;
+  --description: #888888;
+}
+
+.dark {
+  --background: #111113;
+  --foreground: #ededed;
+  --normal-text: #ededed;
+  --description: #888888;
 }
 
 @theme inline {
@@ -22,18 +31,11 @@
   --font-bebas-neue: var(--font-bebas-neue);
   --font-mono: var(--font-geist-mono);
   /* 텍스트 컬러 */
-  --color-normal-text: #121212;
+  --color-normal-text: var(--normal-text);
   /* 설명용 회색 */
-  --color-description: #888888;
+  --color-description: var(--description);
   /* 메인 컬러 */
   --color-main: #d94a52;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {

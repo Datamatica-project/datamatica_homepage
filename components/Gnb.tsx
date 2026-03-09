@@ -57,7 +57,13 @@ export default function Gnb({
   onThemeToggle: () => void;
 }) {
   const isMain = overlayOpacity >= 1;
-  const iconColor = isMain ? "#121212" : "rgba(255,255,255,0.9)";
+  // isMain 구간에서는 isDark 반영, terrain 구간은 항상 밝은 텍스트
+  const iconColor =
+    isMain
+      ? isDark
+        ? "rgba(255,255,255,0.9)"
+        : "#121212"
+      : "rgba(255,255,255,0.9)";
   const [menuOpen, setMenuOpen] = useState(false);
 
   // 메뉴 열릴 때 스크롤 막기
@@ -68,9 +74,14 @@ export default function Gnb({
     };
   }, [menuOpen]);
 
-  // 드로어 배경색: isMain이면 흰색, 아니면 반투명 다크
-  const drawerBg = isMain ? "#ffffff" : "#111111";
-  const drawerText = isMain ? "#121212" : "rgba(255,255,255,0.9)";
+  // 드로어 배경색
+  const drawerBg = isMain ? (isDark ? "#1a1a1b" : "#ffffff") : "#111111";
+  const drawerText =
+    isMain
+      ? isDark
+        ? "rgba(255,255,255,0.9)"
+        : "#121212"
+      : "rgba(255,255,255,0.9)";
 
   return (
     <>
@@ -79,8 +90,12 @@ export default function Gnb({
         style={
           isMain
             ? {
-                backgroundColor: "rgba(255,255,255,1)",
-                borderBottom: "1px solid #ebebeb",
+                backgroundColor: isDark
+                  ? "rgba(17,17,19,1)"
+                  : "rgba(255,255,255,1)",
+                borderBottom: isDark
+                  ? "1px solid #2a2a2a"
+                  : "1px solid #ebebeb",
               }
             : {
                 backgroundColor: "rgba(0,0,0,0.22)",
@@ -105,7 +120,8 @@ export default function Gnb({
               height={36}
               className="object-contain"
               style={{
-                filter: isMain ? "none" : "brightness(0) invert(1)",
+                filter:
+                  isMain && !isDark ? "none" : "brightness(0) invert(1)",
                 transition: "filter 0.3s ease",
               }}
               priority
@@ -119,16 +135,14 @@ export default function Gnb({
                 <li key={label}>
                   <button
                     className="text-[15px] font-medium transition-colors duration-300"
-                    style={{
-                      color: isMain ? "#121212" : "rgba(255,255,255,0.9)",
-                    }}
+                    style={{ color: iconColor }}
                     onMouseEnter={(e) => {
                       (e.currentTarget as HTMLButtonElement).style.color =
-                        isMain ? "#d94a52" : "#ffffff";
+                        "#d94a52";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLButtonElement).style.color =
-                        isMain ? "#121212" : "rgba(255,255,255,0.9)";
+                        iconColor;
                     }}
                   >
                     {label}
@@ -144,17 +158,22 @@ export default function Gnb({
               className="flex items-center justify-center w-[36px] h-[36px] rounded-full transition-colors duration-200"
               style={{
                 color: iconColor,
-                backgroundColor: isMain
-                  ? "rgba(0,0,0,0.06)"
-                  : "rgba(255,255,255,0.12)",
+                backgroundColor:
+                  isMain && !isDark
+                    ? "rgba(0,0,0,0.06)"
+                    : "rgba(255,255,255,0.12)",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                  isMain ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.22)";
+                  isMain && !isDark
+                    ? "rgba(0,0,0,0.12)"
+                    : "rgba(255,255,255,0.22)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                  isMain ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.12)";
+                  isMain && !isDark
+                    ? "rgba(0,0,0,0.06)"
+                    : "rgba(255,255,255,0.12)";
               }}
             >
               {isDark ? <SunIcon /> : <MoonIcon />}
@@ -169,9 +188,10 @@ export default function Gnb({
               className="flex items-center justify-center w-[36px] h-[36px] rounded-full transition-colors duration-200"
               style={{
                 color: iconColor,
-                backgroundColor: isMain
-                  ? "rgba(0,0,0,0.06)"
-                  : "rgba(255,255,255,0.12)",
+                backgroundColor:
+                  isMain && !isDark
+                    ? "rgba(0,0,0,0.06)"
+                    : "rgba(255,255,255,0.12)",
               }}
             >
               {isDark ? <SunIcon /> : <MoonIcon />}
@@ -236,7 +256,7 @@ export default function Gnb({
         <div
           className="flex items-center justify-between px-[24px] h-[64px] shrink-0"
           style={{
-            borderBottom: `1px solid ${isMain ? "#ebebeb" : "#2a2a2a"}`,
+            borderBottom: `1px solid ${isMain && !isDark ? "#ebebeb" : "#2a2a2a"}`,
           }}
         >
           <Image
@@ -245,7 +265,10 @@ export default function Gnb({
             width={120}
             height={29}
             className="object-contain"
-            style={{ filter: isMain ? "none" : "brightness(0) invert(1)" }}
+            style={{
+              filter:
+                isMain && !isDark ? "none" : "brightness(0) invert(1)",
+            }}
           />
           <button
             onClick={() => setMenuOpen(false)}
@@ -275,7 +298,7 @@ export default function Gnb({
                 className="w-full text-left text-[18px] font-medium py-[14px] transition-colors duration-200"
                 style={{
                   color: drawerText,
-                  borderBottom: `1px solid ${isMain ? "#f0f0f0" : "#2a2a2a"}`,
+                  borderBottom: `1px solid ${isMain && !isDark ? "#f0f0f0" : "#2a2a2a"}`,
                 }}
                 onClick={() => setMenuOpen(false)}
               >
