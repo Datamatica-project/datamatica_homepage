@@ -57,7 +57,7 @@ const renderLogos = (keyPrefix: string) =>
       key={`${keyPrefix}-${i}`}
       className="shrink-0 w-[100px] h-[44px] md:w-[140px] md:h-[60px] relative px-[10px] md:px-[16px]"
     >
-      <Image src={logo.src} alt={logo.alt} fill className="object-contain" />
+      <Image src={logo.src} alt={logo.alt} fill className="object-contain dark:brightness-0 dark:invert" />
     </div>
   ));
 

@@ -106,6 +106,7 @@ export default function OurClients() {
               title={
                 <>
                   산업을 선도하는
+                  <br />
                   <span className="text-main font-bold">파트너십</span>
                 </>
               }

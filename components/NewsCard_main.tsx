@@ -20,7 +20,7 @@ export default function NewsCard_main({
 }: NewsCardProps) {
   return (
     <div className="p-[20px]">
-      <div className="w-[320px] rounded-[16px] overflow-hidden border border-[#e8e8e8] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] flex flex-col transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_12px_32px_rgba(0,0,0,0.14)] hover:scale-[1.02]">
+      <div className="w-[320px] rounded-[16px] overflow-hidden border border-[#e8e8e8] dark:border-[#333] bg-white dark:bg-[#1e1e1f] shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] flex flex-col transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_12px_32px_rgba(0,0,0,0.14)] dark:hover:shadow-[0_12px_32px_rgba(0,0,0,0.5)] hover:scale-[1.02]">
         {/* 이미지 */}
         <div className="relative w-full aspect-16/10 overflow-hidden">
           <Image src={image} alt={title} fill className="object-cover" />
