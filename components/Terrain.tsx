@@ -7,8 +7,6 @@ import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
 import {
   EffectComposer,
-  Bloom,
-  Noise,
   Vignette,
 } from "@react-three/postprocessing";
 import SunriseGlow from "./SunriseGlow";
@@ -17,7 +15,7 @@ import { GlobeParticlesScene } from "./GlobeParticles";
 
 const SEG_LEN = 600;
 const WIDTH = 220;
-const GRID = 100;
+const GRID = 70;
 const N_TILES = 3;
 const SCROLL_SPEED = 0.05;
 const CAM_Y = 6;
@@ -332,8 +330,15 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
 
   return (
     <Html position={[0, 7, TITLE_Z]} center distanceFactor={55}>
+      <style>{`
+        @media (max-width: 640px) {
+          .title-billboard-h1 { font-size: clamp(14px, 5.5vw, 58px) !important; }
+          .title-billboard-wrap { padding: 16px 20px !important; gap: 8px !important; }
+        }
+      `}</style>
       <div
         ref={innerRef}
+        className="title-billboard-wrap"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -367,6 +372,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
           인공지능 통합 솔루션 구축 기업
         </p>
         <h1
+          className="title-billboard-h1"
           style={{
             color: isDark ? "white" : "#D94A52",
             fontSize: "clamp(20px, 8vw, 58px)",
@@ -608,53 +614,59 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
   useFrame(() => {
     // 테마 진행값 lerp
     const target = isDark ? 0 : 1;
-    progressRef.current += (target - progressRef.current) * 0.06;
+    const diff = target - progressRef.current;
+    const isThemeStable = Math.abs(diff) < 0.001;
+    if (!isThemeStable) {
+      progressRef.current += diff * 0.06;
+    }
     const t = progressRef.current;
 
-    // 머티리얼 색상 lerp
-    solidMat.color.lerpColors(C.solidDark, C.solidLight, t);
-    lineMat.color.lerpColors(C.lineDark, C.lineLight, t);
-    lineMat.opacity = 0.45 + (0.5 - 0.45) * t;
-    ptMat.color.lerpColors(C.ptDark, C.ptLight, t);
+    if (!isThemeStable) {
+      // 머티리얼 색상 lerp
+      solidMat.color.lerpColors(C.solidDark, C.solidLight, t);
+      lineMat.color.lerpColors(C.lineDark, C.lineLight, t);
+      lineMat.opacity = 0.45 + (0.5 - 0.45) * t;
+      ptMat.color.lerpColors(C.ptDark, C.ptLight, t);
 
-    // blending 전환 (중간 지점에서 스위치)
-    const blendTarget = t < 0.5 ? THREE.NormalBlending : THREE.AdditiveBlending;
-    if (lineMat.blending !== blendTarget) {
-      lineMat.blending = blendTarget;
-      lineMat.needsUpdate = true;
-    }
-    if (ptMat.blending !== blendTarget) {
-      ptMat.blending = blendTarget;
-      ptMat.needsUpdate = true;
-    }
+      // blending 전환 (중간 지점에서 스위치)
+      const blendTarget = t < 0.5 ? THREE.NormalBlending : THREE.AdditiveBlending;
+      if (lineMat.blending !== blendTarget) {
+        lineMat.blending = blendTarget;
+        lineMat.needsUpdate = true;
+      }
+      if (ptMat.blending !== blendTarget) {
+        ptMat.blending = blendTarget;
+        ptMat.needsUpdate = true;
+      }
 
-    // 텍스처 전환 (중간 지점에서 스위치)
-    const mapTarget = t < 0.5 ? circleTex : glowTex;
-    if (ptMat.map !== mapTarget) {
-      ptMat.map = mapTarget;
-      ptMat.needsUpdate = true;
-    }
+      // 텍스처 전환 (중간 지점에서 스위치)
+      const mapTarget = t < 0.5 ? circleTex : glowTex;
+      if (ptMat.map !== mapTarget) {
+        ptMat.map = mapTarget;
+        ptMat.needsUpdate = true;
+      }
 
-    // 안개 색상 lerp
-    if (scene.fog instanceof THREE.Fog) {
-      scene.fog.color.lerpColors(C.fogDark, C.fogLight, t);
-    }
+      // 안개 색상 lerp
+      if (scene.fog instanceof THREE.Fog) {
+        scene.fog.color.lerpColors(C.fogDark, C.fogLight, t);
+      }
 
-    // 조명 강도/색상 lerp
-    if (light1Ref.current) {
-      light1Ref.current.intensity = 1.7 + (1.2 - 1.7) * t;
-    }
-    if (light2Ref.current) {
-      light2Ref.current.color.lerpColors(C.l2Dark, C.l2Light, t);
-      light2Ref.current.intensity = 1.8 + (1.0 - 1.8) * t;
-    }
-    if (light3Ref.current) {
-      light3Ref.current.color.lerpColors(C.l3Dark, C.l3Light, t);
-      light3Ref.current.intensity = 0.7 + (0.5 - 0.7) * t;
-    }
-    if (light4Ref.current) {
-      light4Ref.current.color.lerpColors(C.l4Dark, C.l4Light, t);
-      light4Ref.current.intensity = 0.6 + (0.4 - 0.6) * t;
+      // 조명 강도/색상 lerp
+      if (light1Ref.current) {
+        light1Ref.current.intensity = 1.7 + (1.2 - 1.7) * t;
+      }
+      if (light2Ref.current) {
+        light2Ref.current.color.lerpColors(C.l2Dark, C.l2Light, t);
+        light2Ref.current.intensity = 1.8 + (1.0 - 1.8) * t;
+      }
+      if (light3Ref.current) {
+        light3Ref.current.color.lerpColors(C.l3Dark, C.l3Light, t);
+        light3Ref.current.intensity = 0.7 + (0.5 - 0.7) * t;
+      }
+      if (light4Ref.current) {
+        light4Ref.current.color.lerpColors(C.l4Dark, C.l4Light, t);
+        light4Ref.current.intensity = 0.6 + (0.4 - 0.6) * t;
+      }
     }
 
     // 카메라 스크롤 (원 등장 지점인 500vh에서 고정)
@@ -766,7 +778,7 @@ const LIGHT_BG = `linear-gradient(
 // --------------------
 // Export
 // --------------------
-export default function Terrain({ isDark }: { isDark: boolean }) {
+export default function Terrain({ isDark, overlayOpacity = 0 }: { isDark: boolean; overlayOpacity?: number }) {
   const [themeProgress, setThemeProgress] = useState(0); // 0 = 다크, 1 = 라이트
   const tpRef = useRef(0);
   const rafRef = useRef<number | undefined>(undefined);
@@ -814,7 +826,9 @@ export default function Terrain({ isDark }: { isDark: boolean }) {
       {/* alpha:true → Canvas 배경 투명, CSS 그라데이션 비침 */}
       <Canvas
         camera={{ position: [0, CAM_Y, CAM_Z_BASE], fov: 70 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: false, alpha: true }}
+        dpr={[1, 1.5]}
+        frameloop={overlayOpacity >= 1 ? "never" : "always"}
         style={{ background: "transparent", position: "relative", zIndex: 1 }}
       >
         <TerrainScene isDark={isDark} />

@@ -86,13 +86,13 @@ export default function OurClients() {
   }, []);
 
   return (
-    <div className="mt-[60px] md:mt-[120px] pb-[60px] md:pb-[120px]">
+    <div className="mt-[60px] pb-[60px] ">
       <div className="max-w-[1000px] mx-auto px-[24px]">
         <div className="flex flex-col-reverse gap-[32px] md:flex-row md:gap-[60px] items-center">
           {/* 좌측: 이미지 */}
           <div className="relative w-full md:w-[480px] md:shrink-0 aspect-4/3 rounded-[12px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.5)]">
             <Image
-              src="/ourClient/ourClient.jpg"
+              src="/ourClient/ourClientImage.png"
               alt="Our Clients"
               fill
               className="object-cover"

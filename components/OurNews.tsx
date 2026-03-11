@@ -106,7 +106,7 @@ export default function OurNews() {
   }, []);
 
   return (
-    <section className="mt-[60px] md:mt-[120px] pb-[60px] md:pb-[120px]">
+    <section className="mt-[60px]  pb-[60px] ">
       <div className="flex flex-col md:flex-row md:items-start">
         {/* 좌측: 연도 필터 + 타이틀 + 버튼 */}
         <div

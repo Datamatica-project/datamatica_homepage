@@ -69,7 +69,7 @@ export default function Home() {
       {/* Terrain: 0~500vh 단일 스크롤 컨텍스트 */}
       <section className="relative h-[600vh]">
         <div className="sticky top-0 h-screen overflow-hidden">
-          <Terrain isDark={isDark} />
+          <Terrain isDark={isDark} overlayOpacity={overlayOpacity} />
         </div>
       </section>
 

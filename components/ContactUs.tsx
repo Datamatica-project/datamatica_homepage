@@ -39,7 +39,7 @@ export default function ContactUs() {
   };
 
   return (
-    <section className="max-w-[1000px] mx-auto px-[24px] mt-[60px] md:mt-[120px] pb-[60px] md:pb-[120px]">
+    <section className="max-w-[1000px] mx-auto px-[24px] mt-[60px] pb-[60px] md:pb-[120px]">
       <div className="flex flex-col gap-[40px] md:flex-row md:gap-[80px] items-start">
         {/* 좌측: 타이틀 + 연락처 */}
         <div className="shrink-0 text-center md:text-left w-full md:w-auto">
