@@ -20,8 +20,8 @@ export default function GnbWrapper() {
     const handleScroll = () => {
       const vh = window.innerHeight;
       const sy = window.scrollY;
-      const fadeStart = 4.0 * vh;
-      const fadeEnd = 5.0 * vh;
+      const fadeStart = 3.5 * vh;
+      const fadeEnd = 4.0 * vh;
 
       let opacity = 0;
       if (sy >= fadeStart && sy < fadeEnd) {

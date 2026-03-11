@@ -2,11 +2,16 @@
 
 import Footer from "@/components/layout/Footer";
 import MainPage from "@/components/home/MainPage";
+import NextButton from "@/components/home/NextButton";
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 
 const Terrain = dynamic(() => import("@/components/Terrain"), { ssr: false });
+
+const TERRAIN_MOTION_END_VH = 1.0;
+const TERRAIN_FADE_START_VH = 0.7;
+const TERRAIN_SECTION_HEIGHT_VH = TERRAIN_MOTION_END_VH + 1;
 
 export default function Home() {
   const { isDark } = useTheme();
@@ -17,8 +22,8 @@ export default function Home() {
     const handleScroll = () => {
       const vh = window.innerHeight;
       const sy = window.scrollY;
-      const fadeStart = 4.0 * vh;
-      const fadeEnd = 5.0 * vh;
+      const fadeStart = TERRAIN_FADE_START_VH * vh;
+      const fadeEnd = TERRAIN_MOTION_END_VH * vh;
 
       let opacity = 0;
       if (sy >= fadeStart && sy < fadeEnd) {
@@ -36,16 +41,24 @@ export default function Home() {
 
   return (
     <main className="bg-[#F6F7F9] dark:bg-[#111113]">
+      <NextButton />
       {/* White overlay: fixed, z-10, terrain 위 / MainPage 아래 */}
       <div
         className="fixed inset-0 z-10 bg-[#F6F7F9] dark:bg-[#111113] pointer-events-none"
         style={{ opacity: overlayOpacity }}
       />
 
-      {/* Terrain: 0~500vh 단일 스크롤 컨텍스트 */}
-      <section className="relative h-[600vh]">
+      {/* Terrain: 짧은 스크롤로 3D 구간을 마칠 수 있도록 높이를 압축 */}
+      <section
+        className="relative"
+        style={{ height: `${TERRAIN_SECTION_HEIGHT_VH * 100}vh` }}
+      >
         <div className="sticky top-0 h-screen overflow-hidden">
-          <Terrain isDark={isDark} overlayOpacity={overlayOpacity} />
+          <Terrain
+            isDark={true}
+            overlayOpacity={overlayOpacity}
+            scrollEndVh={TERRAIN_MOTION_END_VH}
+          />
         </div>
       </section>
 

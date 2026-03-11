@@ -5,10 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
-import {
-  EffectComposer,
-  Vignette,
-} from "@react-three/postprocessing";
+import { EffectComposer, Vignette } from "@react-three/postprocessing";
 import SunriseGlow from "./SunriseGlow";
 import { DataBeacon } from "./DataBeacon";
 import { GlobeParticlesScene } from "./GlobeParticles";
@@ -17,7 +14,7 @@ const SEG_LEN = 600;
 const WIDTH = 220;
 const GRID = 70;
 const N_TILES = 3;
-const SCROLL_SPEED = 0.05;
+const SCROLL_SPEED = 0.2;
 const CAM_Y = 6;
 const CAM_Z_BASE = 15;
 const LOOK_AT = new THREE.Vector3(0, 2, -150);
@@ -33,39 +30,45 @@ type HeightFn = (x: number, z: number) => number;
 
 const TECH_NODES = [
   {
-    name: "데이터 라벨링",
-    code: "SYS.01 / Data Annotation",
+    name: "AI 모델 개발",
+    code: "SYS.01 / AI Model Development",
     x: -9,
-    z: -50,
+    z: -45,
     yOffset: -5,
   },
-  { name: "정밀 지도", code: "SYS.02 / HD MAP", x: 10, z: -80, yOffset: -5 },
   {
-    name: "자율 주행",
-    code: "SYS.03 / Autonomous Mobility",
+    name: "소프트웨어 개발",
+    code: "SYS.02 / Software Development",
+    x: 10,
+    z: -55,
+    yOffset: -5,
+  },
+  {
+    name: "데이터 라벨링",
+    code: "SYS.03 / Data Annotation",
     x: -10,
-    z: -110,
+    z: -80,
     yOffset: -4,
   },
   {
-    name: "디지털 트윈",
-    code: "SYS.04 / Digital Twin",
+    name: "고정밀 지도",
+    code: "SYS.04 / HD MAP",
     x: 10,
-    z: -140,
+    z: -105,
     yOffset: -5,
   },
   {
-    name: "스마트 헬스 케어",
-    code: "SYS.05 / Smart Healthcare",
+    name: "자율주행 관제",
+    code: "SYS.05 / Autonomous Driving Control",
     x: -10,
-    z: -170,
+    z: -130,
     yOffset: -5,
   },
   {
-    name: "안전 모니터링",
-    code: "SYS.06 / Smart Safety System",
+    name: "디지털 트윈",
+    code: "SYS.06 / Digital Twin",
     x: 10,
-    z: -200,
+    z: -155,
     yOffset: -5,
   },
 ] as const;
@@ -376,9 +379,8 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
           style={{
             color: isDark ? "white" : "#D94A52",
             fontSize: "clamp(20px, 8vw, 58px)",
-            fontWeight: "300",
+            fontWeight: "500",
             letterSpacing: "clamp(0.05em, 0.5vw, 0.15em)",
-            textTransform: "uppercase",
             lineHeight: 1,
             textShadow: "0 0 30px rgba(255,100,150,0.7)",
             margin: 0,
@@ -387,7 +389,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             fontFamily: "var(--font-a2z), sans-serif",
           }}
         >
-          DATAMATICA
+          DataMatica
         </h1>
         <p
           style={{
@@ -475,7 +477,13 @@ function Stars({ isDark }: { isDark: boolean }) {
 // --------------------
 // Main scene
 // --------------------
-function TerrainScene({ isDark }: { isDark: boolean }) {
+function TerrainScene({
+  isDark,
+  scrollEndVh,
+}: {
+  isDark: boolean;
+  scrollEndVh: number;
+}) {
   const { camera, scene } = useThree();
   const scrollY = useRef(0);
   const groupRefs = useRef<THREE.Group[]>([]);
@@ -629,7 +637,8 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
       ptMat.color.lerpColors(C.ptDark, C.ptLight, t);
 
       // blending 전환 (중간 지점에서 스위치)
-      const blendTarget = t < 0.5 ? THREE.NormalBlending : THREE.AdditiveBlending;
+      const blendTarget =
+        t < 0.5 ? THREE.NormalBlending : THREE.AdditiveBlending;
       if (lineMat.blending !== blendTarget) {
         lineMat.blending = blendTarget;
         lineMat.needsUpdate = true;
@@ -669,8 +678,11 @@ function TerrainScene({ isDark }: { isDark: boolean }) {
       }
     }
 
-    // 카메라 스크롤 (원 등장 지점인 500vh에서 고정)
-    const cappedScroll = Math.min(scrollY.current, 5.0 * window.innerHeight);
+    // 짧은 문서 스크롤 안에서 카메라 이동을 더 빠르게 진행한다.
+    const cappedScroll = Math.min(
+      scrollY.current,
+      scrollEndVh * window.innerHeight
+    );
     const targetZ = CAM_Z_BASE - cappedScroll * SCROLL_SPEED;
     camera.position.z += (targetZ - camera.position.z) * 0.1;
     recycleIfNeeded(camera.position.z);
@@ -778,7 +790,15 @@ const LIGHT_BG = `linear-gradient(
 // --------------------
 // Export
 // --------------------
-export default function Terrain({ isDark, overlayOpacity = 0 }: { isDark: boolean; overlayOpacity?: number }) {
+export default function Terrain({
+  isDark,
+  overlayOpacity = 0,
+  scrollEndVh = 1.0,
+}: {
+  isDark: boolean;
+  overlayOpacity?: number;
+  scrollEndVh?: number;
+}) {
   const [themeProgress, setThemeProgress] = useState(0); // 0 = 다크, 1 = 라이트
   const tpRef = useRef(0);
   const rafRef = useRef<number | undefined>(undefined);
@@ -831,7 +851,7 @@ export default function Terrain({ isDark, overlayOpacity = 0 }: { isDark: boolea
         frameloop={overlayOpacity >= 1 ? "never" : "always"}
         style={{ background: "transparent", position: "relative", zIndex: 1 }}
       >
-        <TerrainScene isDark={isDark} />
+        <TerrainScene isDark={isDark} scrollEndVh={scrollEndVh} />
 
         <EffectComposer>
           <Vignette

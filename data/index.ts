@@ -7,7 +7,7 @@ interface skillDataProps {
 // 기술 데이터
 export const skillData: skillDataProps[] = [
   {
-    title: "자율주행",
+    title: "자율주행 관제",
     description: "센서·AI 기반의<br /> 안전하고 지능적인 주행 기술.",
     imageSrc: "/business/AM.png",
   },

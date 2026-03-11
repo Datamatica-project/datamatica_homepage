@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 
 const LOGO_FILES = [
@@ -64,17 +64,35 @@ const renderLogos = (keyPrefix: string) =>
 const SPEED = 0.5; // px per frame
 
 export default function LogoMarquee() {
-  const [paused, setPaused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const rafRef = useRef(0);
-  const pausedRef = useRef(false);
   const inViewRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragStartOffsetRef = useRef(0);
 
-  useEffect(() => {
-    pausedRef.current = paused;
-  }, [paused]);
+  const wrapOffset = useCallback((offset: number) => {
+    const el = trackRef.current;
+    if (!el) return offset;
+    const halfWidth = el.scrollWidth / 2;
+    if (halfWidth <= 0) return offset;
+    let o = offset % halfWidth;
+    if (o > 0) o -= halfWidth;
+    return o;
+  }, []);
+
+  const tick = useCallback(() => {
+    if (!inViewRef.current) return;
+    const el = trackRef.current;
+    if (el && !isDraggingRef.current) {
+      offsetRef.current -= SPEED;
+      offsetRef.current = wrapOffset(offsetRef.current);
+      el.style.transform = `translateX(${offsetRef.current}px)`;
+    }
+    rafRef.current = requestAnimationFrame(tick);
+  }, [wrapOffset]);
 
   // 뷰포트 진입/이탈 감지
   useEffect(() => {
@@ -96,19 +114,23 @@ export default function LogoMarquee() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const tick = useCallback(() => {
-    if (!inViewRef.current) return;
+  const startDrag = useCallback((clientX: number) => {
+    isDraggingRef.current = true;
+    dragStartXRef.current = clientX;
+    dragStartOffsetRef.current = offsetRef.current;
+  }, []);
 
+  const moveDrag = useCallback((clientX: number) => {
+    if (!isDraggingRef.current) return;
     const el = trackRef.current;
-    if (el && !pausedRef.current) {
-      offsetRef.current -= SPEED;
-      const halfWidth = el.scrollWidth / 2;
-      if (Math.abs(offsetRef.current) >= halfWidth) {
-        offsetRef.current += halfWidth;
-      }
-      el.style.transform = `translateX(${offsetRef.current}px)`;
-    }
-    rafRef.current = requestAnimationFrame(tick);
+    if (!el) return;
+    const delta = clientX - dragStartXRef.current;
+    offsetRef.current = wrapOffset(dragStartOffsetRef.current + delta);
+    el.style.transform = `translateX(${offsetRef.current}px)`;
+  }, [wrapOffset]);
+
+  const endDrag = useCallback(() => {
+    isDraggingRef.current = false;
   }, []);
 
   return (
@@ -118,9 +140,14 @@ export default function LogoMarquee() {
       </p>
 
       <div
-        className="overflow-hidden select-none"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
+        className="overflow-hidden select-none cursor-grab active:cursor-grabbing"
+        onMouseDown={(e) => startDrag(e.clientX)}
+        onMouseMove={(e) => moveDrag(e.clientX)}
+        onMouseUp={endDrag}
+        onMouseLeave={endDrag}
+        onTouchStart={(e) => startDrag(e.touches[0].clientX)}
+        onTouchMove={(e) => { e.preventDefault(); moveDrag(e.touches[0].clientX); }}
+        onTouchEnd={endDrag}
       >
         <div
           ref={trackRef}

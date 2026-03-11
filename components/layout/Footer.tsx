@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -8,9 +9,14 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row md:justify-between gap-[40px]">
           {/* 좌측: 브랜드 + 주소 */}
           <div className="flex flex-col gap-[16px]">
-            <span className="text-[22px] font-bold tracking-tight">
-              Datamatica
-            </span>
+            <Image
+              src="/header/headerlogo.png"
+              alt="Datamatica"
+              width={120}
+              height={29}
+              className="object-contain"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
             <p className="text-[14px] text-[#888888] leading-[1.8]">
               809-1, Urim W City, 9-22, Pangyo-ro 255beon-gil,
               <br />

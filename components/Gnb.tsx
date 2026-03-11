@@ -90,7 +90,7 @@ export default function Gnb({
               height={36}
               className="object-contain"
               style={{
-                filter: isMain && !isDark ? "none" : "brightness(0) invert(1)",
+                filter: "none",
                 transition: "filter 0.3s ease",
               }}
               priority
@@ -103,7 +103,7 @@ export default function Gnb({
               {NAV_ITEMS.map((label) => (
                 <li key={label}>
                   <button
-                    className="cursor-pointer text-[15px] font-medium transition-colors duration-300"
+                    className="cursor-pointer text-[17px] font-semibold transition-colors duration-300"
                     style={{ color: iconColor }}
                     onClick={() => handleNavItemClick(label)}
                     onMouseEnter={(e) => {
@@ -253,7 +253,7 @@ export default function Gnb({
           {NAV_ITEMS.map((label) => (
             <li key={label}>
               <button
-                className="cursor-pointer w-full text-left text-[18px] font-medium py-[14px] transition-colors duration-200"
+                className="cursor-pointer w-full text-left text-[20px] font-semibold py-[14px] transition-colors duration-200"
                 style={{
                   color: drawerText,
                   borderBottom: `1px solid ${isMain && !isDark ? "#f0f0f0" : "#2a2a2a"}`,

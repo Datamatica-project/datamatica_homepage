@@ -4,6 +4,7 @@ import React, { useCallback, useRef, useState, useEffect } from "react";
 import SectionTitle from "../common/SectionTitle";
 import SkillBox from "../common/SkillBox";
 import { skillData } from "@/data";
+import { ChevronLeft, ChevronRight } from "../Icons";
 
 // 문자열에 포함된 "<br />"을 실제 줄바꿈으로 바꿔서 렌더링하는 헬퍼
 function renderDescriptionWithBr(description: string) {
@@ -62,24 +63,50 @@ export default function OurBusiness() {
     e.preventDefault();
     el.scrollLeft = scrollLeft - (e.pageX - el.offsetLeft - startX);
   }, []);
+  const CARD_STEP = 300;
+
+  const slideLeft = useCallback(() => {
+    sliderRef.current?.scrollBy({ left: -CARD_STEP, behavior: "smooth" });
+  }, []);
+
+  const slideRight = useCallback(() => {
+    sliderRef.current?.scrollBy({ left: CARD_STEP, behavior: "smooth" });
+  }, []);
+
   return (
     <>
       <div className="max-w-[1000px] pt-[60px] md:pt-[90px] mx-auto px-[24px]">
-        <SectionTitle
-          subtitle="Our business"
-          title={
-            <>
-              <span className="text-main font-bold">데이터</span>로 설계하는
-              기술
-            </>
-          }
-          description={
-            <>
-              수집부터 분석, 시각화, 자동화까지 <br />
-              데이터를 가치로 전환하는 핵심 기술을 소개합니다.
-            </>
-          }
-        />
+        <div className="flex items-end justify-between">
+          <SectionTitle
+            subtitle="Our business"
+            title={
+              <>
+                <span className="text-main font-bold">데이터</span>로 설계하는
+                기술
+              </>
+            }
+            description={
+              <>
+                수집부터 분석, 시각화, 자동화까지 <br />
+                데이터를 가치로 전환하는 핵심 기술을 소개합니다.
+              </>
+            }
+          />
+          <div className="hidden md:flex gap-[12px] mb-[4px] shrink-0">
+            <button
+              onClick={slideLeft}
+              className="w-[40px] h-[40px] rounded-full border border-[#d0d0d0] dark:border-[#3a3a3a] flex items-center justify-center hover:bg-[#f0f0f0] dark:hover:bg-[#252525] transition-colors cursor-pointer"
+            >
+              <ChevronLeft size={18} className="text-normal-text" />
+            </button>
+            <button
+              onClick={slideRight}
+              className="w-[40px] h-[40px] rounded-full border border-[#d0d0d0] dark:border-[#3a3a3a] flex items-center justify-center hover:bg-[#f0f0f0] dark:hover:bg-[#252525] transition-colors cursor-pointer"
+            >
+              <ChevronRight size={18} className="text-normal-text" />
+            </button>
+          </div>
+        </div>
       </div>
       {/* 드래그 슬라이더: max-w 밖으로 full-width */}
       <div

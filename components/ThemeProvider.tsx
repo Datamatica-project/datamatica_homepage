@@ -8,17 +8,16 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  isDark: true,
+  isDark: false,
   toggleTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const dark = stored ? stored === "dark" : prefersDark;
+    const dark = stored === "dark"; // 저장된 값이 "dark"일 때만 다크모드, 기본값은 라이트
     setIsDark(dark);
     document.documentElement.classList.toggle("dark", dark);
   }, []);

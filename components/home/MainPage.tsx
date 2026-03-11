@@ -19,19 +19,11 @@ export default function MainPage({
         className="relative z-10 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{ transform: `translateY(${entered ? 0 : 100}vh)` }}
       >
-        <OurBusiness />
-        <OurProjects />
-
-        {/* 워터마크 */}
-        {/* <div className="overflow-hidden pointer-events-none select-none py-[20px] md:py-[40px]">
-          <p className="whitespace-nowrap text-[#f0e4e5] dark:text-[#2a1214] text-[80px] md:text-[160px] font-black leading-none tracking-tight">
-            Datamatica
-          </p>
-        </div> */}
-
-        <OurClients />
-        <OurNews />
-        <ContactUs />
+        <div id="section-business"><OurBusiness /></div>
+        <div id="section-projects"><OurProjects /></div>
+        <div id="section-clients"><OurClients /></div>
+        <div id="section-news"><OurNews /></div>
+        <div id="section-contact"><ContactUs /></div>
       </div>
     </div>
   );
