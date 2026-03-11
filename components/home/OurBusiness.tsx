@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useCallback, useRef, useState, useEffect } from "react";
-import SectionTitle from "./SectionTitle";
-import SkillBox from "./SkillBox";
+import SectionTitle from "../common/SectionTitle";
+import SkillBox from "../common/SkillBox";
 import { skillData } from "@/data";
 
 // 문자열에 포함된 "<br />"을 실제 줄바꿈으로 바꿔서 렌더링하는 헬퍼

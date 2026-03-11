@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import SectionTitle from "./SectionTitle";
-import NewsCard_main from "./NewsCard_main";
-import { ChevronLeft, ChevronRight } from "./Icons";
+import SectionTitle from "../common/SectionTitle";
+import NewsCard_main from "../common/NewsCard_main";
+import { ChevronLeft, ChevronRight } from "../Icons";
 
 const NEWS_DATA = [
   {

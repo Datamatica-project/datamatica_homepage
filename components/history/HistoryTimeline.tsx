@@ -1,0 +1,109 @@
+"use client";
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { HistoryTimelineYear } from "@/data/history";
+import HistoryYearNav from "./HistoryYearNav";
+import HistoryYearSection from "./HistoryYearSection";
+
+interface HistoryTimelineProps {
+  timeline: HistoryTimelineYear[];
+}
+
+const SCROLL_OFFSET = 96;
+
+export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
+  const years = useMemo(() => timeline.map((item) => item.year), [timeline]);
+  const [activeYear, setActiveYear] = useState<number>(years[0] ?? 0);
+  const sectionRefs = useRef<Record<number, HTMLElement | null>>({});
+
+  const setSectionRef = useCallback((year: number, node: HTMLElement | null) => {
+    sectionRefs.current[year] = node;
+  }, []);
+
+  const handleSelectYear = useCallback((year: number) => {
+    const section = sectionRefs.current[year];
+
+    if (!section) return;
+
+    const top = section.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET;
+
+    window.scrollTo({
+      top,
+      behavior: "smooth",
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!timeline.length) return;
+
+    setActiveYear(timeline[0].year);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+        if (!visibleEntries.length) return;
+
+        const nextYear = Number(
+          (visibleEntries[0].target as HTMLElement).dataset.year ?? years[0]
+        );
+
+        setActiveYear(nextYear);
+      },
+      {
+        rootMargin: "-18% 0px -45% 0px",
+        threshold: [0.15, 0.35, 0.6],
+      }
+    );
+
+    timeline.forEach((item) => {
+      const section = sectionRefs.current[item.year];
+      if (section) observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, [timeline, years]);
+
+  if (!timeline.length) {
+    return null;
+  }
+
+  return (
+    <section className="relative pb-[96px] md:pb-[140px]">
+      <div className="sticky top-[64px] z-20 border-y border-[#ececec] bg-[#F6F7F9]/92 backdrop-blur lg:hidden dark:border-[#232325] dark:bg-[#111113]/92">
+        <HistoryYearNav
+          years={years}
+          activeYear={activeYear}
+          onSelectYear={handleSelectYear}
+          orientation="mobile"
+        />
+      </div>
+
+      <div
+        className="hidden lg:block fixed top-1/2 z-20 -translate-y-1/2"
+        style={{ left: "max(24px, calc((100vw - 1000px) / 2 - 122px))" }}
+      >
+        <HistoryYearNav
+          years={years}
+          activeYear={activeYear}
+          onSelectYear={handleSelectYear}
+        />
+      </div>
+
+      <div className="max-w-[1000px] mx-auto px-[24px] pt-[28px] md:pt-[36px]">
+        <div className="space-y-[24px] md:space-y-[32px]">
+          {timeline.map((yearData, index) => (
+            <HistoryYearSection
+              key={yearData.year}
+              ref={(node) => setSectionRef(yearData.year, node)}
+              yearData={yearData}
+              isLast={index === timeline.length - 1}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

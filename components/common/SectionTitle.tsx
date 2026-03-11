@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowRightCircle } from "./Icons";
+import { ArrowRightCircle } from "../Icons";
 
 export default function SectionTitle({
   subtitle,

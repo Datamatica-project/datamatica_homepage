@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import SectionTitle from "./SectionTitle";
-import { ChevronLeft, ChevronRight } from "./Icons";
+import SectionTitle from "../common/SectionTitle";
+import { ChevronLeft, ChevronRight } from "../Icons";
 
 const PROJECTS = [
   {
@@ -69,9 +69,9 @@ export default function OurProjects() {
           <button
             onClick={() => setTabOffset((prev) => prev - 1)}
             disabled={!canScrollLeft}
-            className={`pb-[14px] transition-opacity ${canScrollLeft ? "opacity-100 cursor-pointer" : "opacity-20 cursor-default"}`}
+            className={`pb-[14px] text-black dark:text-white transition-opacity ${canScrollLeft ? "opacity-100 cursor-pointer" : "opacity-20 cursor-default"}`}
           >
-            <ChevronLeft size={23} color="#000000" />
+            <ChevronLeft size={23} />
           </button>
         )}
 
@@ -111,9 +111,9 @@ export default function OurProjects() {
           <button
             onClick={() => setTabOffset((prev) => prev + 1)}
             disabled={!canScrollRight}
-            className={`pb-[14px] transition-opacity ${canScrollRight ? "opacity-100 cursor-pointer" : "opacity-20 cursor-default"}`}
+            className={`pb-[14px] text-black dark:text-white transition-opacity ${canScrollRight ? "opacity-100 cursor-pointer" : "opacity-20 cursor-default"}`}
           >
-            <ChevronRight size={23} color="#000000" />
+            <ChevronRight size={23} />
           </button>
         )}
       </div>

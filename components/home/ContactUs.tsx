@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import SectionTitle from "./SectionTitle";
-import { Envelope, Telephone } from "./Icons";
+import SectionTitle from "../common/SectionTitle";
+import { Envelope, Telephone } from "../Icons";
 
 export default function ContactUs() {
   const [submitting, setSubmitting] = useState(false);

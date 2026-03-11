@@ -2,8 +2,8 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
-import SectionTitle from "./SectionTitle";
-import LogoMarquee from "./LogoMarquee";
+import SectionTitle from "../common/SectionTitle";
+import LogoMarquee from "../LogoMarquee";
 
 const STATS = [
   { target: 1, suffix: "M+", label: "데이터 가공" },

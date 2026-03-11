@@ -1,7 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { ArrowRightCircle } from "./Icons";
-import { div } from "three/tsl";
+import { ArrowRightCircle } from "../Icons";
 
 interface NewsCardProps {
   date: string;

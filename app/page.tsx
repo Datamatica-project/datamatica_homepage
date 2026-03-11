@@ -1,34 +1,16 @@
 "use client";
 
-import Footer from "@/components/Footer";
-import Gnb from "@/components/Gnb";
-import MainPage from "@/components/MainPage";
+import Footer from "@/components/layout/Footer";
+import MainPage from "@/components/home/MainPage";
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
+import { useTheme } from "@/components/ThemeProvider";
 
 const Terrain = dynamic(() => import("@/components/Terrain"), { ssr: false });
 
 export default function Home() {
+  const { isDark } = useTheme();
   const [overlayOpacity, setOverlayOpacity] = useState(0);
-  const [isDark, setIsDark] = useState(true); // Terrain 기본값과 일치
-
-  // 테마 초기화 (localStorage / OS 설정)
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const dark = stored ? stored === "dark" : prefersDark;
-    setIsDark(dark);
-    document.documentElement.classList.toggle("dark", dark);
-  }, []);
-
-  const toggleTheme = () => {
-    const next = !isDark;
-    setIsDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-  };
 
   // 스크롤 오버레이
   useEffect(() => {
@@ -54,12 +36,6 @@ export default function Home() {
 
   return (
     <main className="bg-[#F6F7F9] dark:bg-[#111113]">
-      <Gnb
-        overlayOpacity={overlayOpacity}
-        isDark={isDark}
-        onThemeToggle={toggleTheme}
-      />
-
       {/* White overlay: fixed, z-10, terrain 위 / MainPage 아래 */}
       <div
         className="fixed inset-0 z-10 bg-[#F6F7F9] dark:bg-[#111113] pointer-events-none"
