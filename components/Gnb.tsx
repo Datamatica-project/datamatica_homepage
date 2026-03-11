@@ -46,6 +46,8 @@ export default function Gnb({
     // 현재는 회사연혁 메뉴만 별도 페이지로 이동합니다.
     if (label === "회사연혁") {
       router.push("/history");
+    } else if (label === "소식/뉴스") {
+      router.push("/news");
     }
   };
 
