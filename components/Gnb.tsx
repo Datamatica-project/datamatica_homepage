@@ -48,6 +48,8 @@ export default function Gnb({
       router.push("/history");
     } else if (label === "소식/뉴스") {
       router.push("/news");
+    } else if (label === "사업분야") {
+      router.push("/business");
     }
   };
 
