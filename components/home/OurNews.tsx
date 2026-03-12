@@ -4,48 +4,26 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import SectionTitle from "../common/SectionTitle";
 import NewsCard_main from "../common/NewsCard_main";
 import { ChevronLeft, ChevronRight } from "../Icons";
+import { newsArticles } from "@/data/news";
 
-const NEWS_DATA = [
-  {
-    date: "2024년 8월 30일",
-    title: "[앱뉴스] 당진시, 스마트 경로당 구축 시연회 개최",
-    description:
-      "당진시(시장 오성환)가 총 187개소의 경로당에 스마트화상회의시스템과 IoT안전관리시스템 구축을 완료하고, 28일 노인회관 2층 대회의실에서 스마트경로당 구축 시연회를 성공적으로 마쳤다.",
-    image: "/ourNews/news.avif",
-    href: "#",
-    year: 2024,
-  },
-  {
-    date: "2024년 8월 06일",
-    title: "[디지털투데이] 데이터메티카, AI 거닝 재현 데이터 사업 본격 추진",
-    description:
-      "데이터메티카는 2022년 15억원 이상 규모 한국지능정보사회진흥원(NIA) 재현 데이터 사업을 성공적으로 수행한 경험과 다양한 연구 노하우를 기반으로 재현 데이터(Synthetic Data) 사업을 본격화한다고 6일 밝혔다.",
-    image: "/ourNews/news.avif",
-    href: "#",
-    year: 2024,
-  },
-  {
-    date: "2024년 6월 21일",
-    title:
-      "[정보통신신문] 데이터메티카, 스마트 시티 사업 단과 스마트 시티 사업 본격화",
-    description:
-      "인공지능(AI) 학습 데이터 전문 기업 데이터메티카가 적극적으로 스마트 도시 구축에 박차를 가하기 위해 사업단을 구성했다고 21일 밝혔다.",
-    image: "/ourNews/news.avif",
-    href: "#",
-    year: 2024,
-  },
-  {
-    date: "2023년 11월 15일",
-    title: "[전자신문] 데이터메티카, AI 데이터 구축 사업 수주",
-    description:
-      "데이터메티카가 한국지능정보사회진흥원(NIA)의 AI 학습용 데이터 구축 사업을 수주하며 데이터 분야 역량을 입증했다.",
-    image: "/ourNews/news.avif",
-    href: "#",
-    year: 2023,
-  },
-];
+const CURRENT_YEAR = new Date().getFullYear();
+const MAX_YEARS = 5;
+const MAX_PER_YEAR = 10;
 
-const YEARS = [...new Set(NEWS_DATA.map((n) => n.year))].sort((a, b) => b - a);
+// 최근 5년 내 데이터만, 연도별 최대 10개 (최신순)
+const newsDataByYear = new Map<number, typeof newsArticles>();
+newsArticles
+  .filter((n) => n.year >= CURRENT_YEAR - MAX_YEARS + 1)
+  .sort((a, b) => b.id.localeCompare(a.id))
+  .forEach((article) => {
+    const arr = newsDataByYear.get(article.year) ?? [];
+    if (arr.length < MAX_PER_YEAR) {
+      arr.push(article);
+      newsDataByYear.set(article.year, arr);
+    }
+  });
+
+const YEARS = [...newsDataByYear.keys()].sort((a, b) => b - a);
 
 export default function OurNews() {
   const [activeYear, setActiveYear] = useState<number | null>(YEARS[0]);
@@ -68,8 +46,8 @@ export default function OurNews() {
   }, []);
 
   const filtered = activeYear
-    ? NEWS_DATA.filter((n) => n.year === activeYear)
-    : NEWS_DATA;
+    ? (newsDataByYear.get(activeYear) ?? [])
+    : [...newsDataByYear.values()].flat();
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     const el = sliderRef.current;
@@ -182,14 +160,14 @@ export default function OurNews() {
               transform: visible ? "translateX(0)" : "translateX(200px)",
             }}
           >
-            {filtered.map((news, i) => (
-              <li key={`${news.title}-${i}`}>
+            {filtered.map((news) => (
+              <li key={news.id}>
                 <NewsCard_main
                   date={news.date}
                   title={news.title}
                   description={news.description}
-                  image={news.image}
-                  href={news.href}
+                  image={news.thumbnail}
+                  href={news.source}
                 />
               </li>
             ))}
