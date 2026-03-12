@@ -53,7 +53,7 @@ export default function Footer() {
         </div>
 
         {/* 구분선 */}
-        <div className="mt-[48px] border-t border-[#2a2a2a]" />
+        <div className="mt-[48px] border-t border-[#323234]" />
 
         {/* 하단: CEO + Copyright */}
         <div className="mt-[24px] flex flex-col md:flex-row md:justify-between gap-[8px] text-[13px] text-[#555555]">

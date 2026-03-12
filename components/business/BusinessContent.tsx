@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { skillData } from "@/data";
 import { ArrowRightCircle } from "@/components/Icons";
 
@@ -22,7 +24,10 @@ function ProjectCard({
   const isFallback = src === FALLBACK_IMAGE;
 
   return (
-    <div className="rounded-[16px] overflow-hidden border border-[#e8e8e8] dark:border-[#333] bg-white dark:bg-[#1e1e1f] shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] flex flex-col transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_12px_32px_rgba(0,0,0,0.14)] dark:hover:shadow-[0_12px_32px_rgba(0,0,0,0.5)] hover:scale-[1.02]">
+    <Link
+      href={href}
+      className="group rounded-[16px] overflow-hidden border border-[#e8e8e8] dark:border-[#3c3c3e] bg-white dark:bg-[#282829] shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] flex flex-col transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_12px_32px_rgba(0,0,0,0.14)] dark:hover:shadow-[0_12px_32px_rgba(0,0,0,0.5)] hover:scale-[1.02]"
+    >
       <div className="relative w-full aspect-16/10 overflow-hidden bg-[#fdf5f5] dark:bg-[#2a1a1a]">
         <Image
           src={src}
@@ -39,27 +44,28 @@ function ProjectCard({
         <p className="mt-[10px] flex-1 text-[14px] leading-[1.6] text-description">
           {description}
         </p>
-        <a
-          href={href}
-          className="mt-[20px] inline-flex w-fit items-center gap-[8px] text-[14px] font-medium text-normal-text transition-colors hover:text-main"
-        >
+        <div className="mt-[20px] inline-flex w-fit items-center gap-[8px] text-[14px] font-medium text-normal-text transition-colors group-hover:text-main">
           <ArrowRightCircle size={25} />
           자세히보기
-        </a>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
 export default function BusinessContent() {
-  const [activeId, setActiveId] = useState(skillData[0].id);
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const initialId =
+    skillData.find((s) => s.id === tabParam)?.id ?? skillData[0].id;
+  const [activeId, setActiveId] = useState(initialId);
   const active = skillData.find((s) => s.id === activeId) ?? skillData[0];
 
   return (
     <div className="max-w-[1000px] mx-auto px-[24px] pb-[80px] md:pb-[120px]">
 
       {/* 기술 카테고리 탭 */}
-      <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden border-b border-[#e0e0e0] dark:border-[#2e2e2e] mb-[48px] md:mb-[60px]">
+      <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden border-b border-[#e0e0e0] dark:border-[#363638] mb-[48px] md:mb-[60px]">
         {skillData.map((skill) => (
           <button
             key={skill.id}
@@ -89,7 +95,7 @@ export default function BusinessContent() {
             {active.overview}
           </p>
         </div>
-        <div className="relative shrink-0 w-full md:w-[380px] aspect-4/3 rounded-[16px] overflow-hidden bg-[#f0f0f0] dark:bg-[#1e1e1f]">
+        <div className="relative shrink-0 w-full md:w-[380px] aspect-4/3 rounded-[16px] overflow-hidden bg-[#f0f0f0] dark:bg-[#282829]">
           <Image
             src={active.imageSrc}
             alt={active.title}
@@ -106,12 +112,12 @@ export default function BusinessContent() {
         </h3>
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] list-none">
           {active.projects.map((project) => (
-            <li key={project.title}>
+            <li key={project.id}>
               <ProjectCard
                 title={project.title}
                 description={project.description}
                 image={project.image}
-                href={project.href}
+                href={`/business/${active.id}/${project.id}`}
               />
             </li>
           ))}

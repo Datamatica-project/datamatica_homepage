@@ -59,7 +59,7 @@ export default function NewsGrid() {
   };
 
   const selectCls =
-    "h-[42px] px-[12px] pr-[28px] rounded-[8px] border border-[#d8d8d8] dark:border-[#3a3a3a] bg-white dark:bg-[#1a1a1b] text-[13px] text-normal-text outline-none focus:border-main transition-colors cursor-pointer shrink-0 appearance-none";
+    "h-[42px] px-[12px] pr-[28px] rounded-[8px] border border-[#d8d8d8] dark:border-[#434345] bg-white dark:bg-[#252527] text-[13px] text-normal-text outline-none focus:border-main transition-colors cursor-pointer shrink-0 appearance-none";
   const selectArrow = {
     backgroundImage:
       "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%23888' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E\")",
@@ -96,7 +96,7 @@ export default function NewsGrid() {
             value={query}
             onChange={handleQueryChange}
             placeholder="기사 검색"
-            className="w-[180px] md:w-[240px] h-[42px] px-[14px] rounded-[8px] border border-[#d8d8d8] dark:border-[#3a3a3a] bg-white dark:bg-[#1a1a1b] text-[14px] text-normal-text placeholder:text-description outline-none focus:border-main transition-colors"
+            className="w-[180px] md:w-[240px] h-[42px] px-[14px] rounded-[8px] border border-[#d8d8d8] dark:border-[#434345] bg-white dark:bg-[#252527] text-[14px] text-normal-text placeholder:text-description outline-none focus:border-main transition-colors"
           />
           <select
             value={sortOrder}
@@ -138,7 +138,7 @@ export default function NewsGrid() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="w-[36px] h-[36px] rounded-[8px] border border-[#d8d8d8] dark:border-[#3a3a3a] flex items-center justify-center text-description transition-colors hover:text-normal-text disabled:opacity-30 disabled:cursor-default cursor-pointer"
+            className="w-[36px] h-[36px] rounded-[8px] border border-[#d8d8d8] dark:border-[#434345] flex items-center justify-center text-description transition-colors hover:text-normal-text disabled:opacity-30 disabled:cursor-default cursor-pointer"
           >
             ‹
           </button>
@@ -150,7 +150,7 @@ export default function NewsGrid() {
               className={`w-[36px] h-[36px] rounded-[8px] border text-[14px] font-medium transition-all cursor-pointer ${
                 page === p
                   ? "bg-main text-white border-main"
-                  : "border-[#d8d8d8] dark:border-[#3a3a3a] text-description hover:text-normal-text"
+                  : "border-[#d8d8d8] dark:border-[#434345] text-description hover:text-normal-text"
               }`}
             >
               {p}
@@ -160,7 +160,7 @@ export default function NewsGrid() {
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="w-[36px] h-[36px] rounded-[8px] border border-[#d8d8d8] dark:border-[#3a3a3a] flex items-center justify-center text-description transition-colors hover:text-normal-text disabled:opacity-30 disabled:cursor-default cursor-pointer"
+            className="w-[36px] h-[36px] rounded-[8px] border border-[#d8d8d8] dark:border-[#434345] flex items-center justify-center text-description transition-colors hover:text-normal-text disabled:opacity-30 disabled:cursor-default cursor-pointer"
           >
             ›
           </button>

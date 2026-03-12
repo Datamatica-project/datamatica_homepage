@@ -72,7 +72,7 @@ export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
 
   return (
     <section className="relative pb-[96px] md:pb-[140px]">
-      <div className="sticky top-[64px] z-20 border-y border-[#ececec] bg-[#F6F7F9]/92 backdrop-blur lg:hidden dark:border-[#232325] dark:bg-[#111113]/92">
+      <div className="sticky top-[64px] z-20 border-y border-[#ececec] bg-[#F6F7F9]/92 backdrop-blur lg:hidden dark:border-[#232325] dark:bg-[#1c1c1e]/92">
         <HistoryYearNav
           years={years}
           activeYear={activeYear}

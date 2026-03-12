@@ -40,11 +40,11 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="bg-[#F6F7F9] dark:bg-[#111113]">
+    <main className="bg-[#F6F7F9] dark:bg-[#1c1c1e]">
       <NextButton />
       {/* White overlay: fixed, z-10, terrain 위 / MainPage 아래 */}
       <div
-        className="fixed inset-0 z-10 bg-[#F6F7F9] dark:bg-[#111113] pointer-events-none"
+        className="fixed inset-0 z-10 bg-[#F6F7F9] dark:bg-[#1c1c1e] pointer-events-none"
         style={{ opacity: overlayOpacity }}
       />
 

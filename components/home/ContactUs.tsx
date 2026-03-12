@@ -86,7 +86,7 @@ export default function ContactUs() {
         {/* 우측: 문의 폼 */}
         <form
           onSubmit={handleSubmit}
-          className="w-full md:flex-1 bg-white dark:bg-[#1a1a1b] rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] px-[20px] py-[28px] md:px-[33px] md:py-[40px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+          className="w-full md:flex-1 bg-white dark:bg-[#252527] rounded-[10px] border border-[#e5e5e5] dark:border-[#323234] px-[20px] py-[28px] md:px-[33px] md:py-[40px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
         >
           {/* 이름 */}
           <label className="block text-[14px] font-medium text-normal-text mb-[6px]">
@@ -98,7 +98,7 @@ export default function ContactUs() {
             type="text"
             required
             placeholder="홍길동 / John Smith"
-            className="text-normal-text bg-transparent w-full px-[16px] py-[10px] border border-[#E5E5E5] dark:border-[#2a2a2a] text-[14px] outline-none focus:border-main transition-colors mb-[20px] placeholder:text-[#9EA2A2] dark:placeholder:text-[#555555]"
+            className="text-normal-text bg-transparent w-full px-[16px] py-[10px] border border-[#E5E5E5] dark:border-[#323234] text-[14px] outline-none focus:border-main transition-colors mb-[20px] placeholder:text-[#9EA2A2] dark:placeholder:text-[#555555]"
           />
 
           {/* 이메일 */}
@@ -110,7 +110,7 @@ export default function ContactUs() {
             type="email"
             required
             placeholder="sample123@gmail.com"
-            className="text-normal-text bg-transparent w-full px-[16px] py-[10px] border border-[#E5E5E5] dark:border-[#2a2a2a] text-[14px] outline-none focus:border-main transition-colors mb-[20px] placeholder:text-[#9EA2A2] dark:placeholder:text-[#555555]"
+            className="text-normal-text bg-transparent w-full px-[16px] py-[10px] border border-[#E5E5E5] dark:border-[#323234] text-[14px] outline-none focus:border-main transition-colors mb-[20px] placeholder:text-[#9EA2A2] dark:placeholder:text-[#555555]"
           />
 
           {/* 메시지 */}
@@ -123,7 +123,7 @@ export default function ContactUs() {
             rows={5}
             required
             placeholder="메시지를 입력해주세요."
-            className="text-normal-text bg-transparent w-full px-[16px] py-[10px] border border-[#E5E5E5] dark:border-[#2a2a2a] text-[14px] outline-none focus:border-main transition-colors resize-none mb-[24px] placeholder:text-[#9EA2A2] dark:placeholder:text-[#555555]"
+            className="text-normal-text bg-transparent w-full px-[16px] py-[10px] border border-[#E5E5E5] dark:border-[#323234] text-[14px] outline-none focus:border-main transition-colors resize-none mb-[24px] placeholder:text-[#9EA2A2] dark:placeholder:text-[#555555]"
           />
 
           {/* 제출 버튼 */}
@@ -141,7 +141,7 @@ export default function ContactUs() {
 
       {/* 토스트 알림 */}
       <div
-        className={`fixed bottom-[40px] left-1/2 -translate-x-1/2 z-50 px-[24px] py-[14px] bg-[#121212] dark:bg-[#2a2a2a] text-white text-[15px] rounded-[12px] shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-all duration-300 ${
+        className={`fixed bottom-[40px] left-1/2 -translate-x-1/2 z-50 px-[24px] py-[14px] bg-[#121212] dark:bg-[#323234] text-white text-[15px] rounded-[12px] shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-all duration-300 ${
           toast
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-[20px] pointer-events-none"

@@ -6,7 +6,7 @@ import React from "react";
 
 export default function page() {
   return (
-    <main className="bg-[#F6F7F9] dark:bg-[#111113]">
+    <main className="bg-[#F6F7F9] dark:bg-[#1c1c1e]">
       <Header
         breadcrumbLabel="회사연혁"
         title="회사 연혁"

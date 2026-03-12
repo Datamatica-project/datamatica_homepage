@@ -3,7 +3,8 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 
-const LOGO_FILES = [
+// ─── 1열 로고 데이터 ────────────────────────────────────────────
+const ROW1_LOGO_FILES = [
   "BASICAI 로고.png",
   "Databaker 로고.png",
   "JLAB 로고.png",
@@ -24,6 +25,10 @@ const LOGO_FILES = [
   "맥케이 로고.png",
   "메타빌드 로고.png",
   "사람과모빌리티 로고.png",
+];
+
+// ─── 2열 로고 데이터 ────────────────────────────────────────────
+const ROW2_LOGO_FILES = [
   "상상할수없는 로고.jpg",
   "시흥시 로고.png",
   "어빌리티 로고.png",
@@ -46,24 +51,22 @@ const LOGO_FILES = [
   "화성시 로고.png",
 ];
 
-const LOGOS = LOGO_FILES.map((file) => ({
-  src: `/ourClient/logos/${file}`,
-  alt: file.replace(/\.(png|jpg)$/, ""),
-}));
+const toLogoList = (files: string[]) =>
+  files.map((file) => ({
+    src: `/ourClient/logos/${file}`,
+    alt: file.replace(/\.(png|jpg)$/, ""),
+  }));
 
-const renderLogos = (keyPrefix: string) =>
-  LOGOS.map((logo, i) => (
-    <div
-      key={`${keyPrefix}-${i}`}
-      className="shrink-0 w-[100px] h-[44px] md:w-[140px] md:h-[60px] relative px-[10px] md:px-[16px]"
-    >
-      <Image src={logo.src} alt={logo.alt} fill className="object-contain dark:brightness-0 dark:invert" />
-    </div>
-  ));
+const SPEED = 0.5;
 
-const SPEED = 0.5; // px per frame
-
-export default function LogoMarquee() {
+// ─── 단일 마키 행 컴포넌트 ─────────────────────────────────────
+function MarqueeRow({
+  logos,
+  direction,
+}: {
+  logos: { src: string; alt: string }[];
+  direction: "left" | "right";
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
@@ -72,6 +75,7 @@ export default function LogoMarquee() {
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartOffsetRef = useRef(0);
+  const sign = direction === "left" ? -1 : 1;
 
   const wrapOffset = useCallback((offset: number) => {
     const el = trackRef.current;
@@ -79,26 +83,25 @@ export default function LogoMarquee() {
     const halfWidth = el.scrollWidth / 2;
     if (halfWidth <= 0) return offset;
     let o = offset % halfWidth;
-    if (o > 0) o -= halfWidth;
+    if (sign === -1 && o > 0) o -= halfWidth;
+    if (sign === 1 && o < -halfWidth) o += halfWidth;
     return o;
-  }, []);
+  }, [sign]);
 
   const tick = useCallback(() => {
     if (!inViewRef.current) return;
     const el = trackRef.current;
     if (el && !isDraggingRef.current) {
-      offsetRef.current -= SPEED;
+      offsetRef.current += sign * -SPEED;
       offsetRef.current = wrapOffset(offsetRef.current);
       el.style.transform = `translateX(${offsetRef.current}px)`;
     }
     rafRef.current = requestAnimationFrame(tick);
-  }, [wrapOffset]);
+  }, [sign, wrapOffset]);
 
-  // 뷰포트 진입/이탈 감지
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         inViewRef.current = entry.isIntersecting;
@@ -108,7 +111,6 @@ export default function LogoMarquee() {
       },
       { threshold: 0 }
     );
-
     observer.observe(el);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -133,30 +135,63 @@ export default function LogoMarquee() {
     isDraggingRef.current = false;
   }, []);
 
-  return (
-    <div ref={containerRef} className="w-full mt-[40px] md:mt-[80px] bg-white dark:bg-[#1a1a1b] p-[20px] md:p-[30px]">
-      <p className="text-center text-[14px] md:text-[18px] text-normal-text mb-[24px] md:mb-[30px] font-medium">
-        주요 협력 기관
-      </p>
-
+  const renderItems = (keyPrefix: string) =>
+    logos.map((logo, i) => (
       <div
-        className="overflow-hidden select-none cursor-grab active:cursor-grabbing"
-        onMouseDown={(e) => startDrag(e.clientX)}
-        onMouseMove={(e) => moveDrag(e.clientX)}
-        onMouseUp={endDrag}
-        onMouseLeave={endDrag}
-        onTouchStart={(e) => startDrag(e.touches[0].clientX)}
-        onTouchMove={(e) => { e.preventDefault(); moveDrag(e.touches[0].clientX); }}
-        onTouchEnd={endDrag}
+        key={`${keyPrefix}-${i}`}
+        className="shrink-0 w-[100px] h-[44px] md:w-[140px] md:h-[60px] relative px-[10px] md:px-[16px]"
       >
-        <div
-          ref={trackRef}
-          className="flex w-max gap-[40px] md:gap-[80px]"
-          style={{ willChange: "transform" }}
-        >
-          {renderLogos("a")}
-          {renderLogos("b")}
-        </div>
+        <Image
+          src={logo.src}
+          alt={logo.alt}
+          fill
+          draggable={false}
+          className="object-contain dark:brightness-0 dark:invert pointer-events-none"
+        />
+      </div>
+    ));
+
+  return (
+    <div
+      ref={containerRef}
+      className="overflow-hidden select-none cursor-grab active:cursor-grabbing"
+      onMouseDown={(e) => startDrag(e.clientX)}
+      onMouseMove={(e) => moveDrag(e.clientX)}
+      onMouseUp={endDrag}
+      onMouseLeave={endDrag}
+      onTouchStart={(e) => startDrag(e.touches[0].clientX)}
+      onTouchMove={(e) => { e.preventDefault(); moveDrag(e.touches[0].clientX); }}
+      onTouchEnd={endDrag}
+    >
+      <div
+        ref={trackRef}
+        className="flex w-max gap-[40px] md:gap-[80px]"
+        style={{ willChange: "transform" }}
+      >
+        {renderItems("a")}
+        {renderItems("b")}
+      </div>
+    </div>
+  );
+}
+
+// ─── 메인 컴포넌트 ─────────────────────────────────────────────
+export default function LogoMarquee() {
+  const row1 = toLogoList(ROW1_LOGO_FILES);
+  const row2 = toLogoList(ROW2_LOGO_FILES);
+
+  return (
+    <div className="w-full mt-[40px] md:mt-[80px] bg-white dark:bg-[#252527] p-[20px] md:p-[30px]">
+      <div className="flex items-center gap-[16px] mb-[24px] md:mb-[30px]">
+        <div className="flex-1 h-px bg-[#e0e0e0] dark:bg-[#363638]" />
+        <span className="shrink-0 text-[13px] md:text-[15px] font-medium text-description tracking-[0.08em] uppercase">
+          주요 협력 기관
+        </span>
+        <div className="flex-1 h-px bg-[#e0e0e0] dark:bg-[#363638]" />
+      </div>
+      <div className="flex flex-col gap-[20px] md:gap-[28px]">
+        <MarqueeRow logos={row1} direction="left" />
+        <MarqueeRow logos={row2} direction="right" />
       </div>
     </div>
   );

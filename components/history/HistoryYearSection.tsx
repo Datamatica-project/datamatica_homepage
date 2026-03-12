@@ -34,18 +34,21 @@ const HistoryYearSection = React.forwardRef<
               key={`${yearData.year}-${item.month}`}
               className="grid grid-cols-[56px_minmax(0,1fr)] gap-[18px] md:grid-cols-[70px_minmax(0,1fr)] md:gap-[28px]"
             >
-              <div className="pt-[2px] text-[20px] font-semibold leading-none tracking-[-0.02em] text-[#9d9d9d] md:text-[24px]">
+              <div className="pt-[2px] text-[20px] font-semibold leading-none tracking-[-0.02em] text-[#9d9d9d] dark:text-[#666] md:text-[24px]">
                 {item.month}
               </div>
 
               <div className="space-y-[10px] md:space-y-[12px]">
                 {item.entries.map((entry) => (
-                  <p
+                  <div
                     key={`${yearData.year}-${item.month}-${entry}`}
-                    className="font-medium text-[14px] leading-[1.85] text-description dark:text-white md:text-[16px] md:leading-[1.9]"
+                    className="flex items-center gap-[10px]"
                   >
-                    {entry}
-                  </p>
+                    <span className="shrink-0 w-[5px] h-[5px] rounded-full bg-main/60" />
+                    <p className="font-medium text-[15px] leading-[1.85] text-normal-text md:text-[18px] md:leading-[1.9]">
+                      {entry}
+                    </p>
+                  </div>
                 ))}
               </div>
             </div>

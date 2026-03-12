@@ -2,44 +2,26 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import SectionTitle from "../common/SectionTitle";
 import { ChevronLeft, ChevronRight } from "../Icons";
+import { skillData } from "@/data";
 
-const PROJECTS = [
-  {
-    tab: "고정밀 지도",
-    name: "Lidar 기반 3D 경로 생성 플랫폼",
-    image: "/business/AM.png",
-  },
-  {
-    tab: "라벨링 서비스",
-    name: "AI 학습용 고품질 데이터 구축 솔루션",
-    image: "/business/Labeling.png",
-  },
-  {
-    tab: "AI 챗봇 서비스",
-    name: "산업 맞춤형 AI 대화 자동화 플랫폼",
-    image: "/business/Safty.png",
-  },
-  {
-    tab: "인공지능 데이터 구축",
-    name: "AI 학습용 고품질 데이터 구축 솔루션",
-    image: "/business/Labeling.png",
-  },
-  {
-    tab: "고정밀 지도",
-    name: "Lidar 기반 3D 경로 생성 플랫폼",
-    image: "/business/AM.png",
-  },
-];
+// 각 사업 분야의 가장 최근 프로젝트(첫 번째) 1개씩 추출
+const PROJECTS = skillData.map((skill) => ({
+  tab: skill.title,
+  skillId: skill.id,
+  project: skill.projects[0],
+}));
 
 const VISIBLE_COUNT = 3;
 
 export default function OurProjects() {
-  const [activeProject, setActiveProject] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [tabOffset, setTabOffset] = useState(0);
 
+  const active = PROJECTS[activeIdx];
   const canScrollLeft = tabOffset > 0;
   const canScrollRight = tabOffset + VISIBLE_COUNT < PROJECTS.length;
 
@@ -63,19 +45,18 @@ export default function OurProjects() {
         center={true}
       />
 
-      {/* 탭: 항상 3개 표시, 초과 시 좌우 버튼으로 이동 */}
+      {/* 탭 */}
       <div className="flex items-end mt-[30px] md:mt-[50px] gap-[8px]">
-        {PROJECTS.length > VISIBLE_COUNT && (
+        {canScrollLeft && (
           <button
             onClick={() => setTabOffset((prev) => prev - 1)}
-            disabled={!canScrollLeft}
-            className={`pb-[14px] text-black dark:text-white transition-opacity ${canScrollLeft ? "opacity-100 cursor-pointer" : "opacity-20 cursor-default"}`}
+            className="pb-[14px] text-black dark:text-white cursor-pointer"
           >
             <ChevronLeft size={23} />
           </button>
         )}
 
-        <div className="flex-1 overflow-hidden border-b border-[#e0e0e0] dark:border-[#2a2a2a]">
+        <div className="flex-1 overflow-hidden border-b border-[#e0e0e0] dark:border-[#323234]">
           <div
             className="flex transition-transform duration-400 ease-out"
             style={{
@@ -85,66 +66,87 @@ export default function OurProjects() {
           >
             {PROJECTS.map((p, i) => (
               <button
-                key={i}
-                onClick={() => setActiveProject(i)}
+                key={p.skillId}
+                onClick={() => { setActiveIdx(i); setHovered(false); }}
                 className={
-                  "pb-[14px] text-[13px] md:text-[20px] transition-colors relative " +
-                  (activeProject === i
+                  "pb-[14px] text-[13px] md:text-[18px] transition-colors relative " +
+                  (activeIdx === i
                     ? "text-normal-text font-bold cursor-default"
                     : "text-description font-medium hover:text-normal-text cursor-pointer")
                 }
                 style={{ width: `${100 / PROJECTS.length}%` }}
               >
                 {p.tab}
-                {activeProject === i && (
-                  <span
-                    key={activeProject}
-                    className="absolute bottom-0 left-0 w-full h-[2px] bg-normal-text rounded-full origin-center animate-[expandX_0.3s_ease-out_forwards]"
-                  />
+                {activeIdx === i && (
+                  <span className="absolute bottom-0 left-0 w-full h-[2px] bg-normal-text rounded-full origin-center animate-[expandX_0.3s_ease-out_forwards]" />
                 )}
               </button>
             ))}
           </div>
         </div>
 
-        {PROJECTS.length > VISIBLE_COUNT && (
+        {canScrollRight && (
           <button
             onClick={() => setTabOffset((prev) => prev + 1)}
-            disabled={!canScrollRight}
-            className={`pb-[14px] text-black dark:text-white transition-opacity ${canScrollRight ? "opacity-100 cursor-pointer" : "opacity-20 cursor-default"}`}
+            className="pb-[14px] text-black dark:text-white cursor-pointer"
           >
             <ChevronRight size={23} />
           </button>
         )}
       </div>
 
-      {/* 이미지 영역 */}
-      <div
-        className="relative mt-[24px] w-full aspect-video rounded-[12px] overflow-hidden cursor-pointer"
+      {/* 이미지 + 호버 오버레이 */}
+      <Link
+        href={`/business/${active.skillId}/${active.project.id}`}
+        className="block relative mt-[24px] w-full aspect-video rounded-[12px] overflow-hidden"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         <Image
-          src={PROJECTS[activeProject].image}
-          alt={PROJECTS[activeProject].name}
+          src={active.project.image || "/header/datamatica_logo.png"}
+          alt={active.project.title}
           fill
-          className="object-cover transition-transform duration-500"
+          className={`object-cover transition-transform duration-500 ${hovered ? "scale-105" : "scale-100"}`}
         />
-        <div
-          className={
-            "absolute inset-0 bg-black transition-opacity duration-300 " +
-            (hovered ? "opacity-60" : "opacity-0")
-          }
-        />
-        <div
-          className={
-            "absolute bottom-[14px] left-[14px] md:bottom-[28px] md:left-[28px] text-white text-[15px] md:text-[22px] font-bold transition-opacity duration-300 " +
-            (hovered ? "opacity-100" : "opacity-0")
-          }
-        >
-          {PROJECTS[activeProject].name}
+
+        {/* 어두운 오버레이 */}
+        <div className={`absolute inset-0 bg-black transition-opacity duration-300 ${hovered ? "opacity-65" : "opacity-0"}`} />
+
+        {/* 오버레이 콘텐츠 */}
+        <div className={`absolute inset-0 flex flex-col justify-end p-[20px] md:p-[36px] transition-opacity duration-300 ${hovered ? "opacity-100" : "opacity-0"}`}>
+          {/* 사업 분야 태그 */}
+          <span className="mb-[10px] inline-block w-fit px-[12px] py-[4px] rounded-full bg-main/80 text-white text-[11px] md:text-[13px] font-medium">
+            {active.tab}
+          </span>
+
+          {/* 프로젝트 제목 */}
+          <h3 className="text-white text-[18px] md:text-[26px] font-bold leading-[1.3] mb-[10px]">
+            {active.project.title}
+          </h3>
+
+          {/* 한 줄 설명 */}
+          <p className="text-white/80 text-[13px] md:text-[15px] leading-[1.6] mb-[14px] line-clamp-2">
+            {active.project.description}
+          </p>
+
+          {/* 주요 성과 첫 번째 항목 */}
+          <p className="text-white/60 text-[12px] md:text-[13px] leading-[1.5] line-clamp-1">
+            ✦ {active.project.results[0]}
+          </p>
+
+          {/* 기술 태그 (최대 4개) */}
+          <div className="flex flex-wrap gap-[6px] mt-[14px]">
+            {active.project.technologies.slice(0, 4).map((tech) => (
+              <span
+                key={tech}
+                className="px-[10px] py-[3px] rounded-full bg-white/15 text-white text-[11px] md:text-[12px] font-medium"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }

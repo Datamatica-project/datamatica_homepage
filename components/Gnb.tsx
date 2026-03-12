@@ -35,7 +35,7 @@ export default function Gnb({
   }, [menuOpen]);
 
   // 드로어 배경색
-  const drawerBg = isMain ? (isDark ? "#1a1a1b" : "#ffffff") : "#111111";
+  const drawerBg = isMain ? (isDark ? "#252527" : "#ffffff") : "#1c1c1e";
   const drawerText = isMain
     ? isDark
       ? "rgba(255,255,255,0.9)"
@@ -64,7 +64,7 @@ export default function Gnb({
                   ? "rgba(17,17,19,1)"
                   : "rgba(255,255,255,1)",
                 borderBottom: isDark
-                  ? "1px solid #2a2a2a"
+                  ? "1px solid #323234"
                   : "1px solid #ebebeb",
               }
             : {
@@ -228,7 +228,7 @@ export default function Gnb({
         <div
           className="flex items-center justify-between px-[24px] h-[64px] shrink-0"
           style={{
-            borderBottom: `1px solid ${isMain && !isDark ? "#ebebeb" : "#2a2a2a"}`,
+            borderBottom: `1px solid ${isMain && !isDark ? "#ebebeb" : "#323234"}`,
           }}
         >
           <Image
@@ -258,7 +258,7 @@ export default function Gnb({
                 className="cursor-pointer w-full text-left text-[20px] font-semibold py-[14px] transition-colors duration-200"
                 style={{
                   color: drawerText,
-                  borderBottom: `1px solid ${isMain && !isDark ? "#f0f0f0" : "#2a2a2a"}`,
+                  borderBottom: `1px solid ${isMain && !isDark ? "#f0f0f0" : "#323234"}`,
                 }}
                 onClick={() => {
                   handleNavItemClick(label);

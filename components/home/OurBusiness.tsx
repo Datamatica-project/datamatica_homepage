@@ -95,13 +95,13 @@ export default function OurBusiness() {
           <div className="hidden md:flex gap-[12px] mb-[4px] shrink-0">
             <button
               onClick={slideLeft}
-              className="w-[40px] h-[40px] rounded-full border border-[#d0d0d0] dark:border-[#3a3a3a] flex items-center justify-center hover:bg-[#f0f0f0] dark:hover:bg-[#252525] transition-colors cursor-pointer"
+              className="w-[40px] h-[40px] rounded-full border border-[#d0d0d0] dark:border-[#434345] flex items-center justify-center hover:bg-[#f0f0f0] dark:hover:bg-[#2e2e30] transition-colors cursor-pointer"
             >
               <ChevronLeft size={18} className="text-normal-text" />
             </button>
             <button
               onClick={slideRight}
-              className="w-[40px] h-[40px] rounded-full border border-[#d0d0d0] dark:border-[#3a3a3a] flex items-center justify-center hover:bg-[#f0f0f0] dark:hover:bg-[#252525] transition-colors cursor-pointer"
+              className="w-[40px] h-[40px] rounded-full border border-[#d0d0d0] dark:border-[#434345] flex items-center justify-center hover:bg-[#f0f0f0] dark:hover:bg-[#2e2e30] transition-colors cursor-pointer"
             >
               <ChevronRight size={18} className="text-normal-text" />
             </button>
@@ -132,6 +132,7 @@ export default function OurBusiness() {
               title={item.title}
               description={renderDescriptionWithBr(item.description)}
               imageSrc={item.imageSrc}
+              href={`/business?tab=${item.id}`}
             />
           ))}
         </ul>
