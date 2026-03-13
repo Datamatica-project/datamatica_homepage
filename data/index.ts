@@ -2,9 +2,9 @@ export interface ProjectItem {
   id: string;
   title: string;
   description: string; // 카드용 짧은 설명
-  overview: string;    // 상세 페이지 개요
-  image: string;       // 대표 이미지
-  images: string[];    // 상세 갤러리 이미지
+  overview: string; // 상세 페이지 개요
+  image: string; // 대표 이미지
+  images: string[]; // 상세 갤러리 이미지
   technologies: string[];
   results: string[];
 }
@@ -14,7 +14,7 @@ export interface SkillDataItem {
   title: string;
   titleEn: string;
   description: string; // <br /> 포함, 메인 홈 카드용
-  overview: string;    // 사업 페이지 기술 설명 영역용
+  overview: string; // 사업 페이지 기술 설명 영역용
   imageSrc: string;
   projects: ProjectItem[];
 }
@@ -25,10 +25,11 @@ export const skillData: SkillDataItem[] = [
     id: "autonomous",
     title: "자율주행 관제",
     titleEn: "Autonomous Driving",
-    description: "센서·AI 기반의<br /> 안전하고 지능적인 주행 기술.",
+    description:
+      "센서·AI 기반의<br /> 안전하고 지능적인 주행 기술 관리 플랫폼.",
     overview:
       "LiDAR, 카메라, RADAR 등 다양한 센서 데이터를 융합하여 자율주행 환경을 구축합니다. 실시간 모니터링 및 경로 최적화 솔루션을 제공합니다.",
-    imageSrc: "/business/AM.png",
+    imageSrc: "/business/automobil.png",
     projects: [
       {
         id: "hd-map",
@@ -94,7 +95,13 @@ export const skillData: SkillDataItem[] = [
           "자체 개발한 Auto Annotation 엔진을 탑재한 Matica STEP 플랫폼으로 이미지·비디오 데이터의 고정밀 라벨링을 수행합니다. 바운딩 박스, 폴리곤, 세그멘테이션 등 다양한 어노테이션 유형을 지원합니다.",
         image: "/business/Labeling.png",
         images: ["/business/Labeling.png", "/business/Labeling.png"],
-        technologies: ["Matica STEP", "Auto Annotation", "COCO", "Pascal VOC", "Python"],
+        technologies: [
+          "Matica STEP",
+          "Auto Annotation",
+          "COCO",
+          "Pascal VOC",
+          "Python",
+        ],
         results: [
           "NIA 재현 데이터 사업 15억 규모 수행",
           "어노테이션 작업 속도 기존 대비 3배 향상",
@@ -180,7 +187,13 @@ export const skillData: SkillDataItem[] = [
           "기존 CCTV 인프라에 AI를 결합하여 딥페이크 콘텐츠, 이상 행동, 불법 침입 등을 자동으로 감지하는 지능형 영상 관제 솔루션입니다.",
         image: "/business/Safty.png",
         images: ["/business/Safty.png", "/business/Safty.png"],
-        technologies: ["DeepFake Detection", "OpenCV", "YOLO", "React", "FFmpeg"],
+        technologies: [
+          "DeepFake Detection",
+          "OpenCV",
+          "YOLO",
+          "React",
+          "FFmpeg",
+        ],
         results: [
           "딥페이크 감지 정확도 92% 달성",
           "이상 행동 감지 실시간 처리 구현",
@@ -206,7 +219,13 @@ export const skillData: SkillDataItem[] = [
           "스마트링 등 웨어러블 기기에서 수집된 심박수, 혈중 산소, 수면 패턴 데이터를 실시간으로 수집·분석하여 개인 건강 이상 징후를 조기에 감지하는 플랫폼입니다.",
         image: "/business/AM.png",
         images: ["/business/AM.png", "/business/AM.png"],
-        technologies: ["BLE", "Python", "TensorFlow Lite", "React Native", "InfluxDB"],
+        technologies: [
+          "BLE",
+          "Python",
+          "TensorFlow Lite",
+          "React Native",
+          "InfluxDB",
+        ],
         results: [
           "실시간 생체 데이터 수집 지연 100ms 이하",
           "이상 심박 감지 정확도 91% 달성",
@@ -292,7 +311,13 @@ export const skillData: SkillDataItem[] = [
           "제조 설비의 센서 데이터를 실시간으로 수집하여 디지털 트윈에 반영하고, AI로 고장을 사전 예측하여 유지보수 비용을 절감하는 예지 보전 솔루션입니다.",
         image: "/business/AM.png",
         images: ["/business/AM.png", "/business/AM.png"],
-        technologies: ["OPC-UA", "InfluxDB", "TensorFlow", "Three.js", "Grafana"],
+        technologies: [
+          "OPC-UA",
+          "InfluxDB",
+          "TensorFlow",
+          "Three.js",
+          "Grafana",
+        ],
         results: [
           "설비 고장 예측 정확도 89% 달성",
           "예방 정비로 설비 다운타임 30% 감소",
@@ -333,7 +358,13 @@ export const skillData: SkillDataItem[] = [
           "GPS 신호가 없는 실내 공간에서 LiDAR SLAM 기술로 공항, 대형 터미널, 쇼핑몰 등의 실내 정밀 지도를 구축하여 실내 내비게이션 및 로봇 자율주행에 활용합니다.",
         image: "/business/AM.png",
         images: ["/business/AM.png", "/business/AM.png"],
-        technologies: ["LiDAR SLAM", "IndoorGML", "BLE Beacon", "React", "Mapbox"],
+        technologies: [
+          "LiDAR SLAM",
+          "IndoorGML",
+          "BLE Beacon",
+          "React",
+          "Mapbox",
+        ],
         results: [
           "실내 위치 정확도 ±30cm 달성",
           "대형 공간 3D 모델링 자동화",
@@ -348,7 +379,13 @@ export const skillData: SkillDataItem[] = [
           "드론과 LiDAR를 이용해 농경지의 지형·식생·경계를 정밀 측량하고, 자율주행 농기계가 활용 가능한 고정밀 3D 지도를 생성합니다.",
         image: "/business/AM.png",
         images: ["/business/AM.png", "/business/AM.png"],
-        technologies: ["Drone LiDAR", "Agisoft Metashape", "QGIS", "ROS2", "Python"],
+        technologies: [
+          "Drone LiDAR",
+          "Agisoft Metashape",
+          "QGIS",
+          "ROS2",
+          "Python",
+        ],
         results: [
           "농경지 지형 정밀도 ±10cm 달성",
           "드론 기반 자동 측량 파이프라인 구축",
