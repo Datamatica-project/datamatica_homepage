@@ -8,6 +8,7 @@ export default function SectionTitle({
   title,
   description,
   center = false,
+  centerOnMobile = false,
   linkHref,
   linkText = "더보기",
 }: {
@@ -15,6 +16,7 @@ export default function SectionTitle({
   title: React.ReactNode;
   description?: React.ReactNode;
   center?: boolean;
+  centerOnMobile?: boolean;
   linkHref?: string;
   linkText?: string;
 }) {
@@ -34,7 +36,11 @@ export default function SectionTitle({
     return () => observer.disconnect();
   }, []);
 
-  const alignClass = center ? "text-center" : "";
+  const alignClass = center
+    ? "text-center"
+    : centerOnMobile
+      ? "text-center md:text-left"
+      : "";
 
   const lineClass = `overflow-hidden ${alignClass}`;
 
@@ -46,7 +52,7 @@ export default function SectionTitle({
     <div ref={ref}>
       <div className={lineClass}>
         <span
-          className={`text-[14px] md:text-[20px] text-description font-normal ${center ? "block" : ""} ${innerClass}`}
+          className={`text-[14px] md:text-[20px] text-description font-normal ${center || centerOnMobile ? "block" : ""} ${innerClass}`}
           style={{ transitionDelay: "0ms" }}
         >
           {subtitle}

@@ -76,7 +76,7 @@ export default function SkillBox({
 
   return (
     <li className="shrink-0">
-      {href ? <Link href={href}>{card}</Link> : card}
+      {href ? <Link href={href} draggable={false}>{card}</Link> : card}
     </li>
   );
 }

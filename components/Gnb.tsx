@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Close, Moon, Sun } from "./Icons";
 
-const NAV_ITEMS = ["사업분야", "회사연혁", "소식/뉴스"];
+const NAV_ITEMS = ["홈", "사업분야", "회사연혁", "소식/뉴스"];
 
 export default function Gnb({
   overlayOpacity,
@@ -17,6 +17,7 @@ export default function Gnb({
   onThemeToggle: () => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const isMain = overlayOpacity >= 1;
   // isMain 구간에서는 isDark 반영, terrain 구간은 항상 밝은 텍스트
   const iconColor = isMain
@@ -43,8 +44,16 @@ export default function Gnb({
     : "rgba(255,255,255,0.9)";
 
   const handleNavItemClick = (label: string) => {
-    // 현재는 회사연혁 메뉴만 별도 페이지로 이동합니다.
-    if (label === "회사연혁") {
+    if (label === "홈") {
+      if (pathname === "/") {
+        document.getElementById("section-business")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      } else {
+        router.push("/#section-business");
+      }
+    } else if (label === "회사연혁") {
       router.push("/history");
     } else if (label === "소식/뉴스") {
       router.push("/news");
@@ -56,22 +65,17 @@ export default function Gnb({
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 transition-[background-color,border-color] duration-300"
-        style={
-          isMain
-            ? {
-                backgroundColor: isDark
-                  ? "rgba(17,17,19,1)"
-                  : "rgba(255,255,255,1)",
-                borderBottom: isDark
-                  ? "1px solid #323234"
-                  : "1px solid #ebebeb",
-              }
-            : {
-                backgroundColor: "rgba(0,0,0,0.22)",
-                backdropFilter: "blur(8px)",
-              }
-        }
+        className="fixed top-0 left-0 right-0 z-50 border-b border-transparent transition-[background-color,backdrop-filter,border-color] duration-300"
+        style={{
+          backgroundColor: isDark
+            ? `rgba(10,10,12,${0.78 * overlayOpacity})`
+            : `rgba(255,255,255,${0.78 * overlayOpacity})`,
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          borderColor: isDark
+            ? `rgba(43,43,46,${overlayOpacity})`
+            : `rgba(226,226,229,${0.9 * overlayOpacity})`,
+        }}
       >
         <div className="max-w-[1200px] mx-auto px-[24px] h-[64px] flex items-center justify-between">
           {/* 로고 – 클릭 시 페이지 최상단으로 스크롤 */}

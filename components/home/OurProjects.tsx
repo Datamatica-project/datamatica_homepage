@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import SectionTitle from "../common/SectionTitle";
@@ -14,16 +14,33 @@ const PROJECTS = skillData.map((skill) => ({
   project: skill.projects[0],
 }));
 
-const VISIBLE_COUNT = 3;
+const VISIBLE_COUNT_MOBILE = 2;
+const VISIBLE_COUNT_DESKTOP = 3;
 
 export default function OurProjects() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [tabOffset, setTabOffset] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(VISIBLE_COUNT_DESKTOP);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const handler = () =>
+      setVisibleCount(mq.matches ? VISIBLE_COUNT_DESKTOP : VISIBLE_COUNT_MOBILE);
+    handler();
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    setTabOffset((prev) =>
+      Math.min(prev, Math.max(0, PROJECTS.length - visibleCount))
+    );
+  }, [visibleCount]);
 
   const active = PROJECTS[activeIdx];
   const canScrollLeft = tabOffset > 0;
-  const canScrollRight = tabOffset + VISIBLE_COUNT < PROJECTS.length;
+  const canScrollRight = tabOffset + visibleCount < PROJECTS.length;
 
   return (
     <div className="max-w-[1000px] mx-auto px-[24px] pb-[60px] md:pb-[120px]">
@@ -60,7 +77,7 @@ export default function OurProjects() {
           <div
             className="flex transition-transform duration-400 ease-out"
             style={{
-              width: `${(PROJECTS.length / VISIBLE_COUNT) * 100}%`,
+              width: `${(PROJECTS.length / visibleCount) * 100}%`,
               transform: `translateX(-${(tabOffset / PROJECTS.length) * 100}%)`,
             }}
           >
@@ -69,7 +86,7 @@ export default function OurProjects() {
                 key={p.skillId}
                 onClick={() => { setActiveIdx(i); setHovered(false); }}
                 className={
-                  "pb-[14px] text-[13px] md:text-[18px] transition-colors relative " +
+                  "pb-[14px] text-[13px] md:text-[18px] transition-colors relative whitespace-nowrap " +
                   (activeIdx === i
                     ? "text-normal-text font-bold cursor-default"
                     : "text-description font-medium hover:text-normal-text cursor-pointer")

@@ -14,7 +14,11 @@ const SCROLL_OFFSET = 96;
 export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
   const years = useMemo(() => timeline.map((item) => item.year), [timeline]);
   const [activeYear, setActiveYear] = useState<number>(years[0] ?? 0);
+  const [activeEmphasizedYear, setActiveEmphasizedYear] = useState<number | null>(
+    timeline[0]?.year ?? null
+  );
   const sectionRefs = useRef<Record<number, HTMLElement | null>>({});
+  const rafRef = useRef<number | null>(null);
 
   const setSectionRef = useCallback((year: number, node: HTMLElement | null) => {
     sectionRefs.current[year] = node;
@@ -66,6 +70,41 @@ export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
     return () => observer.disconnect();
   }, [timeline, years]);
 
+  // 뷰포트 중앙에 가장 가까운 연도 섹션을 강조
+  useEffect(() => {
+    const updateActiveYear = () => {
+      const vh = window.innerHeight;
+      const centerY = vh / 2;
+      let closestYear: number | null = null;
+      let minDist = Infinity;
+      Object.values(sectionRefs.current).forEach((el) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const sectionCenter = rect.top + rect.height / 2;
+        const dist = Math.abs(sectionCenter - centerY);
+        const year = Number(el.dataset.year);
+        if (dist < minDist && rect.top < vh && rect.bottom > 0 && !isNaN(year)) {
+          minDist = dist;
+          closestYear = year;
+        }
+      });
+      setActiveEmphasizedYear(closestYear);
+    };
+    const handleScroll = () => {
+      if (rafRef.current != null) return;
+      rafRef.current = requestAnimationFrame(() => {
+        updateActiveYear();
+        rafRef.current = null;
+      });
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    updateActiveYear();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
   if (!timeline.length) {
     return null;
   }
@@ -100,6 +139,8 @@ export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
               ref={(node) => setSectionRef(yearData.year, node)}
               yearData={yearData}
               isLast={index === timeline.length - 1}
+              isLatestYear={index === 0}
+              activeEmphasizedYear={activeEmphasizedYear}
             />
           ))}
         </div>

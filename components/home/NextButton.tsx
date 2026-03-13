@@ -15,18 +15,10 @@ export default function NextButton() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const businessSection = document.getElementById("section-business");
-
-      if (!businessSection) {
-        setVisible(true);
-        return;
-      }
-
-      const { top } = businessSection.getBoundingClientRect();
-
-      // 첫 섹션이 화면 상단 기준점에 닿기 전까지만 버튼을 노출한다.
-      // 다시 그 기준점 위로 올라오면 버튼이 다시 보인다.
-      setVisible(top > 0);
+      const sy = window.scrollY;
+      const threshold = 5;
+      // 스크롤 맨 위에서만 노출, 조금만 내려도 숨김. 맨 위로 돌아오면 다시 노출
+      setVisible(sy < threshold);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -45,11 +37,9 @@ export default function NextButton() {
 
     const businessTop = businessSection.getBoundingClientRect().top;
 
-    // 첫 섹션보다 위에 있으면 항상 section-business 상단으로 정확히 이동한다.
-    // MainPage가 아직 translateY(100vh) 상태일 때만 보정값을 적용한다.
+    // 첫 섹션보다 위에 있으면 section-business 상단으로 이동한다.
     if (businessTop > 0) {
-      const hiddenOffset = businessTop > vh ? vh : 0;
-      const targetTop = sy + businessTop - hiddenOffset;
+      const targetTop = sy + businessTop;
       window.scrollTo({ top: targetTop, behavior: "smooth" });
       return;
     }

@@ -45,7 +45,7 @@ export default async function ProjectDetailPage({
         breadcrumbLabel={`사업 분야 / ${skill.title}`}
         title={project.title}
         description={project.description}
-        watermark={skill.title}
+        watermark={skill.titleEn}
       />
       <ProjectDetail skill={skill} project={project} />
       <Footer />

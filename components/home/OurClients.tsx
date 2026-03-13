@@ -86,7 +86,7 @@ export default function OurClients() {
   }, []);
 
   return (
-    <div className="mt-[60px] pb-[60px] ">
+    <div className="md:mt-[60px] pb-[60px] ">
       <div className="max-w-[1000px] mx-auto px-[24px]">
         <div className="flex flex-col-reverse gap-[32px] md:flex-row md:gap-[60px] items-center">
           {/* 좌측: 이미지 */}

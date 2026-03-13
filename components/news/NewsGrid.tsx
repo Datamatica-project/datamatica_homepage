@@ -70,15 +70,15 @@ export default function NewsGrid() {
   return (
     <section className="max-w-[1000px] mx-auto px-[24px] pb-[80px] md:pb-[120px]">
 
-      {/* 필터 바: 연도(좌) + 검색·정렬(우) 한 줄 */}
-      <div className="flex items-center justify-between gap-[8px] mb-[36px] md:mb-[48px]">
+      {/* 필터 바: 모바일 2행 / 데스크탑 1행 */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-[12px] sm:gap-[8px] mb-[36px] md:mb-[48px]">
         {/* 좌: 연도 드롭다운 */}
         <select
           value={activeYear ?? ""}
           onChange={(e) =>
             handleYearChange(e.target.value ? Number(e.target.value) : null)
           }
-          className={selectCls}
+          className={`${selectCls} w-full sm:w-auto sm:min-w-[120px]`}
           style={selectArrow}
         >
           <option value="">전체 연도</option>
@@ -90,18 +90,18 @@ export default function NewsGrid() {
         </select>
 
         {/* 우: 검색창 + 정렬 드롭다운 */}
-        <div className="flex gap-[8px]">
+        <div className="flex gap-[8px] min-w-0">
           <input
             type="text"
             value={query}
             onChange={handleQueryChange}
             placeholder="기사 검색"
-            className="w-[180px] md:w-[240px] h-[42px] px-[14px] rounded-[8px] border border-[#d8d8d8] dark:border-[#434345] bg-white dark:bg-[#252527] text-[14px] text-normal-text placeholder:text-description outline-none focus:border-main transition-colors"
+            className="min-w-0 flex-1 md:flex-none md:w-[240px] h-[42px] px-[14px] rounded-[8px] border border-[#d8d8d8] dark:border-[#434345] bg-white dark:bg-[#252527] text-[14px] text-normal-text placeholder:text-description outline-none focus:border-main transition-colors"
           />
           <select
             value={sortOrder}
             onChange={(e) => handleSortChange(e.target.value as SortOrder)}
-            className={selectCls}
+            className={`${selectCls} shrink-0`}
             style={selectArrow}
           >
             <option value="newest">최신순</option>

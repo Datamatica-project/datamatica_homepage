@@ -1,6 +1,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import HistoryTimeline from "@/components/history/HistoryTimeline";
+import ScrollToTopButton from "@/components/common/ScrollToTopButton";
 import { historyTimeline } from "@/data/history";
 import React from "react";
 
@@ -20,6 +21,7 @@ export default function page() {
         watermark="Company History"
       />
       <HistoryTimeline timeline={historyTimeline} />
+      <ScrollToTopButton />
       <Footer />
     </main>
   );

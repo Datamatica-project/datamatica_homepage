@@ -31,9 +31,12 @@ export default function OurNews() {
   const sliderRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const dragState = useRef({ isDown: false, startX: 0, scrollLeft: 0 });
+  const dragOccurredRef = useRef(false);
+
+  const DRAG_THRESHOLD = 5;
 
   useEffect(() => {
-    const el = listRef.current;
+    const el = sliderRef.current;
     if (!el) return;
 
     const observer = new IntersectionObserver(
@@ -52,6 +55,7 @@ export default function OurNews() {
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     const el = sliderRef.current;
     if (!el) return;
+    dragOccurredRef.current = false;
     dragState.current = {
       isDown: true,
       startX: e.pageX - el.offsetLeft,
@@ -69,11 +73,13 @@ export default function OurNews() {
     const { isDown, startX, scrollLeft } = dragState.current;
     const el = sliderRef.current;
     if (!isDown || !el) return;
+    const deltaX = Math.abs(e.pageX - el.offsetLeft - startX);
+    if (deltaX > DRAG_THRESHOLD) dragOccurredRef.current = true;
     e.preventDefault();
     el.scrollLeft = scrollLeft - (e.pageX - el.offsetLeft - startX);
   }, []);
 
-  const CARD_STEP = 344; // 카드 320px + gap 24px
+  const CARD_STEP = 336; // 카드 320px + gap 16px
 
   const slideLeft = useCallback(() => {
     sliderRef.current?.scrollBy({ left: -CARD_STEP, behavior: "smooth" });
@@ -114,10 +120,11 @@ export default function OurNews() {
           <div className="shrink-0 md:mr-[40px]">
             <SectionTitle
               subtitle="Our news"
+              centerOnMobile
               title={
                 <>
-                  데이터메티카
-                  <br />
+                  데이터메티카{" "}
+                  <br className="hidden md:block" />
                   <span className="text-main font-bold">소식</span>
                 </>
               }
@@ -143,18 +150,24 @@ export default function OurNews() {
           </div>
         </div>
 
-        {/* 우측: 카드 슬라이더 (타이틀 옆에서 화면 밖까지 확장) */}
+        {/* 우측: 카드 슬라이더 (모바일: 내용 높이, 데스크탑: flex-1으로 남은 공간) */}
         <div
           ref={sliderRef}
-          className="flex-1 min-w-0 overflow-x-scroll select-none cursor-grab [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex-none md:flex-1 min-w-0 overflow-x-scroll select-none cursor-grab [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
           onMouseUp={onMouseUp}
           onMouseLeave={onMouseUp}
+          onClickCapture={(e) => {
+            if (dragOccurredRef.current) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
         >
           <ul
             ref={listRef}
-            className="flex gap-[24px] w-max pr-[24px] py-[10px] list-none transition-[opacity,transform] duration-800 ease-out"
+            className="flex  w-max pr-[24px] py-[10px] list-none transition-[opacity,transform] duration-800 ease-out"
             style={{
               opacity: visible ? 1 : 0,
               transform: visible ? "translateX(0)" : "translateX(200px)",
@@ -168,6 +181,7 @@ export default function OurNews() {
                   description={news.description}
                   image={news.thumbnail}
                   href={news.source}
+                  className="w-[245px] md:w-[320px]"
                 />
               </li>
             ))}

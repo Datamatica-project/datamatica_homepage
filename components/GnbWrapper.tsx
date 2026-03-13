@@ -10,6 +10,7 @@ export default function GnbWrapper() {
   const pathname = usePathname();
   const isMainPage = pathname === "/";
   const [overlayOpacity, setOverlayOpacity] = useState(isMainPage ? 0 : 1);
+  const [sectionBusinessInView, setSectionBusinessInView] = useState(false);
 
   useEffect(() => {
     if (!isMainPage) {
@@ -37,9 +38,27 @@ export default function GnbWrapper() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isMainPage]);
 
+  useEffect(() => {
+    if (!isMainPage) {
+      return;
+    }
+    const el = document.getElementById("section-business");
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setSectionBusinessInView(entry.isIntersecting);
+      },
+      { threshold: 0, rootMargin: "-64px 0px 0px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isMainPage]);
+
+  const effectiveOpacity = sectionBusinessInView ? 1 : overlayOpacity;
+
   return (
     <Gnb
-      overlayOpacity={overlayOpacity}
+      overlayOpacity={effectiveOpacity}
       isDark={isDark}
       onThemeToggle={toggleTheme}
     />

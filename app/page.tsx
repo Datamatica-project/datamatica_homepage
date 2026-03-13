@@ -64,7 +64,7 @@ export default function Home() {
 
       {/* MainPage: 일반 문서 흐름, z-20 */}
       <div className="relative z-20">
-        <MainPage overlayOpacity={overlayOpacity} />
+        <MainPage />
         <Footer />
       </div>
     </main>

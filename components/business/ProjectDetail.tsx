@@ -53,7 +53,6 @@ export default function ProjectDetail({
 
   return (
     <div className="max-w-[1000px] mx-auto px-[24px] pb-[80px] md:pb-[120px]">
-
       {/* 대표 이미지 */}
       <div className="relative w-full aspect-16/7 rounded-[20px] overflow-hidden bg-[#f0f0f0] dark:bg-[#282829] mb-[56px] md:mb-[72px]">
         <Image
@@ -79,8 +78,12 @@ export default function ProjectDetail({
 
         {/* 적용 분야 */}
         <div className="mt-[32px] inline-flex items-center gap-[12px] px-[20px] py-[14px] rounded-[12px] bg-[#fdf5f5] dark:bg-[#2a1a1a] border border-main/20">
-          <span className="text-[13px] text-description font-medium">적용 분야</span>
-          <span className="text-[14px] font-semibold text-main">{skill.title}</span>
+          <span className="text-[13px] text-description font-medium">
+            적용 분야
+          </span>
+          <span className="text-[14px] font-semibold text-main">
+            {skill.title}
+          </span>
         </div>
       </section>
 

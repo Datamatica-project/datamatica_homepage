@@ -26,22 +26,26 @@ function ProjectCard({
   return (
     <Link
       href={href}
-      className="group rounded-[16px] overflow-hidden border border-[#e8e8e8] dark:border-[#3c3c3e] bg-white dark:bg-[#282829] shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] flex flex-col transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_12px_32px_rgba(0,0,0,0.14)] dark:hover:shadow-[0_12px_32px_rgba(0,0,0,0.5)] hover:scale-[1.02]"
+      className="group h-[360px] md:h-[380px] rounded-[16px] overflow-hidden border border-[#e8e8e8] dark:border-[#3c3c3e] bg-white dark:bg-[#282829] shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] flex flex-col transition-all duration-300 hover:-translate-y-[6px] hover:shadow-[0_12px_32px_rgba(0,0,0,0.14)] dark:hover:shadow-[0_12px_32px_rgba(0,0,0,0.5)] hover:scale-[1.02]"
     >
       <div className="relative w-full aspect-16/10 overflow-hidden bg-[#fdf5f5] dark:bg-[#2a1a1a]">
         <Image
           src={src}
           alt={title}
           fill
-          className={isFallback ? "object-contain p-[20px]" : "object-cover transition-transform duration-500 group-hover:scale-105"}
+          className={
+            isFallback
+              ? "object-contain p-[20px]"
+              : "object-cover transition-transform duration-500 group-hover:scale-105"
+          }
           onError={() => setSrc(FALLBACK_IMAGE)}
         />
       </div>
       <div className="flex flex-col flex-1 p-[24px]">
-        <h3 className="text-[16px] font-bold leading-[1.4] text-normal-text">
+        <h3 className="text-[16px] font-bold leading-[1.4] text-normal-text line-clamp-2">
           {title}
         </h3>
-        <p className="mt-[10px] flex-1 text-[14px] leading-[1.6] text-description">
+        <p className="mt-[10px] flex-1 text-[14px] leading-[1.6] text-description line-clamp-3">
           {description}
         </p>
         <div className="mt-[20px] inline-flex w-fit items-center gap-[8px] text-[14px] font-medium text-normal-text transition-colors group-hover:text-main">
@@ -63,7 +67,6 @@ export default function BusinessContent() {
 
   return (
     <div className="max-w-[1000px] mx-auto px-[24px] pb-[80px] md:pb-[120px]">
-
       {/* 기술 카테고리 탭 */}
       <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden border-b border-[#e0e0e0] dark:border-[#363638] mb-[48px] md:mb-[60px]">
         {skillData.map((skill) => (

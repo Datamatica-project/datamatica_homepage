@@ -12,6 +12,7 @@ export interface ProjectItem {
 export interface SkillDataItem {
   id: string;
   title: string;
+  titleEn: string;
   description: string; // <br /> 포함, 메인 홈 카드용
   overview: string;    // 사업 페이지 기술 설명 영역용
   imageSrc: string;
@@ -23,6 +24,7 @@ export const skillData: SkillDataItem[] = [
   {
     id: "autonomous",
     title: "자율주행 관제",
+    titleEn: "Autonomous Driving",
     description: "센서·AI 기반의<br /> 안전하고 지능적인 주행 기술.",
     overview:
       "LiDAR, 카메라, RADAR 등 다양한 센서 데이터를 융합하여 자율주행 환경을 구축합니다. 실시간 모니터링 및 경로 최적화 솔루션을 제공합니다.",
@@ -78,6 +80,7 @@ export const skillData: SkillDataItem[] = [
   {
     id: "ai-data",
     title: "인공지능 데이터 구축",
+    titleEn: "AI Data Construction",
     description: "AI 학습을 위한<br /> 고품질 데이터 구축 솔루션.",
     overview:
       "이미지·음성·텍스트·LiDAR 등 다양한 데이터 타입을 처리하는 자체 Auto Annotation 플랫폼으로 고품질 AI 학습 데이터를 효율적으로 구축합니다.",
@@ -133,6 +136,7 @@ export const skillData: SkillDataItem[] = [
   {
     id: "smart-safety",
     title: "스마트 안전 관리 시스템",
+    titleEn: "Smart Safety System",
     description: "IoT 센서 기반 실시간<br /> 위험 감지 및 대응 플랫폼.",
     overview:
       "IoT 센서와 AI를 결합하여 시설물 및 생활 환경의 위험 요소를 실시간으로 감지하고 즉각 대응할 수 있는 통합 안전 관리 솔루션을 제공합니다.",
@@ -188,6 +192,7 @@ export const skillData: SkillDataItem[] = [
   {
     id: "healthcare",
     title: "스마트 헬스케어 플랫폼",
+    titleEn: "Smart Healthcare",
     description: "지속 가능한 건강 관리와<br /> 데이터 기반 의료 솔루션.",
     overview:
       "웨어러블 기기 데이터와 AI를 연결하여 개인 맞춤형 건강 관리 서비스를 제공합니다. 실시간 생체 데이터 분석으로 예방적 의료를 실현합니다.",
@@ -243,6 +248,7 @@ export const skillData: SkillDataItem[] = [
   {
     id: "digital-twin",
     title: "디지털 트윈",
+    titleEn: "Digital Twin",
     description: "현실을 복제한 가상 시뮬레이션<br /> 기반 예측 시스템.",
     overview:
       "현실 환경을 가상 공간에 정밀 복제하여 시뮬레이션·예측·최적화를 수행합니다. 도시·산업·농업 등 다양한 분야에 적용 가능합니다.",
@@ -298,6 +304,7 @@ export const skillData: SkillDataItem[] = [
   {
     id: "hd-map",
     title: "고정밀 지도",
+    titleEn: "HD Map",
     description: "정밀 3D 공간 데이터로<br /> 자율주행의 정확도를 완성합니다.",
     overview:
       "LiDAR·GPS·카메라 센서를 융합해 자율주행에 필요한 정밀도의 3D 공간 정보를 구축합니다. 실시간 갱신과 글로벌 표준 포맷을 지원합니다.",

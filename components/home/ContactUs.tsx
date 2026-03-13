@@ -21,8 +21,9 @@ export default function ContactUs() {
 
     const formData = new FormData(e.currentTarget);
 
+    const form = e.currentTarget;
     try {
-      await fetch("/api/contact", {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -31,8 +32,11 @@ export default function ContactUs() {
           message: formData.get("message"),
         }),
       });
+      if (!res.ok) throw new Error();
       setToast("문의가 성공적으로 전송되었습니다.");
-      e.currentTarget.reset();
+      form.reset();
+    } catch {
+      setToast("전송에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setSubmitting(false);
     }
