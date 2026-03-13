@@ -26,7 +26,7 @@ newsArticles
 const YEARS = [...newsDataByYear.keys()].sort((a, b) => b - a);
 
 export default function OurNews() {
-  const [activeYear, setActiveYear] = useState<number | null>(YEARS[0]);
+  const [activeYear, setActiveYear] = useState<number | null>(null);
   const [visible, setVisible] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -50,7 +50,7 @@ export default function OurNews() {
 
   const filtered = activeYear
     ? (newsDataByYear.get(activeYear) ?? [])
-    : [...newsDataByYear.values()].flat();
+    : [...newsDataByYear.values()].flat().slice(0, MAX_PER_YEAR);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     const el = sliderRef.current;
@@ -99,6 +99,19 @@ export default function OurNews() {
         >
           {/* 연도 필터: 모바일에서 가로 탭 */}
           <div className="flex flex-row md:flex-col gap-[8px] md:gap-[30px] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <button
+              onClick={() => setActiveYear(null)}
+              className={`shrink-0 transition-all
+                text-[13px] px-[16px] py-[6px] rounded-full border
+                md:text-[18px] md:px-[12px] md:py-[3px] md:rounded-none md:border-0 md:border-l-0 md:text-right
+                ${
+                  activeYear === null
+                    ? "bg-main text-white border-main md:bg-transparent md:text-main md:font-medium md:text-[22px] md:border-l-[5px] md:border-main"
+                    : "bg-white text-description border-[#d8d8d8] md:bg-transparent md:border-0 hover:text-normal-text dark:bg-transparent dark:border-[#434345]"
+                }`}
+            >
+              최근
+            </button>
             {YEARS.map((year) => (
               <button
                 key={year}
@@ -109,7 +122,7 @@ export default function OurNews() {
                   ${
                     activeYear === year
                       ? "bg-main text-white border-main md:bg-transparent md:text-main md:font-medium md:text-[22px] md:border-l-[5px] md:border-main"
-                      : "bg-white text-description border-[#d8d8d8] md:bg-transparent md:border-0 hover:text-normal-text"
+                      : "bg-white text-description border-[#d8d8d8] md:bg-transparent md:border-0 hover:text-normal-text dark:bg-transparent dark:border-[#434345]"
                   }`}
               >
                 {year}년

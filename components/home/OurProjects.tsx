@@ -7,12 +7,14 @@ import SectionTitle from "../common/SectionTitle";
 import { ChevronLeft, ChevronRight } from "../Icons";
 import { skillData } from "@/data";
 
-// 각 사업 분야의 가장 최근 프로젝트(첫 번째) 1개씩 추출
-const PROJECTS = skillData.map((skill) => ({
-  tab: skill.title,
-  skillId: skill.id,
-  project: skill.projects[0],
-}));
+// 각 사업 분야의 가장 최근 프로젝트(첫 번째) 1개씩 추출 (프로젝트 없는 사업 제외)
+const PROJECTS = skillData
+  .filter((skill) => skill.projects.length > 0)
+  .map((skill) => ({
+    tab: skill.title,
+    skillId: skill.id,
+    project: skill.projects[0],
+  }));
 
 const VISIBLE_COUNT_MOBILE = 2;
 const VISIBLE_COUNT_DESKTOP = 3;

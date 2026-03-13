@@ -15,9 +15,9 @@ function HistoryMonthBlock({
   isEmphasized,
 }: HistoryMonthBlockProps) {
   return (
-    <div className="grid grid-cols-[56px_minmax(0,1fr)] gap-[18px] md:grid-cols-[70px_minmax(0,1fr)] md:gap-[28px]">
+    <div className="flex flex-col gap-[6px] md:grid md:grid-cols-[70px_minmax(0,1fr)] md:gap-[28px]">
       <div
-        className={`pt-[2px] font-semibold leading-none tracking-[-0.02em] text-[20px] md:text-[24px] transition-colors duration-300 ${
+        className={`font-semibold leading-none tracking-[-0.02em] text-[18px] md:pt-[2px] md:text-[24px] transition-colors duration-300 ${
           isEmphasized
             ? "text-[#9d9d9d] dark:text-[#666]"
             : "text-[#c0c0c0] dark:text-[#555]"

@@ -19,6 +19,9 @@ export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
   );
   const sectionRefs = useRef<Record<number, HTMLElement | null>>({});
   const rafRef = useRef<number | null>(null);
+  const outerSectionRef = useRef<HTMLElement>(null);
+  const desktopNavRef = useRef<HTMLDivElement>(null);
+  const [desktopNavFixed, setDesktopNavFixed] = useState(false);
 
   const setSectionRef = useCallback((year: number, node: HTMLElement | null) => {
     sectionRefs.current[year] = node;
@@ -105,12 +108,31 @@ export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const INITIAL_OFFSET = 36;
+    const update = () => {
+      const section = outerSectionRef.current;
+      const nav = desktopNavRef.current;
+      if (!section || !nav) return;
+      const sectionTop = section.getBoundingClientRect().top;
+      const navHeight = nav.offsetHeight;
+      setDesktopNavFixed(sectionTop + INITIAL_OFFSET + navHeight / 2 <= window.innerHeight / 2);
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
   if (!timeline.length) {
     return null;
   }
 
   return (
-    <section className="relative pb-[96px] md:pb-[140px]">
+    <section ref={outerSectionRef} className="relative pb-[96px] md:pb-[140px]">
       <div className="sticky top-[64px] z-20 border-y border-[#ececec] bg-[#F6F7F9]/92 backdrop-blur lg:hidden dark:border-[#232325] dark:bg-[#1c1c1e]/92">
         <HistoryYearNav
           years={years}
@@ -121,8 +143,14 @@ export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
       </div>
 
       <div
-        className="hidden lg:block fixed top-1/2 z-20 -translate-y-1/2"
-        style={{ left: "max(24px, calc((100vw - 1000px) / 2 - 122px))" }}
+        ref={desktopNavRef}
+        className="hidden lg:block z-20"
+        style={{
+          position: desktopNavFixed ? "fixed" : "absolute",
+          top: desktopNavFixed ? "50%" : "36px",
+          transform: desktopNavFixed ? "translateY(-50%)" : "none",
+          left: "max(24px, calc((100vw - 1000px) / 2 - 122px))",
+        }}
       >
         <HistoryYearNav
           years={years}

@@ -68,8 +68,7 @@ export default function NewsGrid() {
   };
 
   return (
-    <section className="max-w-[1000px] mx-auto px-[24px] pb-[80px] md:pb-[120px]">
-
+    <section className="max-w-[1000px] mx-auto px-[24px] pb-[80px] md:pb-[120px] pt-[20px]">
       {/* 필터 바: 모바일 2행 / 데스크탑 1행 */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-[12px] sm:gap-[8px] mb-[36px] md:mb-[48px]">
         {/* 좌: 연도 드롭다운 */}

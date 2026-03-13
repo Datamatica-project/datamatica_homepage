@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { skillData, type SkillDataItem, type ProjectItem } from "@/data";
 import { ArrowRightCircle } from "@/components/Icons";
+import ProjectImageGallery from "./ProjectImageGallery";
 
 const FALLBACK_IMAGE = "/header/datamatica_logo.png";
 
@@ -54,7 +55,7 @@ export default function ProjectDetail({
   return (
     <div className="max-w-[1000px] mx-auto px-[24px] pb-[80px] md:pb-[120px]">
       {/* 대표 이미지 */}
-      <div className="relative w-full aspect-16/7 rounded-[20px] overflow-hidden bg-[#f0f0f0] dark:bg-[#282829] mb-[56px] md:mb-[72px]">
+      <div className="relative w-full aspect-[338/177] rounded-[20px] overflow-hidden bg-[#f0f0f0] dark:bg-[#282829] mb-[56px] md:mb-[72px]">
         <Image
           src={project.image || FALLBACK_IMAGE}
           alt={project.title}
@@ -132,21 +133,7 @@ export default function ProjectDetail({
           <h3 className="text-[20px] md:text-[24px] font-semibold text-normal-text mb-[24px]">
             프로젝트 이미지
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
-            {project.images.map((img, i) => (
-              <div
-                key={i}
-                className="relative aspect-16/10 rounded-[14px] overflow-hidden bg-[#f0f0f0] dark:bg-[#282829]"
-              >
-                <Image
-                  src={img || FALLBACK_IMAGE}
-                  alt={`${project.title} 이미지 ${i + 1}`}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            ))}
-          </div>
+          <ProjectImageGallery images={project.images} title={project.title} />
         </section>
       )}
 

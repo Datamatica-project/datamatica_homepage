@@ -146,7 +146,7 @@ export default function OurBusiness() {
               slideLeft();
             }}
             aria-label="이전 슬라이드"
-            className="absolute left-0 top-[20px] md:top-[30px] z-10 w-[48px] md:w-[56px] h-[300px] md:h-[485px] rounded-r-lg bg-black/20 dark:bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-30 hover:opacity-90 transition-opacity duration-200 cursor-pointer border-0 shadow-lg"
+            className="absolute left-0 top-[20px] md:top-[30px] z-10 w-[48px] md:w-[56px] h-[300px] md:h-[485px] rounded-r-lg bg-black/20 dark:bg-white/20 backdrop-blur-sm hidden md:flex items-center justify-center opacity-30 hover:opacity-90 transition-opacity duration-200 cursor-pointer border-0 shadow-lg"
           >
             <ChevronLeft size={24} className="text-white" />
           </button>
@@ -159,7 +159,7 @@ export default function OurBusiness() {
               slideRight();
             }}
             aria-label="다음 슬라이드"
-            className="absolute right-0 top-[20px] md:top-[30px] z-10 w-[48px] md:w-[56px] h-[300px] md:h-[485px] rounded-l-lg bg-black/20 dark:bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-30 hover:opacity-90 transition-opacity duration-200 cursor-pointer border-0 shadow-lg"
+            className="absolute right-0 top-[20px] md:top-[30px] z-10 w-[48px] md:w-[56px] h-[300px] md:h-[485px] rounded-l-lg bg-black/20 dark:bg-white/20 backdrop-blur-sm hidden md:flex items-center justify-center opacity-30 hover:opacity-90 transition-opacity duration-200 cursor-pointer border-0 shadow-lg"
           >
             <ChevronRight size={24} className="text-white" />
           </button>

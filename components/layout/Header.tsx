@@ -19,7 +19,7 @@ export default function Header({
 }: HeaderProps) {
   return (
     <section
-      className={`relative overflow-hidden pt-[108px] pb-[56px] md:pt-[132px] md:pb-[72px] ${className}`}
+      className={`relative overflow-hidden pt-[108px] pb-[56px] md:pt-[132px] md:pb-[72px] shadow-[0_4px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.25)] ${className}`}
     >
       <div className="relative z-10 max-w-[1000px] mx-auto px-[24px]">
         <div className="flex items-center gap-[8px] text-[12px] md:text-[13px] text-description">
