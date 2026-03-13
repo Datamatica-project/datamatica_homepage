@@ -3,13 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const TO_EMAIL = "jonghyun1803@naver.com";
+const TO_EMAIL = "mattew1803@naver.com";
 
 export async function POST(req: NextRequest) {
   const { name, email, message } = await req.json();
 
   if (!name || !email || !message) {
-    return NextResponse.json({ error: "필수 항목이 누락되었습니다." }, { status: 400 });
+    return NextResponse.json(
+      { error: "필수 항목이 누락되었습니다." },
+      { status: 400 }
+    );
   }
 
   const { error } = await resend.emails.send({
@@ -41,7 +44,11 @@ export async function POST(req: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: "메일 전송에 실패했습니다." }, { status: 500 });
+    console.error("[contact] Resend error:", error);
+    return NextResponse.json(
+      { error: "메일 전송에 실패했습니다.", detail: error.message },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ ok: true });
