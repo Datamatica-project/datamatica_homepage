@@ -92,7 +92,7 @@ export default function OurClients() {
           {/* 좌측: 이미지 */}
           <div className="relative w-full md:w-[480px] md:shrink-0 aspect-4/3 rounded-[12px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.5)]">
             <Image
-              src="/ourClient/ourClientImage.png"
+              src="/ourClient/2.png"
               alt="Our Clients"
               fill
               className="object-cover"
