@@ -339,7 +339,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
     <Html position={[0, 7, TITLE_Z]} center distanceFactor={55}>
       <style>{`
         @media (max-width: 640px) {
-          .title-billboard-h1 { font-size: clamp(14px, 5.5vw, 58px) !important; }
+          .title-billboard-h1 { font-size: clamp(28px, 7.5vw, 58px) !important; }
           .title-billboard-wrap { width: 100vw !important; max-width: 100vw !important; padding: 16px 24px !important; gap: 8px !important; border-radius: 0 !important; }
         }
       `}</style>
