@@ -23,8 +23,15 @@ export async function generateMetadata({
   const project = skill?.projects.find((p) => p.id === projectId);
   if (!skill || !project) return {};
   return {
-    title: `${project.title} | ${skill.title} | DataMatica`,
+    title: `${project.title} | ${skill.title}`,
     description: project.description,
+    alternates: { canonical: `/business/${skillId}/${projectId}` },
+    openGraph: {
+      title: `${project.title} | ${skill.title} | DataMatica`,
+      description: project.description,
+      url: `/business/${skillId}/${projectId}`,
+      images: [{ url: project.image || "/header/thumbnail.png", alt: project.title }],
+    },
   };
 }
 

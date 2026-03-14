@@ -36,9 +36,78 @@ const bebasNeue = Bebas_Neue({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://datamatica-homepage.vercel.app";
+
 export const metadata: Metadata = {
-  title: "DataMatica",
-  description: "DataMatica Home Page",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "DataMatica",
+    template: "%s | DataMatica",
+  },
+  description:
+    "수집부터 분석, 시각화, 자동화까지 데이터를 가치로 전환하는 DataMatica. 자율주행, 공간정보, AI 데이터 전문 기업입니다.",
+  keywords: [
+    "DataMatica", "데이터메티카", "데이터 분석", "자율주행", "공간정보",
+    "AI 데이터", "HD맵", "데이터 시각화", "데이터 자동화",
+  ],
+  authors: [{ name: "DataMatica", url: SITE_URL }],
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: SITE_URL,
+    siteName: "DataMatica",
+    title: "DataMatica",
+    description:
+      "수집부터 분석, 시각화, 자동화까지 데이터를 가치로 전환하는 DataMatica. 자율주행, 공간정보, AI 데이터 전문 기업입니다.",
+    images: [
+      {
+        url: "/header/thumbnail.png",
+        width: 1200,
+        height: 630,
+        alt: "DataMatica",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DataMatica",
+    description:
+      "수집부터 분석, 시각화, 자동화까지 데이터를 가치로 전환하는 DataMatica.",
+    images: ["/header/thumbnail.png"],
+  },
+  themeColor: "#d94a52",
+  icons: {
+    icon: [
+      { url: "/favicon_io/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon_io/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/favicon_io/apple-touch-icon.png",
+    other: [
+      { rel: "manifest", url: "/favicon_io/site.webmanifest" },
+    ],
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "DataMatica",
+  url: SITE_URL,
+  logo: `${SITE_URL}/header/headerlogo.png`,
+  image: `${SITE_URL}/header/thumbnail.png`,
+  description:
+    "수집부터 분석, 시각화, 자동화까지 데이터를 가치로 전환하는 DataMatica. 자율주행, 공간정보, AI 데이터 전문 기업입니다.",
+  telephone: "+82-31-628-8360",
+  email: "support@datamatica.kr",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "판교로255번길 9-22, 우림W시티 809-1",
+    addressLocality: "성남시 분당구",
+    addressRegion: "경기도",
+    addressCountry: "KR",
+  },
+  foundingDate: "2020",
+  sameAs: [SITE_URL],
 };
 
 export default function RootLayout({
@@ -47,10 +116,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} ${a2z.variable} antialiased`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ThemeProvider>
           <GnbWrapper />
           {children}
