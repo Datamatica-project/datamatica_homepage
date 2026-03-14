@@ -43,12 +43,11 @@ export function DataBeacon({
         <div className="flex pointer-events-none select-none">
           <div
             style={{
-              backdropFilter: "blur(6px)",
               padding: "6px 12px",
               borderRadius: "4px",
               backgroundColor: isDark
-                ? "rgba(0,229,255,0.08)"
-                : "rgba(255,255,255,0.6)",
+                ? "rgba(0,15,25,0.5)"
+                : "rgba(240,248,255,0.65)",
               border: `1px solid ${isDark ? "#00E5FF" : "#00C2FF"}`,
               boxShadow: isDark
                 ? "0 0 2px #00E5FF, 0 0 10px rgba(0,229,255,0.4)"

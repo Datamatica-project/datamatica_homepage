@@ -13,7 +13,7 @@ import { GlobeParticlesScene } from "./GlobeParticles";
 const SEG_LEN = 600;
 const WIDTH = 220;
 const GRID = 70;
-const N_TILES = 3;
+const N_TILES = 2;
 const SCROLL_SPEED = 0.2;
 const CAM_Y = 6;
 const CAM_Z_BASE = 15;
@@ -322,13 +322,17 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
   const { camera } = useThree();
   const innerRef = useRef<HTMLDivElement>(null);
 
+  const prevOpacityRef = useRef(-1);
   useFrame(() => {
     if (!innerRef.current) return;
-    // camera.z - TITLE_Z: 양수 = 카메라가 타이틀 앞, 음수 = 통과 후
     const dist = camera.position.z - TITLE_Z;
-    // dist 25 이상: 완전히 보임 / dist 0 이하: 완전히 사라짐
-    const opacity = Math.max(0, Math.min(1, (dist - 0) / 25));
-    innerRef.current.style.opacity = String(opacity);
+    const opacity = Math.max(0, Math.min(1, dist / 25));
+    // 값이 실제로 바뀔 때만 DOM에 씀
+    const rounded = Math.round(opacity * 1000) / 1000;
+    if (rounded !== prevOpacityRef.current) {
+      prevOpacityRef.current = rounded;
+      innerRef.current.style.opacity = String(rounded);
+    }
   });
 
   return (
@@ -351,17 +355,15 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
           userSelect: "none",
           textAlign: "center",
           maxWidth: "90vw",
-          backgroundColor: isDark ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)",
+          backgroundColor: isDark ? "rgba(0,0,0,0.72)" : "rgba(255,255,255,0.6)",
           padding: "clamp(6px, 1.5vw, 10px) clamp(10px, 3vw, 20px)",
-          borderRadius: "5px",
-          backdropFilter: "blur(5px)",
-          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: "8px",
           transition: "background-color 0.7s ease",
         }}
       >
         <p
           style={{
-            color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
+            color: isDark ? "rgba(255,255,255,0.8)" : "#64748B",
             fontSize: "clamp(6px, 1.8vw, 10px)",
             letterSpacing: "clamp(0.15em, 0.8vw, 0.45em)",
             textTransform: "uppercase",
@@ -369,6 +371,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             margin: 0,
             whiteSpace: "nowrap",
             fontWeight: "normal",
+            textShadow: "0 1px 10px rgba(0,0,0,1), 0 0 6px rgba(0,0,0,0.8)",
             transition: "color 0.7s ease",
           }}
         >
@@ -382,7 +385,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             fontWeight: "500",
             letterSpacing: "clamp(0.05em, 0.5vw, 0.15em)",
             lineHeight: 1,
-            textShadow: "0 0 30px rgba(255,100,150,0.7)",
+            textShadow: "0 0 32px rgba(255,80,130,1), 0 0 8px rgba(255,80,130,0.6), 0 2px 12px rgba(0,0,0,1)",
             margin: 0,
             whiteSpace: "nowrap",
             transition: "color 0.7s ease",
@@ -393,7 +396,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
         </h1>
         <p
           style={{
-            color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
+            color: isDark ? "rgba(255,255,255,0.8)" : "#64748B",
             fontSize: "clamp(6px, 1.8vw, 10px)",
             letterSpacing: "clamp(0.15em, 0.8vw, 0.45em)",
             textTransform: "uppercase",
@@ -401,6 +404,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             margin: 0,
             whiteSpace: "nowrap",
             fontWeight: "normal",
+            textShadow: "0 1px 10px rgba(0,0,0,1), 0 0 6px rgba(0,0,0,0.8)",
             transition: "color 0.7s ease",
           }}
         >
@@ -768,6 +772,209 @@ function TerrainScene({
   );
 }
 
+// --------------------
+// Ship Overlay (배 앞머리 + 타륜)
+// --------------------
+function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
+  const wheelSvgRef = useRef<SVGSVGElement>(null);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (rafRef.current == null) {
+        rafRef.current = requestAnimationFrame(() => {
+          if (wheelSvgRef.current) {
+            const deg = window.scrollY * 0.2;
+            wheelSvgRef.current.style.transform =
+              `perspective(300px) rotateX(18deg) rotate(${deg}deg)`;
+          }
+          rafRef.current = null;
+        });
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 4,
+        pointerEvents: "none",
+        opacity: fadeOpacity,
+        transition: "opacity 0.4s ease",
+      }}
+    >
+      <style>{`
+        @keyframes shipBob {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(3px); }
+        }
+      `}</style>
+
+      {/* 흔들림 래퍼 */}
+      <div style={{ position: "absolute", inset: 0, animation: "shipBob 3.6s ease-in-out infinite" }}>
+
+        {/* ── 하단 비네트 (어두운 코크핏 느낌) ── */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "30vh",
+            background:
+              "linear-gradient(to top, rgba(4,10,18,0.72) 0%, rgba(4,10,18,0.3) 45%, transparent 100%)",
+          }}
+        />
+
+        {/* ── 레일 두 줄 (단순화, 낮은 불투명도) ── */}
+        <svg
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            height: "22vh",
+          }}
+          viewBox="0 0 1000 500"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <filter id="railGlow" x="-15%" y="-15%" width="130%" height="130%">
+              <feGaussianBlur stdDeviation="2.5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* 좌현 레일 */}
+          <line x1="500" y1="0" x2="0" y2="500"
+            stroke="rgba(0,187,204,0.22)" strokeWidth="2"
+            filter="url(#railGlow)" />
+
+          {/* 우현 레일 */}
+          <line x1="500" y1="0" x2="1000" y2="500"
+            stroke="rgba(0,187,204,0.22)" strokeWidth="2"
+            filter="url(#railGlow)" />
+
+          {/* 선수 포인트 */}
+          <circle cx="500" cy="4" r="5"
+            fill="rgba(0,187,204,0.18)"
+            filter="url(#railGlow)" />
+        </svg>
+
+        {/* ── 타륜 + 콘솔 받침 ── */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "3%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {/* 타륜 */}
+          <div
+            style={{
+              width: "clamp(100px, 13vw, 165px)",
+              height: "clamp(100px, 13vw, 165px)",
+              filter: "drop-shadow(0 0 8px rgba(0,187,204,0.3))",
+            }}
+          >
+            <svg
+              ref={wheelSvgRef}
+              viewBox="0 0 120 120"
+              style={{
+                width: "100%",
+                height: "100%",
+                transform: "perspective(300px) rotateX(18deg) rotate(0deg)",
+                transformOrigin: "center",
+              }}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* 외부 링 */}
+              <circle cx="60" cy="60" r="53"
+                fill="none"
+                stroke="rgba(0,187,204,0.55)"
+                strokeWidth="4" />
+
+              {/* 8개 스포크 + 그립 노브 */}
+              {Array.from({ length: 8 }, (_, i) => {
+                const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                return (
+                  <g key={i}>
+                    <line
+                      x1={60 + 17 * cos} y1={60 + 17 * sin}
+                      x2={60 + 50 * cos} y2={60 + 50 * sin}
+                      stroke="rgba(0,187,204,0.5)"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                    <circle
+                      cx={60 + 53 * cos} cy={60 + 53 * sin} r="4.5"
+                      fill="rgba(0,20,30,0.92)"
+                      stroke="rgba(0,187,204,0.65)"
+                      strokeWidth="1.5"
+                    />
+                  </g>
+                );
+              })}
+
+              {/* 중심 허브 */}
+              <circle cx="60" cy="60" r="17"
+                fill="rgba(0,10,20,0.88)"
+                stroke="rgba(0,187,204,0.55)"
+                strokeWidth="2.5" />
+              <circle cx="60" cy="60" r="7"
+                fill="rgba(0,187,204,0.38)" />
+            </svg>
+          </div>
+
+          {/* 콘솔 받침 */}
+          <svg
+            viewBox="0 0 200 56"
+            style={{
+              width: "clamp(88px, 11.5vw, 150px)",
+              marginTop: "-3px",
+              filter: "drop-shadow(0 3px 10px rgba(0,0,0,0.7))",
+            }}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* 받침 몸체 */}
+            <polygon
+              points="52,0 148,0 178,56 22,56"
+              fill="rgba(4,12,22,0.82)"
+              stroke="rgba(0,187,204,0.22)"
+              strokeWidth="1.5"
+            />
+            {/* 상단 하이라이트 */}
+            <line x1="52" y1="0" x2="148" y2="0"
+              stroke="rgba(0,187,204,0.38)" strokeWidth="1.5" />
+            {/* 계기 점 3개 */}
+            <circle cx="85" cy="34" r="3.5" fill="rgba(0,187,204,0.25)" />
+            <circle cx="100" cy="34" r="3.5" fill="rgba(0,187,204,0.45)" />
+            <circle cx="115" cy="34" r="3.5" fill="rgba(0,187,204,0.25)" />
+          </svg>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 const DARK_BG = `linear-gradient(
   to bottom,
   #041818  0%,
@@ -882,6 +1089,8 @@ export default function Terrain({
           mixBlendMode: "overlay",
         }}
       />
+
+      <ShipOverlay fadeOpacity={1 - overlayOpacity} />
     </div>
   );
 }

@@ -74,8 +74,7 @@ export default function NextButton() {
       <div
         className="w-[44px] h-[44px] rounded-full flex items-center justify-center animate-bounce"
         style={{
-          background: "rgba(255,255,255,0.12)",
-          backdropFilter: "blur(8px)",
+          background: "rgba(255,255,255,0.14)",
           border: "1px solid rgba(255,255,255,0.25)",
           boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
         }}
