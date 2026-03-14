@@ -26,11 +26,7 @@ export default function page() {
         breadcrumbLabel="회사연혁"
         title="회사 연혁"
         description={
-          <>
-            국내외 주요 기관과의 협력을 통해 데이터 기술 역량을 축적해왔으며,
-            <br />
-            자율주행과 공간정보 산업에서 지속 가능한 혁신을 실현하고 있습니다.
-          </>
+          <>데이터 기술로 자율주행·공간정보 산업의 혁신을 추구합니다.</>
         }
         watermark="Company History"
       />
