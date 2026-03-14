@@ -168,6 +168,7 @@ export default function ProjectImageGallery({
                   src={img || FALLBACK_IMAGE}
                   alt={`${title} 이미지 ${i + 1}`}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 480px"
                   className="object-cover transition-transform duration-300 hover:scale-105"
                 />
               </button>

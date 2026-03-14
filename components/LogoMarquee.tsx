@@ -145,6 +145,7 @@ function MarqueeRow({
           src={logo.src}
           alt={logo.alt}
           fill
+          sizes="120px"
           draggable={false}
           className="object-contain dark:brightness-0 dark:invert pointer-events-none"
         />

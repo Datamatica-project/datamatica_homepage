@@ -95,6 +95,7 @@ export default function OurClients() {
               src="/ourClient/2.png"
               alt="Our Clients"
               fill
+              sizes="(max-width: 768px) 100vw, 480px"
               className="object-cover"
             />
           </div>

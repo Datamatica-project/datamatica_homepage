@@ -33,6 +33,7 @@ function ProjectCard({
           src={src}
           alt={title}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 320px"
           className={
             isFallback
               ? "object-contain p-[20px]"
@@ -100,9 +101,10 @@ export default function BusinessContent() {
         </div>
         <div className="relative shrink-0 w-full md:w-[380px] aspect-4/3 rounded-[16px] overflow-hidden bg-[#f0f0f0] dark:bg-[#282829]">
           <Image
-            src={active.imageSrc}
+            src={active.imageSrcDetail ?? active.imageSrc}
             alt={active.title}
             fill
+            sizes="(max-width: 768px) 100vw, 380px"
             className="object-cover"
           />
         </div>

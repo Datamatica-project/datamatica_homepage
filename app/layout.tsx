@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Bebas_Neue } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -75,7 +75,6 @@ export const metadata: Metadata = {
       "수집부터 분석, 시각화, 자동화까지 데이터를 가치로 전환하는 DataMatica.",
     images: ["/header/thumbnail.png"],
   },
-  themeColor: "#d94a52",
   icons: {
     icon: [
       { url: "/favicon_io/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -86,6 +85,10 @@ export const metadata: Metadata = {
       { rel: "manifest", url: "/favicon_io/site.webmanifest" },
     ],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#d94a52",
 };
 
 const jsonLd = {

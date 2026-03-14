@@ -94,7 +94,6 @@ export default function Gnb({
               alt="DataMatica"
               width={148}
               height={36}
-              className="object-contain"
               style={{
                 filter: "none",
                 transition: "filter 0.3s ease",
@@ -240,7 +239,6 @@ export default function Gnb({
             alt="DataMatica"
             width={120}
             height={29}
-            className="object-contain"
             style={{
               filter: isMain && !isDark ? "none" : "brightness(0) invert(1)",
             }}

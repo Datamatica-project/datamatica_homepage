@@ -35,6 +35,7 @@ export default function NewsCard_main({
           src={src}
           alt={title}
           fill
+          sizes="(max-width: 768px) 245px, 320px"
           draggable={false}
           className={
             isFallback
