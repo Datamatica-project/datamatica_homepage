@@ -340,7 +340,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
       <style>{`
         @media (max-width: 640px) {
           .title-billboard-h1 { font-size: clamp(14px, 5.5vw, 58px) !important; }
-          .title-billboard-wrap { padding: 16px 20px !important; gap: 8px !important; }
+          .title-billboard-wrap { width: 100vw !important; max-width: 100vw !important; padding: 16px 24px !important; gap: 8px !important; border-radius: 0 !important; }
         }
       `}</style>
       <div
@@ -358,7 +358,7 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
           backgroundColor: isDark
             ? "rgba(0,0,0,0.84)"
             : "rgba(255,255,255,0.6)",
-          padding: "clamp(6px, 1.5vw, 10px) clamp(10px, 3vw, 20px)",
+          padding: "clamp(6px, 1.5vw, 10px) clamp(18px, 3vw, 20px)",
           borderRadius: "8px",
           transition: "background-color 0.7s ease",
         }}
