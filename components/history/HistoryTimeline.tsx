@@ -13,6 +13,16 @@ const SCROLL_OFFSET = 96;
 
 export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
   const years = useMemo(() => timeline.map((item) => item.year), [timeline]);
+  const entryCounts = useMemo(
+    () =>
+      Object.fromEntries(
+        timeline.map((item) => [
+          item.year,
+          item.items.reduce((sum, m) => sum + m.entries.length, 0),
+        ])
+      ),
+    [timeline]
+  );
   const [activeYear, setActiveYear] = useState<number>(years[0] ?? 0);
   const [activeEmphasizedYear, setActiveEmphasizedYear] = useState<number | null>(
     timeline[0]?.year ?? null
@@ -139,6 +149,7 @@ export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
           activeYear={activeYear}
           onSelectYear={handleSelectYear}
           orientation="mobile"
+          entryCounts={entryCounts}
         />
       </div>
 
@@ -156,6 +167,7 @@ export default function HistoryTimeline({ timeline }: HistoryTimelineProps) {
           years={years}
           activeYear={activeYear}
           onSelectYear={handleSelectYear}
+          entryCounts={entryCounts}
         />
       </div>
 
