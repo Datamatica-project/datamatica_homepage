@@ -355,7 +355,9 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
           userSelect: "none",
           textAlign: "center",
           maxWidth: "90vw",
-          backgroundColor: isDark ? "rgba(0,0,0,0.72)" : "rgba(255,255,255,0.6)",
+          backgroundColor: isDark
+            ? "rgba(0,0,0,0.84)"
+            : "rgba(255,255,255,0.6)",
           padding: "clamp(6px, 1.5vw, 10px) clamp(10px, 3vw, 20px)",
           borderRadius: "8px",
           transition: "background-color 0.7s ease",
@@ -385,7 +387,8 @@ function TitleBillboard({ isDark }: { isDark: boolean }) {
             fontWeight: "500",
             letterSpacing: "clamp(0.05em, 0.5vw, 0.15em)",
             lineHeight: 1,
-            textShadow: "0 0 32px rgba(255,80,130,1), 0 0 8px rgba(255,80,130,0.6), 0 2px 12px rgba(0,0,0,1)",
+            textShadow:
+              "0 0 32px rgba(255,80,130,1), 0 0 8px rgba(255,80,130,0.6), 0 2px 12px rgba(0,0,0,1)",
             margin: 0,
             whiteSpace: "nowrap",
             transition: "color 0.7s ease",
@@ -785,8 +788,7 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
         rafRef.current = requestAnimationFrame(() => {
           if (wheelSvgRef.current) {
             const deg = window.scrollY * 0.2;
-            wheelSvgRef.current.style.transform =
-              `perspective(300px) rotateX(18deg) rotate(${deg}deg)`;
+            wheelSvgRef.current.style.transform = `perspective(300px) rotateX(18deg) rotate(${deg}deg)`;
           }
           rafRef.current = null;
         });
@@ -818,8 +820,13 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
       `}</style>
 
       {/* 흔들림 래퍼 */}
-      <div style={{ position: "absolute", inset: 0, animation: "shipBob 3.6s ease-in-out infinite" }}>
-
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          animation: "shipBob 3.6s ease-in-out infinite",
+        }}
+      >
         {/* ── 하단 비네트 (어두운 코크핏 느낌) ── */}
         <div
           style={{
@@ -857,19 +864,35 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
           </defs>
 
           {/* 좌현 레일 */}
-          <line x1="500" y1="0" x2="0" y2="500"
-            stroke="rgba(0,187,204,0.22)" strokeWidth="2"
-            filter="url(#railGlow)" />
+          <line
+            x1="500"
+            y1="0"
+            x2="0"
+            y2="500"
+            stroke="rgba(0,187,204,0.22)"
+            strokeWidth="2"
+            filter="url(#railGlow)"
+          />
 
           {/* 우현 레일 */}
-          <line x1="500" y1="0" x2="1000" y2="500"
-            stroke="rgba(0,187,204,0.22)" strokeWidth="2"
-            filter="url(#railGlow)" />
+          <line
+            x1="500"
+            y1="0"
+            x2="1000"
+            y2="500"
+            stroke="rgba(0,187,204,0.22)"
+            strokeWidth="2"
+            filter="url(#railGlow)"
+          />
 
           {/* 선수 포인트 */}
-          <circle cx="500" cy="4" r="5"
+          <circle
+            cx="500"
+            cy="4"
+            r="5"
             fill="rgba(0,187,204,0.18)"
-            filter="url(#railGlow)" />
+            filter="url(#railGlow)"
+          />
         </svg>
 
         {/* ── 타륜 + 콘솔 받침 ── */}
@@ -904,10 +927,14 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
               xmlns="http://www.w3.org/2000/svg"
             >
               {/* 외부 링 */}
-              <circle cx="60" cy="60" r="53"
+              <circle
+                cx="60"
+                cy="60"
+                r="53"
                 fill="none"
                 stroke="rgba(0,187,204,0.55)"
-                strokeWidth="4" />
+                strokeWidth="4"
+              />
 
               {/* 8개 스포크 + 그립 노브 */}
               {Array.from({ length: 8 }, (_, i) => {
@@ -917,14 +944,18 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
                 return (
                   <g key={i}>
                     <line
-                      x1={60 + 17 * cos} y1={60 + 17 * sin}
-                      x2={60 + 50 * cos} y2={60 + 50 * sin}
+                      x1={60 + 17 * cos}
+                      y1={60 + 17 * sin}
+                      x2={60 + 50 * cos}
+                      y2={60 + 50 * sin}
                       stroke="rgba(0,187,204,0.5)"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     />
                     <circle
-                      cx={60 + 53 * cos} cy={60 + 53 * sin} r="4.5"
+                      cx={60 + 53 * cos}
+                      cy={60 + 53 * sin}
+                      r="4.5"
                       fill="rgba(0,20,30,0.92)"
                       stroke="rgba(0,187,204,0.65)"
                       strokeWidth="1.5"
@@ -934,12 +965,15 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
               })}
 
               {/* 중심 허브 */}
-              <circle cx="60" cy="60" r="17"
+              <circle
+                cx="60"
+                cy="60"
+                r="17"
                 fill="rgba(0,10,20,0.88)"
                 stroke="rgba(0,187,204,0.55)"
-                strokeWidth="2.5" />
-              <circle cx="60" cy="60" r="7"
-                fill="rgba(0,187,204,0.38)" />
+                strokeWidth="2.5"
+              />
+              <circle cx="60" cy="60" r="7" fill="rgba(0,187,204,0.38)" />
             </svg>
           </div>
 
@@ -961,15 +995,20 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
               strokeWidth="1.5"
             />
             {/* 상단 하이라이트 */}
-            <line x1="52" y1="0" x2="148" y2="0"
-              stroke="rgba(0,187,204,0.38)" strokeWidth="1.5" />
+            <line
+              x1="52"
+              y1="0"
+              x2="148"
+              y2="0"
+              stroke="rgba(0,187,204,0.38)"
+              strokeWidth="1.5"
+            />
             {/* 계기 점 3개 */}
             <circle cx="85" cy="34" r="3.5" fill="rgba(0,187,204,0.25)" />
             <circle cx="100" cy="34" r="3.5" fill="rgba(0,187,204,0.45)" />
             <circle cx="115" cy="34" r="3.5" fill="rgba(0,187,204,0.25)" />
           </svg>
         </div>
-
       </div>
     </div>
   );
