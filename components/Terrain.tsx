@@ -504,20 +504,32 @@ function DeckOverlay({
       const t1 = 1 / 3;
       const t2 = 0.56; // 3단계 더 빨리
 
-      // 1단계: 더 늦게 등장 후 t1 경계에서 페이드아웃
-      imgs[0]!.style.opacity = String(
-        ss(0.08, 0.16, t) * (1 - ss(t1 - B, t1 + B, t)) * 0.22
-      );
-      // 2단계: t1에서 페이드인, t2에서 페이드아웃
-      imgs[1]!.style.opacity = String(
-        ss(t1 - B, t1 + B, t) * (1 - ss(t2 - B, t2 + B, t)) * 0.22
-      );
-      // 3단계: t2에서 페이드인
-      imgs[2]!.style.opacity = String(ss(t2 - B, t2 + B, t) * 0.22);
+      // 등장 진행값 (0→1): 각 파도의 페이드인 구간
+      const enter1 = ss(0.08, 0.16, t);
+      const enter2 = ss(t1 - B, t1 + B, t);
+      const enter3 = ss(t2 - B, t2 + B, t);
 
-      // 안개: 3단계 이후 등장
-      if (mistRef.current)
-        mistRef.current.style.opacity = String(ss(t2 + B, t2 + B + 0.12, t) * 0.15);
+      // scale: 0.82에서 1.0으로 커지며 등장
+      const sc1 = 0.82 + 0.18 * enter1;
+      const sc2 = 0.82 + 0.18 * enter2;
+      const sc3 = 0.82 + 0.18 * enter3;
+
+      // 1단계: 더 늦게 등장 후 t1 경계에서 페이드아웃
+      imgs[0]!.style.opacity = String(enter1 * (1 - ss(t1 - B, t1 + B, t)) * 0.22);
+      imgs[0]!.style.transform = `translateX(-50%) scale(${sc1})`;
+      // 2단계: t1에서 페이드인, t2에서 페이드아웃
+      imgs[1]!.style.opacity = String(enter2 * (1 - ss(t2 - B, t2 + B, t)) * 0.22);
+      imgs[1]!.style.transform = `translateX(-50%) scale(${sc2})`;
+      // 3단계: t2에서 페이드인
+      imgs[2]!.style.opacity = String(enter3 * 0.22);
+      imgs[2]!.style.transform = `translateX(-50%) scale(${sc3})`;
+
+      // 안개: 1단계와 함께 등장 + 스케일
+      if (mistRef.current) {
+        const enterMist = ss(0.08, 0.20, t);
+        mistRef.current.style.opacity = String(enterMist * 0.15);
+        mistRef.current.style.transform = `translateX(-50%) scale(${0.82 + 0.18 * enterMist})`;
+      }
 
       rafId = null;
     };
@@ -677,8 +689,8 @@ function DeckOverlay({
             bottom: 0,
             left: "50%",
             transform: "translateX(-50%)",
-            width: "100%",
-            maxWidth: "860px",
+            width: "110%",
+            maxWidth: "980px",
             transition: "opacity 0.08s",
           }}
         />
@@ -694,8 +706,8 @@ function DeckOverlay({
             bottom: 0,
             left: "50%",
             transform: "translateX(-50%)",
-            width: "100%",
-            maxWidth: "860px",
+            width: "110%",
+            maxWidth: "980px",
             transition: "opacity 0.08s",
           }}
         />

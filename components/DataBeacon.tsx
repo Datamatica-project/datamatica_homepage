@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -30,6 +30,13 @@ export function DataBeacon({
 }) {
   const y = heightAt(x, z) + yOffset;
   const groupRef = useRef<THREE.Group>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
@@ -40,7 +47,7 @@ export function DataBeacon({
   return (
     <group ref={groupRef} position={[x, y, z]}>
       <Html position={[0, FLOAT_H, 0]} center distanceFactor={80}>
-        <div className="flex pointer-events-none select-none">
+        <div className="flex pointer-events-none select-none" style={{ transform: isMobile ? `scale(0.5) perspective(400px) rotateY(${x > 0 ? -20 : 20}deg)` : `perspective(400px) rotateY(${x > 0 ? -20 : 20}deg)`, transformOrigin: "center center" }}>
           <div
             style={{
               padding: "6px 12px",
