@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useMemo, useCallback, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
 import { EffectComposer, Vignette } from "@react-three/postprocessing";
@@ -317,105 +316,101 @@ function updateTile(tile: Tile, newWorldZ: number, heightAt: HeightFn) {
 }
 
 // --------------------
-// TitleBillboard (3D 월드 공간 타이틀)
+// TitleOverlay (스크롤 기반 fade)
 // --------------------
-function TitleBillboard({ isDark }: { isDark: boolean }) {
-  const { camera } = useThree();
-  const innerRef = useRef<HTMLDivElement>(null);
+function TitleOverlay({ isDark }: { isDark: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
 
-  const prevOpacityRef = useRef(-1);
-  useFrame(() => {
-    if (!innerRef.current) return;
-    const dist = camera.position.z - TITLE_Z;
-    const opacity = Math.max(0, Math.min(1, dist / 25));
-    // 값이 실제로 바뀔 때만 DOM에 씀
-    const rounded = Math.round(opacity * 1000) / 1000;
-    if (rounded !== prevOpacityRef.current) {
-      prevOpacityRef.current = rounded;
-      innerRef.current.style.opacity = String(rounded);
-    }
-  });
+  useEffect(() => {
+    const onScroll = () => {
+      if (!ref.current) return;
+      ref.current.style.opacity = window.scrollY > 60 ? "0" : "1";
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <Html position={[0, 7, TITLE_Z]} center distanceFactor={55}>
+    <div
+      ref={ref}
+      className="title-overlay-wrap"
+      style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        zIndex: 5,
+        pointerEvents: "none",
+        userSelect: "none",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "clamp(4px, 1.5vw, 8px)",
+        textAlign: "center",
+        maxWidth: "90vw",
+        backgroundColor: isDark ? "rgba(0,0,0,0.84)" : "rgba(255,255,255,0.6)",
+        padding: "clamp(6px, 1.5vw, 10px) clamp(18px, 3vw, 20px)",
+        borderRadius: "8px",
+        transition: "opacity 0.35s ease, background-color 0.7s ease",
+      }}
+    >
       <style>{`
         @media (max-width: 640px) {
-          .title-billboard-h1 { font-size: clamp(28px, 7.5vw, 58px) !important; }
-          .title-billboard-wrap { width: 100vw !important; max-width: 100vw !important; padding: 16px 24px !important; gap: 8px !important; border-radius: 0 !important; }
+          .title-billboard-h1 { font-size: clamp(36px, 11vw, 80px) !important; }
+          .title-overlay-wrap { gap: 14px !important; padding: 20px 28px !important; }
         }
       `}</style>
-      <div
-        ref={innerRef}
-        className="title-billboard-wrap"
+      <p
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "clamp(4px, 1.5vw, 8px)",
-          pointerEvents: "none",
-          userSelect: "none",
-          textAlign: "center",
-          maxWidth: "90vw",
-          backgroundColor: isDark
-            ? "rgba(0,0,0,0.84)"
-            : "rgba(255,255,255,0.6)",
-          padding: "clamp(6px, 1.5vw, 10px) clamp(18px, 3vw, 20px)",
-          borderRadius: "8px",
-          transition: "background-color 0.7s ease",
+          color: isDark ? "rgba(255,255,255,0.8)" : "#64748B",
+          fontSize: "clamp(10px, 1.8vw, 16px)",
+          letterSpacing: "clamp(0.15em, 0.8vw, 0.45em)",
+          textTransform: "uppercase",
+          fontFamily: "noto sans kr",
+          margin: 0,
+          whiteSpace: "nowrap",
+          fontWeight: "normal",
+          textShadow: "0 1px 10px rgba(0,0,0,1), 0 0 6px rgba(0,0,0,0.8)",
+          transition: "color 0.7s ease",
         }}
       >
-        <p
-          style={{
-            color: isDark ? "rgba(255,255,255,0.8)" : "#64748B",
-            fontSize: "clamp(6px, 1.8vw, 10px)",
-            letterSpacing: "clamp(0.15em, 0.8vw, 0.45em)",
-            textTransform: "uppercase",
-            fontFamily: "noto sans kr",
-            margin: 0,
-            whiteSpace: "nowrap",
-            fontWeight: "normal",
-            textShadow: "0 1px 10px rgba(0,0,0,1), 0 0 6px rgba(0,0,0,0.8)",
-            transition: "color 0.7s ease",
-          }}
-        >
-          인공지능 통합 솔루션 구축 기업
-        </p>
-        <h1
-          className="title-billboard-h1"
-          style={{
-            color: isDark ? "white" : "#D94A52",
-            fontSize: "clamp(20px, 8vw, 58px)",
-            fontWeight: "500",
-            letterSpacing: "clamp(0.05em, 0.5vw, 0.15em)",
-            lineHeight: 1,
-            textShadow:
-              "0 0 32px rgba(255,80,130,1), 0 0 8px rgba(255,80,130,0.6), 0 2px 12px rgba(0,0,0,1)",
-            margin: 0,
-            whiteSpace: "nowrap",
-            transition: "color 0.7s ease",
-            fontFamily: "var(--font-a2z), sans-serif",
-          }}
-        >
-          DataMatica
-        </h1>
-        <p
-          style={{
-            color: isDark ? "rgba(255,255,255,0.8)" : "#64748B",
-            fontSize: "clamp(6px, 1.8vw, 10px)",
-            letterSpacing: "clamp(0.15em, 0.8vw, 0.45em)",
-            textTransform: "uppercase",
-            fontFamily: "noto sans kr",
-            margin: 0,
-            whiteSpace: "nowrap",
-            fontWeight: "normal",
-            textShadow: "0 1px 10px rgba(0,0,0,1), 0 0 6px rgba(0,0,0,0.8)",
-            transition: "color 0.7s ease",
-          }}
-        >
-          (주)데이터메티카
-        </p>
-      </div>
-    </Html>
+        인공지능 통합 솔루션 구축 기업
+      </p>
+      <h1
+        className="title-billboard-h1"
+        style={{
+          color: isDark ? "white" : "#D94A52",
+          fontSize: "clamp(36px, 10vw, 108px)",
+          fontWeight: "500",
+          letterSpacing: "clamp(0.05em, 0.5vw, 0.15em)",
+          lineHeight: 1,
+          textShadow:
+            "0 0 32px rgba(255,80,130,1), 0 0 8px rgba(255,80,130,0.6), 0 2px 12px rgba(0,0,0,1)",
+          margin: 0,
+          whiteSpace: "nowrap",
+          transition: "color 0.7s ease",
+          fontFamily: "var(--font-a2z), sans-serif",
+        }}
+      >
+        DataMatica
+      </h1>
+      <p
+        style={{
+          color: isDark ? "rgba(255,255,255,0.8)" : "#64748B",
+          fontSize: "clamp(10px, 1.8vw, 16px)",
+          letterSpacing: "clamp(0.15em, 0.8vw, 0.45em)",
+          textTransform: "uppercase",
+          fontFamily: "noto sans kr",
+          margin: 0,
+          whiteSpace: "nowrap",
+          fontWeight: "normal",
+          textShadow: "0 1px 10px rgba(0,0,0,1), 0 0 6px rgba(0,0,0,0.8)",
+          transition: "color 0.7s ease",
+        }}
+      >
+        (주)데이터메티카
+      </p>
+    </div>
   );
 }
 
@@ -738,7 +733,6 @@ function TerrainScene({
           <GlobeParticlesScene />
         </group>
       )}
-      <TitleBillboard isDark={isDark} />
 
       {/* 지형 타일 */}
       {tiles.map((tile, i) => (
@@ -1110,6 +1104,7 @@ export default function Terrain({
       />
 
       <ShipOverlay fadeOpacity={1 - overlayOpacity} />
+      <TitleOverlay isDark={isDark} />
     </div>
   );
 }
