@@ -416,20 +416,35 @@ function TitleOverlay({ isDark }: { isDark: boolean }) {
 // --------------------
 // DeckOverlay (선수 갑판 — 다크 모드 전용)
 // --------------------
-function DeckOverlay({ isDark }: { isDark: boolean }) {
+function DeckOverlay({
+  isDark,
+  scrollEndVh,
+}: {
+  isDark: boolean;
+  scrollEndVh: number;
+}) {
   const wheelRef = useRef<HTMLImageElement>(null);
   const wheelContainerRef = useRef<HTMLDivElement>(null);
   const shipRef = useRef<HTMLImageElement>(null);
+  const waveRef = useRef<HTMLDivElement>(null);
+  const lowRef = useRef<HTMLImageElement>(null);
+  const midRef = useRef<HTMLImageElement>(null);
+  const highRef = useRef<HTMLImageElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mistRef = useRef<HTMLImageElement>(null);
 
+  // 스크롤 → 선박·타륜 이동
   useEffect(() => {
     const SCROLL_END = 180;
     const easeOut = (t: number) => 1 - Math.pow(1 - t, 2);
     let rafId: number | null = null;
     let lastScrollY = 0;
 
-    // 초기 위치 (화면 아래 숨김)
-    if (shipRef.current) shipRef.current.style.transform = "translateX(-50%) translateY(110%)";
-    if (wheelContainerRef.current) wheelContainerRef.current.style.transform = "translateX(-50%) translateY(140%)";
+    if (shipRef.current)
+      shipRef.current.style.transform = "translateX(-50%) translateY(110%)";
+    if (wheelContainerRef.current)
+      wheelContainerRef.current.style.transform =
+        "translateX(-50%) translateY(140%)";
 
     const update = () => {
       const scrollY = lastScrollY;
@@ -464,6 +479,164 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
     };
   }, []);
 
+  // 파도: 전체 3D 스크롤 범위를 3구간으로 나눠 1→2→3 순서로 전환
+  useEffect(() => {
+    const imgs = [lowRef.current, midRef.current, highRef.current];
+    if (!imgs[0] || !imgs[1] || !imgs[2]) return;
+
+    imgs.forEach((img) => {
+      img!.style.transition = "none";
+      img!.style.opacity = "0";
+    });
+
+    let rafId: number | null = null;
+
+    // smoothstep
+    const ss = (e0: number, e1: number, x: number) => {
+      const v = Math.max(0, Math.min(1, (x - e0) / (e1 - e0)));
+      return v * v * (3 - 2 * v);
+    };
+
+    const update = () => {
+      const total = scrollEndVh * window.innerHeight;
+      const t = Math.min(window.scrollY / total, 1);
+      const B = 0.07; // 경계 전환 구간 폭
+      const t1 = 1 / 3;
+      const t2 = 0.56; // 3단계 더 빨리
+
+      // 1단계: 더 늦게 등장 후 t1 경계에서 페이드아웃
+      imgs[0]!.style.opacity = String(
+        ss(0.08, 0.16, t) * (1 - ss(t1 - B, t1 + B, t)) * 0.22
+      );
+      // 2단계: t1에서 페이드인, t2에서 페이드아웃
+      imgs[1]!.style.opacity = String(
+        ss(t1 - B, t1 + B, t) * (1 - ss(t2 - B, t2 + B, t)) * 0.22
+      );
+      // 3단계: t2에서 페이드인
+      imgs[2]!.style.opacity = String(ss(t2 - B, t2 + B, t) * 0.22);
+
+      // 안개: 3단계 이후 등장
+      if (mistRef.current)
+        mistRef.current.style.opacity = String(ss(t2 + B, t2 + B + 0.12, t) * 0.15);
+
+      rafId = null;
+    };
+
+    const onScroll = () => {
+      if (rafId === null) rafId = requestAnimationFrame(update);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [scrollEndVh]);
+
+  // 선수 양측 파티클 — 스크롤 시 물 튀김 효과
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas);
+
+    type Particle = {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      life: number;
+      decay: number;
+      size: number;
+    };
+    const particles: Particle[] = [];
+    let frameId: number;
+    let lastTime = performance.now();
+    let lastScrollY = window.scrollY;
+
+    const spawn = (side: -1 | 1) => {
+      // 선수 꼭짓점 — 이미지 정 중앙 하단 부근
+      const sx = canvas.width * 0.5 + (Math.random() - 0.5) * canvas.width * 0.02;
+      const isMobile = window.innerWidth < 640;
+      const sy = canvas.height * (isMobile ? 0.72 : 0.55) + (Math.random() - 0.5) * canvas.height * 0.04;
+      // 왼쪽: 145°~205°, 오른쪽: 335°~395°(=-25°~35°) — 좌우로 강하게
+      const base = side === -1 ? Math.PI * (175 / 180) : Math.PI * (5 / 180);
+      const spread = (Math.random() - 0.5) * (Math.PI / 1.6);
+      const angle = base + spread * side;
+      const speed = 2.5 + Math.random() * 4.0;
+      particles.push({
+        x: sx,
+        y: sy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1.0,
+        decay: 0.018 + Math.random() * 0.014,
+        size: 0.8 + Math.random() * 2.0,
+      });
+    };
+
+    const SHIP_SCROLL_END = 180; // 선박이 완전히 올라오는 스크롤 지점
+    const onScrollParticle = () => {
+      const delta = Math.abs(window.scrollY - lastScrollY);
+      lastScrollY = window.scrollY;
+      if (window.scrollY < SHIP_SCROLL_END) return; // 선박 미완성 시 파티클 생략
+      const count = Math.min(Math.ceil(delta * 0.35), 7);
+      for (let i = 0; i < count; i++) {
+        spawn(-1);
+        spawn(1);
+      }
+    };
+    window.addEventListener("scroll", onScrollParticle, { passive: true });
+
+    const animate = (time: number) => {
+      const dt = Math.min((time - lastTime) / 16.67, 3);
+      lastTime = time;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = "lighter";
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.life -= p.decay * dt;
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 0.05 * dt;
+        p.vx *= 1 - 0.014 * dt;
+
+        const alpha = p.life * 0.45;
+        const r = p.size * (0.3 + p.life * 0.7);
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 5);
+        g.addColorStop(0, `rgba(220, 248, 255, ${alpha})`);
+        g.addColorStop(0.3, `rgba(0, 210, 255,   ${alpha * 0.7})`);
+        g.addColorStop(0.7, `rgba(60, 30, 210,   ${alpha * 0.28})`);
+        g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r * 5, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.fill();
+      }
+      frameId = requestAnimationFrame(animate);
+    };
+    frameId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      ro.disconnect();
+      window.removeEventListener("scroll", onScrollParticle);
+    };
+  }, []);
+
   if (!isDark) return null;
 
   return (
@@ -479,10 +652,108 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
         userSelect: "none",
       }}
     >
+      <style>{`@media (max-width: 639px) { .wave-img { bottom: 8% !important; } }`}</style>
+
+      {/* 파도 이미지 — 선박 아래 레이어 (low → mid → high 중첩) */}
+      <div
+        ref={waveRef}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "65%",
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          ref={lowRef}
+          src="/low.webp"
+          alt=""
+          draggable={false}
+          className="wave-img"
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "100%",
+            maxWidth: "860px",
+            transition: "opacity 0.08s",
+          }}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          ref={midRef}
+          src="/mid.webp"
+          alt=""
+          draggable={false}
+          className="wave-img"
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "100%",
+            maxWidth: "860px",
+            transition: "opacity 0.08s",
+          }}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          ref={highRef}
+          src="/high.webp"
+          alt=""
+          draggable={false}
+          className="wave-img"
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "100%",
+            maxWidth: "860px",
+            transition: "opacity 0.15s",
+          }}
+        />
+      </div>
+
+      {/* 안개 — 파티클·선박 아래 레이어 */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        ref={mistRef}
+        src="/waterMist.webp"
+        alt=""
+        draggable={false}
+        style={{
+          position: "absolute",
+          bottom: "8%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "110%",
+          maxWidth: "1000px",
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* 파티클 캔버스 — 선박 아래 레이어 */}
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* 선박 — 파티클 위 레이어 */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         ref={shipRef}
-        src="/shipBody.png"
+        src="/shipBody.webp"
         alt=""
         draggable={false}
         style={{
@@ -491,8 +762,8 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
           left: "50%",
           width: "100%",
           maxWidth: "860px",
-          opacity: 0.75,
-          filter: "brightness(0.55) saturate(0.85)",
+          opacity: 1,
+          filter: "brightness(0.75) saturate(0.9)",
           willChange: "transform",
         }}
       />
@@ -507,7 +778,8 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
           width: "clamp(180px, 28vmin, 340px)",
           height: "clamp(180px, 28vmin, 340px)",
           opacity: 0.8,
-          filter: "drop-shadow(0 0 6px #00e5ff) drop-shadow(0 0 14px rgba(0,229,255,0.45))",
+          filter:
+            "drop-shadow(0 0 6px #00e5ff) drop-shadow(0 0 14px rgba(0,229,255,0.45))",
           willChange: "transform",
         }}
       >
@@ -517,13 +789,10 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
           src="/shipWheel.png"
           alt=""
           draggable={false}
-          style={{
-            width: "100%",
-            height: "100%",
-            willChange: "transform",
-          }}
+          style={{ width: "100%", height: "100%", willChange: "transform" }}
         />
       </div>
+
     </div>
   );
 }
@@ -880,11 +1149,9 @@ function TerrainScene({
           isDark={isDark}
         />
       ))}
-
     </>
   );
 }
-
 
 const DARK_BG = `linear-gradient(
   to bottom,
@@ -1001,7 +1268,7 @@ export default function Terrain({
         }}
       />
 
-      <DeckOverlay isDark={isDark} />
+      <DeckOverlay isDark={isDark} scrollEndVh={scrollEndVh} />
       <TitleOverlay isDark={isDark} />
     </div>
   );
