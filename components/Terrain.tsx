@@ -32,42 +32,42 @@ const TECH_NODES = [
     name: "AI 모델 개발",
     code: "SYS.01 / AI Model Development",
     x: -9,
-    z: -45,
+    z: -30,
     yOffset: -5,
   },
   {
     name: "소프트웨어 개발",
     code: "SYS.02 / Software Development",
     x: 10,
-    z: -55,
+    z: -38,
     yOffset: -5,
   },
   {
     name: "데이터 라벨링",
     code: "SYS.03 / Data Annotation",
     x: -10,
-    z: -80,
+    z: -55,
     yOffset: -4,
   },
   {
     name: "고정밀 지도",
     code: "SYS.04 / HD MAP",
     x: 10,
-    z: -105,
+    z: -72,
     yOffset: -5,
   },
   {
-    name: "자율주행 관제",
+    name: "차량용 SW 검증 시스템",
     code: "SYS.05 / Autonomous Driving Control",
     x: -10,
-    z: -130,
+    z: -90,
     yOffset: -5,
   },
   {
     name: "디지털 트윈",
     code: "SYS.06 / Digital Twin",
     x: 10,
-    z: -155,
+    z: -108,
     yOffset: -5,
   },
 ] as const;
@@ -422,7 +422,7 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
   const shipRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    const SCROLL_END = 350;
+    const SCROLL_END = 180;
     const easeOut = (t: number) => 1 - Math.pow(1 - t, 2);
     let rafId: number | null = null;
     let lastScrollY = 0;
@@ -434,13 +434,16 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
     const update = () => {
       const scrollY = lastScrollY;
       const progress = easeOut(Math.min(scrollY / SCROLL_END, 1));
+      const isMobile = window.innerWidth < 640;
 
       if (shipRef.current) {
-        const ty = 35 + (1 - progress) * 75;
+        const finalTy = isMobile ? 10 : 35;
+        const ty = finalTy + (1 - progress) * 75;
         shipRef.current.style.transform = `translateX(-50%) translateY(${ty}%)`;
       }
       if (wheelContainerRef.current) {
-        const ty = 50 + (1 - progress) * 90;
+        const finalTy = isMobile ? 25 : 50;
+        const ty = finalTy + (1 - progress) * 90;
         wheelContainerRef.current.style.transform = `translateX(-50%) translateY(${ty}%)`;
       }
       if (wheelRef.current) {
