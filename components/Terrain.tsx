@@ -424,13 +424,15 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
   useEffect(() => {
     const SCROLL_END = 350;
     const easeOut = (t: number) => 1 - Math.pow(1 - t, 2);
+    let rafId: number | null = null;
+    let lastScrollY = 0;
 
     // 초기 위치 (화면 아래 숨김)
     if (shipRef.current) shipRef.current.style.transform = "translateX(-50%) translateY(110%)";
     if (wheelContainerRef.current) wheelContainerRef.current.style.transform = "translateX(-50%) translateY(140%)";
 
-    const onScroll = () => {
-      const scrollY = window.scrollY;
+    const update = () => {
+      const scrollY = lastScrollY;
       const progress = easeOut(Math.min(scrollY / SCROLL_END, 1));
 
       if (shipRef.current) {
@@ -444,10 +446,19 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
       if (wheelRef.current) {
         wheelRef.current.style.transform = `rotate(${scrollY * 0.4}deg)`;
       }
+      rafId = null;
+    };
+
+    const onScroll = () => {
+      lastScrollY = window.scrollY;
+      if (rafId === null) rafId = requestAnimationFrame(update);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   if (!isDark) return null;
@@ -483,7 +494,7 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
         }}
       />
 
-      {/* 타륜 */}
+      {/* 타륜 — filter는 정적 컨테이너에, rotate만 img에 적용 */}
       <div
         ref={wheelContainerRef}
         style={{
@@ -492,6 +503,9 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
           left: "50%",
           width: "clamp(180px, 28vmin, 340px)",
           height: "clamp(180px, 28vmin, 340px)",
+          opacity: 0.8,
+          filter: "drop-shadow(0 0 6px #00e5ff) drop-shadow(0 0 14px rgba(0,229,255,0.45))",
+          willChange: "transform",
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -503,8 +517,6 @@ function DeckOverlay({ isDark }: { isDark: boolean }) {
           style={{
             width: "100%",
             height: "100%",
-            opacity: 0.8,
-            filter: "drop-shadow(0 0 6px #00e5ff) drop-shadow(0 0 16px rgba(0,229,255,0.5))",
             willChange: "transform",
           }}
         />
