@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const TO_EMAIL = "mattew1803@naver.com";
+const TO_EMAIL = "support@datamatica.kr";
 
 export async function POST(req: NextRequest) {
   const { name, email, message } = await req.json();
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { error } = await resend.emails.send({
-    from: "DataMatica 문의 <onboarding@resend.dev>",
+    from: "DataMatica 문의 <support@datamatica.kr>",
     to: TO_EMAIL,
     replyTo: email,
     subject: `[문의] ${name}님의 문의`,
