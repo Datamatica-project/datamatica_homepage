@@ -345,11 +345,11 @@ function TitleOverlay({ isDark }: { isDark: boolean }) {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: "clamp(4px, 1.5vw, 8px)",
+        gap: "clamp(10px, 1.8vw, 18px)",
         textAlign: "center",
         maxWidth: "90vw",
         backgroundColor: isDark ? "rgba(0,0,0,0.84)" : "rgba(255,255,255,0.6)",
-        padding: "clamp(6px, 1.5vw, 10px) clamp(18px, 3vw, 20px)",
+        padding: "clamp(16px, 2.5vw, 28px) clamp(28px, 4vw, 48px)",
         borderRadius: "8px",
         transition: "opacity 0.35s ease, background-color 0.7s ease",
       }}
