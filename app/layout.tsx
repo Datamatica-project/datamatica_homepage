@@ -36,9 +36,14 @@ const bebasNeue = Bebas_Neue({
   subsets: ["latin"],
 });
 
-const SITE_URL = "https://datamatica-homepage.vercel.app";
+const SITE_URL = "https://datamatica.kr";
 
 export const metadata: Metadata = {
+  verification: {
+    other: {
+      "naver-site-verification": "5826887a067b3caccac81e7096aaf57c694ad4ea",
+    },
+  },
   metadataBase: new URL(SITE_URL),
   title: {
     default: "DataMatica",

@@ -9,6 +9,7 @@ import { EffectComposer, Vignette } from "@react-three/postprocessing";
 import SunriseGlow from "./SunriseGlow";
 import { DataBeacon } from "./DataBeacon";
 import { GlobeParticlesScene } from "./GlobeParticles";
+import { SteeringWheel } from "./Icons";
 
 const SEG_LEN = 600;
 const WIDTH = 220;
@@ -817,6 +818,10 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
           0%, 100% { transform: translateY(0px); }
           50%       { transform: translateY(3px); }
         }
+        @keyframes routeFlow {
+          0%   { stroke-dashoffset: 0; }
+          100% { stroke-dashoffset: -40; }
+        }
       `}</style>
 
       {/* 흔들림 래퍼 */}
@@ -840,7 +845,7 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
           }}
         />
 
-        {/* ── 레일 두 줄 (단순화, 낮은 불투명도) ── */}
+        {/* ── Navigation Route (점선 + waypoints) ── */}
         <svg
           style={{
             position: "absolute",
@@ -854,7 +859,7 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
-            <filter id="railGlow" x="-15%" y="-15%" width="130%" height="130%">
+            <filter id="routeGlow" x="-15%" y="-15%" width="130%" height="130%">
               <feGaussianBlur stdDeviation="2.5" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
@@ -863,35 +868,59 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
             </filter>
           </defs>
 
-          {/* 좌현 레일 */}
+          {/* 좌현 항로 */}
           <line
-            x1="500"
-            y1="0"
-            x2="0"
-            y2="500"
-            stroke="rgba(0,187,204,0.22)"
-            strokeWidth="2"
-            filter="url(#railGlow)"
+            x1="500" y1="0" x2="0" y2="500"
+            stroke="rgba(0,187,204,0.32)"
+            strokeWidth="1.5"
+            strokeDasharray="14 8"
+            filter="url(#routeGlow)"
+            style={{ animation: "routeFlow 2.2s linear infinite" }}
+          />
+          {/* 우현 항로 */}
+          <line
+            x1="500" y1="0" x2="1000" y2="500"
+            stroke="rgba(0,187,204,0.32)"
+            strokeWidth="1.5"
+            strokeDasharray="14 8"
+            filter="url(#routeGlow)"
+            style={{ animation: "routeFlow 2.2s linear infinite" }}
           />
 
-          {/* 우현 레일 */}
-          <line
-            x1="500"
-            y1="0"
-            x2="1000"
-            y2="500"
-            stroke="rgba(0,187,204,0.22)"
-            strokeWidth="2"
-            filter="url(#railGlow)"
-          />
+          {/* 좌현 waypoints */}
+          {[0.28, 0.56, 0.82].map((t, i) => (
+            <circle
+              key={i}
+              cx={500 - 500 * t}
+              cy={500 * t}
+              r="5"
+              fill="rgba(0,10,20,0.9)"
+              stroke="rgba(0,187,204,0.65)"
+              strokeWidth="1.5"
+              filter="url(#routeGlow)"
+            />
+          ))}
+          {/* 우현 waypoints */}
+          {[0.28, 0.56, 0.82].map((t, i) => (
+            <circle
+              key={i}
+              cx={500 + 500 * t}
+              cy={500 * t}
+              r="5"
+              fill="rgba(0,10,20,0.9)"
+              stroke="rgba(0,187,204,0.65)"
+              strokeWidth="1.5"
+              filter="url(#routeGlow)"
+            />
+          ))}
 
           {/* 선수 포인트 */}
           <circle
             cx="500"
             cy="4"
             r="5"
-            fill="rgba(0,187,204,0.18)"
-            filter="url(#railGlow)"
+            fill="rgba(0,187,204,0.2)"
+            filter="url(#routeGlow)"
           />
         </svg>
 
@@ -915,66 +944,17 @@ function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
               filter: "drop-shadow(0 0 8px rgba(0,187,204,0.3))",
             }}
           >
-            <svg
+            <SteeringWheel
               ref={wheelSvgRef}
-              viewBox="0 0 120 120"
+              size="100%"
+              fill="rgba(0,187,204,1)"
               style={{
                 width: "100%",
                 height: "100%",
                 transform: "perspective(300px) rotateX(18deg) rotate(0deg)",
                 transformOrigin: "center",
               }}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {/* 외부 링 */}
-              <circle
-                cx="60"
-                cy="60"
-                r="53"
-                fill="none"
-                stroke="rgba(0,187,204,0.55)"
-                strokeWidth="4"
-              />
-
-              {/* 8개 스포크 + 그립 노브 */}
-              {Array.from({ length: 8 }, (_, i) => {
-                const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
-                const cos = Math.cos(angle);
-                const sin = Math.sin(angle);
-                return (
-                  <g key={i}>
-                    <line
-                      x1={60 + 17 * cos}
-                      y1={60 + 17 * sin}
-                      x2={60 + 50 * cos}
-                      y2={60 + 50 * sin}
-                      stroke="rgba(0,187,204,0.5)"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                    />
-                    <circle
-                      cx={60 + 53 * cos}
-                      cy={60 + 53 * sin}
-                      r="4.5"
-                      fill="rgba(0,20,30,0.92)"
-                      stroke="rgba(0,187,204,0.65)"
-                      strokeWidth="1.5"
-                    />
-                  </g>
-                );
-              })}
-
-              {/* 중심 허브 */}
-              <circle
-                cx="60"
-                cy="60"
-                r="17"
-                fill="rgba(0,10,20,0.88)"
-                stroke="rgba(0,187,204,0.55)"
-                strokeWidth="2.5"
-              />
-              <circle cx="60" cy="60" r="7" fill="rgba(0,187,204,0.38)" />
-            </svg>
+            />
           </div>
 
           {/* 콘솔 받침 */}

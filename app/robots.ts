@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://datamatica-homepage.vercel.app";
+const SITE_URL = "https://datamatica.kr";
 
 export default function robots(): MetadataRoute.Robots {
   return {

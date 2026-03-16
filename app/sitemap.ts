@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { skillData } from "@/data";
 
-const SITE_URL = "https://datamatica-homepage.vercel.app";
+const SITE_URL = "https://datamatica.kr";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [

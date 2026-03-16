@@ -7,3 +7,4 @@ export { default as Home } from "./Home";
 export { default as Moon } from "./Moon";
 export { default as Sun } from "./Sun";
 export { default as Telephone } from "./Telephone";
+export { default as SteeringWheel } from "./SteeringWheel";
