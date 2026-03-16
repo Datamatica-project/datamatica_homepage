@@ -8,7 +8,6 @@ import { EffectComposer, Vignette } from "@react-three/postprocessing";
 import SunriseGlow from "./SunriseGlow";
 import { DataBeacon } from "./DataBeacon";
 import { GlobeParticlesScene } from "./GlobeParticles";
-import { SteeringWheel } from "./Icons";
 
 const SEG_LEN = 600;
 const WIDTH = 220;
@@ -415,6 +414,106 @@ function TitleOverlay({ isDark }: { isDark: boolean }) {
 }
 
 // --------------------
+// DeckOverlay (선수 갑판 — 다크 모드 전용)
+// --------------------
+function DeckOverlay({ isDark }: { isDark: boolean }) {
+  const wheelRef = useRef<HTMLImageElement>(null);
+  const wheelContainerRef = useRef<HTMLDivElement>(null);
+  const shipRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const SCROLL_END = 350;
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 2);
+
+    // 초기 위치 (화면 아래 숨김)
+    if (shipRef.current) shipRef.current.style.transform = "translateX(-50%) translateY(110%)";
+    if (wheelContainerRef.current) wheelContainerRef.current.style.transform = "translateX(-50%) translateY(140%)";
+
+    const onScroll = () => {
+      const scrollY = window.scrollY;
+      const progress = easeOut(Math.min(scrollY / SCROLL_END, 1));
+
+      if (shipRef.current) {
+        const ty = 35 + (1 - progress) * 75;
+        shipRef.current.style.transform = `translateX(-50%) translateY(${ty}%)`;
+      }
+      if (wheelContainerRef.current) {
+        const ty = 50 + (1 - progress) * 90;
+        wheelContainerRef.current.style.transform = `translateX(-50%) translateY(${ty}%)`;
+      }
+      if (wheelRef.current) {
+        wheelRef.current.style.transform = `rotate(${scrollY * 0.4}deg)`;
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (!isDark) return null;
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: "50vh",
+        zIndex: 4,
+        pointerEvents: "none",
+        userSelect: "none",
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        ref={shipRef}
+        src="/shipBody.png"
+        alt=""
+        draggable={false}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: "50%",
+          width: "100%",
+          maxWidth: "860px",
+          opacity: 0.75,
+          filter: "brightness(0.55) saturate(0.85)",
+          willChange: "transform",
+        }}
+      />
+
+      {/* 타륜 */}
+      <div
+        ref={wheelContainerRef}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: "50%",
+          width: "clamp(180px, 28vmin, 340px)",
+          height: "clamp(180px, 28vmin, 340px)",
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          ref={wheelRef}
+          src="/shipWheel.png"
+          alt=""
+          draggable={false}
+          style={{
+            width: "100%",
+            height: "100%",
+            opacity: 0.8,
+            filter: "drop-shadow(0 0 6px #00e5ff) drop-shadow(0 0 16px rgba(0,229,255,0.5))",
+            willChange: "transform",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// --------------------
 // Stars
 // --------------------
 // 글로브와 동일한 5색 그라디언트 (X 위치 기반)
@@ -766,227 +865,11 @@ function TerrainScene({
           isDark={isDark}
         />
       ))}
+
     </>
   );
 }
 
-// --------------------
-// Ship Overlay (배 앞머리 + 타륜)
-// --------------------
-function ShipOverlay({ fadeOpacity }: { fadeOpacity: number }) {
-  const wheelSvgRef = useRef<SVGSVGElement>(null);
-  const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (rafRef.current == null) {
-        rafRef.current = requestAnimationFrame(() => {
-          if (wheelSvgRef.current) {
-            const deg = window.scrollY * 0.2;
-            wheelSvgRef.current.style.transform = `perspective(300px) rotateX(18deg) rotate(${deg}deg)`;
-          }
-          rafRef.current = null;
-        });
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        inset: 0,
-        zIndex: 4,
-        pointerEvents: "none",
-        opacity: fadeOpacity,
-        transition: "opacity 0.4s ease",
-      }}
-    >
-      <style>{`
-        @keyframes shipBob {
-          0%, 100% { transform: translateY(0px); }
-          50%       { transform: translateY(3px); }
-        }
-        @keyframes routeFlow {
-          0%   { stroke-dashoffset: 0; }
-          100% { stroke-dashoffset: -40; }
-        }
-      `}</style>
-
-      {/* 흔들림 래퍼 */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          animation: "shipBob 3.6s ease-in-out infinite",
-        }}
-      >
-        {/* ── 하단 비네트 (어두운 코크핏 느낌) ── */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "30vh",
-            background:
-              "linear-gradient(to top, rgba(4,10,18,0.72) 0%, rgba(4,10,18,0.3) 45%, transparent 100%)",
-          }}
-        />
-
-        {/* ── Navigation Route (점선 + waypoints) ── */}
-        <svg
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            height: "22vh",
-          }}
-          viewBox="0 0 1000 500"
-          preserveAspectRatio="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <filter id="routeGlow" x="-15%" y="-15%" width="130%" height="130%">
-              <feGaussianBlur stdDeviation="2.5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-
-          {/* 좌현 항로 */}
-          <line
-            x1="500" y1="0" x2="0" y2="500"
-            stroke="rgba(0,187,204,0.32)"
-            strokeWidth="1.5"
-            strokeDasharray="14 8"
-            filter="url(#routeGlow)"
-            style={{ animation: "routeFlow 2.2s linear infinite" }}
-          />
-          {/* 우현 항로 */}
-          <line
-            x1="500" y1="0" x2="1000" y2="500"
-            stroke="rgba(0,187,204,0.32)"
-            strokeWidth="1.5"
-            strokeDasharray="14 8"
-            filter="url(#routeGlow)"
-            style={{ animation: "routeFlow 2.2s linear infinite" }}
-          />
-
-          {/* 좌현 waypoints */}
-          {[0.28, 0.56, 0.82].map((t, i) => (
-            <circle
-              key={i}
-              cx={500 - 500 * t}
-              cy={500 * t}
-              r="5"
-              fill="rgba(0,10,20,0.9)"
-              stroke="rgba(0,187,204,0.65)"
-              strokeWidth="1.5"
-              filter="url(#routeGlow)"
-            />
-          ))}
-          {/* 우현 waypoints */}
-          {[0.28, 0.56, 0.82].map((t, i) => (
-            <circle
-              key={i}
-              cx={500 + 500 * t}
-              cy={500 * t}
-              r="5"
-              fill="rgba(0,10,20,0.9)"
-              stroke="rgba(0,187,204,0.65)"
-              strokeWidth="1.5"
-              filter="url(#routeGlow)"
-            />
-          ))}
-
-          {/* 선수 포인트 */}
-          <circle
-            cx="500"
-            cy="4"
-            r="5"
-            fill="rgba(0,187,204,0.2)"
-            filter="url(#routeGlow)"
-          />
-        </svg>
-
-        {/* ── 타륜 + 콘솔 받침 ── */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "3%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          {/* 타륜 */}
-          <div
-            style={{
-              width: "clamp(100px, 13vw, 165px)",
-              height: "clamp(100px, 13vw, 165px)",
-              filter: "drop-shadow(0 0 8px rgba(0,187,204,0.3))",
-            }}
-          >
-            <SteeringWheel
-              ref={wheelSvgRef}
-              size="100%"
-              fill="rgba(0,187,204,1)"
-              style={{
-                width: "100%",
-                height: "100%",
-                transform: "perspective(300px) rotateX(18deg) rotate(0deg)",
-                transformOrigin: "center",
-              }}
-            />
-          </div>
-
-          {/* 콘솔 받침 */}
-          <svg
-            viewBox="0 0 200 56"
-            style={{
-              width: "clamp(88px, 11.5vw, 150px)",
-              marginTop: "-3px",
-              filter: "drop-shadow(0 3px 10px rgba(0,0,0,0.7))",
-            }}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {/* 받침 몸체 */}
-            <polygon
-              points="52,0 148,0 178,56 22,56"
-              fill="rgba(4,12,22,0.82)"
-              stroke="rgba(0,187,204,0.22)"
-              strokeWidth="1.5"
-            />
-            {/* 상단 하이라이트 */}
-            <line
-              x1="52"
-              y1="0"
-              x2="148"
-              y2="0"
-              stroke="rgba(0,187,204,0.38)"
-              strokeWidth="1.5"
-            />
-            {/* 계기 점 3개 */}
-            <circle cx="85" cy="34" r="3.5" fill="rgba(0,187,204,0.25)" />
-            <circle cx="100" cy="34" r="3.5" fill="rgba(0,187,204,0.45)" />
-            <circle cx="115" cy="34" r="3.5" fill="rgba(0,187,204,0.25)" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const DARK_BG = `linear-gradient(
   to bottom,
@@ -1103,7 +986,7 @@ export default function Terrain({
         }}
       />
 
-      <ShipOverlay fadeOpacity={1 - overlayOpacity} />
+      <DeckOverlay isDark={isDark} />
       <TitleOverlay isDark={isDark} />
     </div>
   );
