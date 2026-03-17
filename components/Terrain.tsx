@@ -591,7 +591,7 @@ function DeckOverlay({
         vx: dirX * speed,
         vy: (speed * 0.15 + Math.random() * 0.1) * e,
         life: 1.0,
-        decay: 0.006 + Math.random() * 0.006,
+        decay: 0.018 + Math.random() * 0.018,
         size: 0.8 + Math.random() * 2.0,
         gravity: 0.02 + Math.random() * 0.02,
       });
@@ -614,7 +614,7 @@ function DeckOverlay({
         vx: dirX * speed,
         vy: (speed * 0.15 + Math.random() * 0.1) * e,
         life: 1.0,
-        decay: 0.006 + Math.random() * 0.006,
+        decay: 0.018 + Math.random() * 0.018,
         size: 0.6 + Math.random() * 1.8,
         gravity: 0.02 + Math.random() * 0.02,
       });
@@ -632,7 +632,7 @@ function DeckOverlay({
         vx: side * (2 + Math.random() * 2) * e,
         vy: (0.5 + Math.random() * 0.3) * e,
         life: 1.0,
-        decay: 0.003 + Math.random() * 0.003,
+        decay: 0.009 + Math.random() * 0.009,
         size: 2 + Math.random() * 3,
       });
     };
@@ -644,7 +644,8 @@ function DeckOverlay({
       const rawDelta = window.scrollY - lastScrollY;
       const delta = Math.abs(rawDelta);
       lastScrollY = window.scrollY;
-      if (window.scrollY < SHIP_SCROLL_END) return;
+      const sceneEnd = scrollEndVh * window.innerHeight;
+      if (window.scrollY < SHIP_SCROLL_END || window.scrollY > sceneEnd) return;
 
       // 선박이 최종 위치에 도달한 후 처음 한 번만 좌표 갱신
       if (!shipCoordsReady) {
