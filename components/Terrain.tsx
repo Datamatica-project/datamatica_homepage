@@ -883,7 +883,7 @@ function DeckOverlay({
           left: "50%",
           width: "100%",
           maxWidth: "860px",
-          opacity: 1,
+          opacity: 0.75,
           filter: "brightness(0.75) saturate(0.9)",
           willChange: "transform",
         }}
@@ -1017,11 +1017,11 @@ function TerrainScene({
       ptLight: new THREE.Color(0xd94a52),
       fogDark: new THREE.Color(0x021012),
       fogLight: new THREE.Color(0xf2f5f8),
-      l2Dark: new THREE.Color(0xd94a52),
+      l2Dark: new THREE.Color(0x1a44b8),
       l2Light: new THREE.Color(0xe6eaf0),
       l3Dark: new THREE.Color(0x1a2a60),
       l3Light: new THREE.Color(0xdce3ea),
-      l4Dark: new THREE.Color(0xd94a52),
+      l4Dark: new THREE.Color(0x1a44b8),
       l4Light: new THREE.Color(0xe6eaf0),
     }),
     []
@@ -1236,7 +1236,7 @@ function TerrainScene({
 
       <directionalLight
         ref={light2Ref}
-        color={0xd94a52}
+        color={0x1a44b8}
         intensity={1.8}
         position={[0, 20, 80]}
       />
@@ -1250,7 +1250,7 @@ function TerrainScene({
 
       <directionalLight
         ref={light4Ref}
-        color={0xd94a52}
+        color={0x1a44b8}
         intensity={0.6}
         position={[-40, 30, -200]}
       />
@@ -1422,8 +1422,9 @@ export default function Terrain({
         className="absolute inset-0 pointer-events-none"
         style={{
           zIndex: 3,
-          backgroundImage:
-            "repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 3px)",
+          backgroundImage: isMobile
+            ? "repeating-linear-gradient(0deg, rgba(255,255,255,0.10) 0px, rgba(255,255,255,0.10) 1px, transparent 1px, transparent 3px)"
+            : "repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 3px)",
           mixBlendMode: "overlay",
         }}
       />
