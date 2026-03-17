@@ -515,19 +515,19 @@ function DeckOverlay({
       const sc3 = 0.82 + 0.18 * enter3;
 
       // 1단계: 더 늦게 등장 후 t1 경계에서 페이드아웃
-      imgs[0]!.style.opacity = String(enter1 * (1 - ss(t1 - B, t1 + B, t)) * 0.22);
+      imgs[0]!.style.opacity = String(enter1 * (1 - ss(t1 - B, t1 + B, t)) * 0.48);
       imgs[0]!.style.transform = `translateX(-50%) scale(${sc1})`;
       // 2단계: t1에서 페이드인, t2에서 페이드아웃
-      imgs[1]!.style.opacity = String(enter2 * (1 - ss(t2 - B, t2 + B, t)) * 0.22);
+      imgs[1]!.style.opacity = String(enter2 * (1 - ss(t2 - B, t2 + B, t)) * 0.48);
       imgs[1]!.style.transform = `translateX(-50%) scale(${sc2})`;
       // 3단계: t2에서 페이드인
-      imgs[2]!.style.opacity = String(enter3 * 0.22);
+      imgs[2]!.style.opacity = String(enter3 * 0.48);
       imgs[2]!.style.transform = `translateX(-50%) scale(${sc3})`;
 
       // 안개: 1단계와 함께 등장 + 스케일
       if (mistRef.current) {
         const enterMist = ss(0.08, 0.20, t);
-        mistRef.current.style.opacity = String(enterMist * 0.15);
+        mistRef.current.style.opacity = String(enterMist * 0.35);
         mistRef.current.style.transform = `translateX(-50%) scale(${0.82 + 0.18 * enterMist})`;
       }
 
@@ -789,7 +789,7 @@ function DeckOverlay({
           left: "50%",
           width: "clamp(180px, 28vmin, 340px)",
           height: "clamp(180px, 28vmin, 340px)",
-          opacity: 0.8,
+          opacity: 0.55,
           filter:
             "drop-shadow(0 0 6px #00e5ff) drop-shadow(0 0 14px rgba(0,229,255,0.45))",
           willChange: "transform",
