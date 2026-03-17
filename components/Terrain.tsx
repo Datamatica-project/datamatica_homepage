@@ -631,6 +631,7 @@ function DeckOverlay({
     };
 
     const SHIP_SCROLL_END = 180;
+    const isMobileDevice = window.innerWidth < 768;
     const onScrollParticle = () => {
       const rawDelta = window.scrollY - lastScrollY;
       const delta = Math.abs(rawDelta);
@@ -642,12 +643,20 @@ function DeckOverlay({
       const factor = isForward ? 1.0 : 0.3;
       const energy = isForward ? 1.0 : 0.3;
 
-      const count = Math.min(Math.ceil(delta * 0.55 * factor), 12);
-      const bowCount = Math.min(Math.ceil(delta * 1.0 * factor), 20);
-      const flowCount = Math.min(Math.ceil(delta * 1.2 * factor), 25);
-      for (let i = 0; i < count; i++) { spawn(-1, energy); spawn(1, energy); }
-      for (let i = 0; i < flowCount; i++) { spawnFlow(-1, energy); spawnFlow(1, energy); }
-      for (let i = 0; i < bowCount; i++) { spawnBow(energy); }
+      // 모바일: 상한 50% 감소 + flowParticles 생략
+      if (isMobileDevice) {
+        const count    = Math.min(Math.ceil(delta * 0.55 * factor), 6);
+        const bowCount = Math.min(Math.ceil(delta * 1.0  * factor), 10);
+        for (let i = 0; i < count;    i++) { spawn(-1, energy); spawn(1, energy); }
+        for (let i = 0; i < bowCount; i++) { spawnBow(energy); }
+      } else {
+        const count     = Math.min(Math.ceil(delta * 0.55 * factor), 12);
+        const bowCount  = Math.min(Math.ceil(delta * 1.0  * factor), 20);
+        const flowCount = Math.min(Math.ceil(delta * 1.2  * factor), 25);
+        for (let i = 0; i < count;     i++) { spawn(-1, energy); spawn(1, energy); }
+        for (let i = 0; i < flowCount; i++) { spawnFlow(-1, energy); spawnFlow(1, energy); }
+        for (let i = 0; i < bowCount;  i++) { spawnBow(energy); }
+      }
     };
     window.addEventListener("scroll", onScrollParticle, { passive: true });
 
