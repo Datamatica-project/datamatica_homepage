@@ -4,7 +4,7 @@ import { useRef, useEffect, useMemo, useCallback, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
-import { EffectComposer, Vignette } from "@react-three/postprocessing";
+import { EffectComposer, Vignette, SMAA } from "@react-three/postprocessing";
 import SunriseGlow from "./SunriseGlow";
 import { DataBeacon } from "./DataBeacon";
 import { GlobeParticlesScene } from "./GlobeParticles";
@@ -429,7 +429,7 @@ function DeckOverlay({
         shipRef.current.style.transform = `translateX(-50%) translateY(${ty}%)`;
       }
       if (wheelContainerRef.current) {
-        const finalTy = isMobile ? 25 : 50;
+        const finalTy = isMobile ? 60 : 50;
         const ty = finalTy + (1 - progress) * 90;
         wheelContainerRef.current.style.transform = `translateX(-50%) translateY(${ty}%)`;
       }
@@ -657,12 +657,14 @@ function DeckOverlay({
       const factor = isForward ? 1.0 : 0.3;
       const energy = isForward ? 1.0 : 0.3;
 
-      // 모바일: 상한 50% 감소 + flowParticles 생략
+      // 모바일: 상한 50% 감소 + flowParticles 절반
       if (isMobileDevice) {
-        const count    = Math.min(Math.ceil(delta * 0.55 * factor), 6);
-        const bowCount = Math.min(Math.ceil(delta * 1.0  * factor), 10);
-        for (let i = 0; i < count;    i++) { spawn(-1, energy); spawn(1, energy); }
-        for (let i = 0; i < bowCount; i++) { spawnBow(energy); }
+        const count     = Math.min(Math.ceil(delta * 0.55 * factor), 6);
+        const bowCount  = Math.min(Math.ceil(delta * 1.0  * factor), 10);
+        const flowCount = Math.min(Math.ceil(delta * 1.2  * factor), 12);
+        for (let i = 0; i < count;     i++) { spawn(-1, energy); spawn(1, energy); }
+        for (let i = 0; i < flowCount; i++) { spawnFlow(-1, energy); spawnFlow(1, energy); }
+        for (let i = 0; i < bowCount;  i++) { spawnBow(energy); }
       } else {
         const count     = Math.min(Math.ceil(delta * 0.55 * factor), 12);
         const bowCount  = Math.min(Math.ceil(delta * 1.0  * factor), 20);
@@ -1395,16 +1397,17 @@ export default function Terrain({
       >
         <TerrainScene isDark={isDark} scrollEndVh={scrollEndVh} isMobile={isMobile} />
 
-        {/* 모바일에서는 post-processing 생략 — GPU 패스 절감 */}
-        {!isMobile && (
-          <EffectComposer>
+        {/* 모바일: SMAA만 / 데스크탑: SMAA + Vignette */}
+        <EffectComposer>
+          <SMAA />
+          {!isMobile && (
             <Vignette
               eskil={false}
               offset={vignetteOffset}
               darkness={vignetteDarkness}
             />
-          </EffectComposer>
-        )}
+          )}
+        </EffectComposer>
       </Canvas>
 
       <div
