@@ -249,7 +249,9 @@ function makeHeightFn(hmap?: HMapData) {
 
     // heightmap + contrast curve → 대형 지형 형상
     const u = x / WIDTH + 0.5;
-    const v = (((-zWorld / MAP_WORLD_LEN) % 1) + 1) % 1;
+    // V_OFFSET: 카메라 근처(z=0)를 평탄하게, z≈-120 부근에 산맥 배치
+    const V_OFFSET = 0.15;
+    const v = (((-zWorld / MAP_WORLD_LEN) % 1) + 1 - V_OFFSET) % 1;
     let map = sampleHMap(hmap, u, v); // 0~1
     map = Math.pow(map, CURVE);
     const baseHeight = map * MAP_HEIGHT;
@@ -431,7 +433,6 @@ function DeckOverlay({
   const midRef = useRef<HTMLImageElement>(null);
   const highRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mistRef = useRef<HTMLImageElement>(null);
 
   // 스크롤 → 선박·타륜 이동
   useEffect(() => {
@@ -515,21 +516,19 @@ function DeckOverlay({
       const sc3 = 0.82 + 0.18 * enter3;
 
       // 1단계: 더 늦게 등장 후 t1 경계에서 페이드아웃
-      imgs[0]!.style.opacity = String(enter1 * (1 - ss(t1 - B, t1 + B, t)) * 0.48);
+      imgs[0]!.style.opacity = String(
+        enter1 * (1 - ss(t1 - B, t1 + B, t)) * 0.48
+      );
       imgs[0]!.style.transform = `translateX(-50%) scale(${sc1})`;
       // 2단계: t1에서 페이드인, t2에서 페이드아웃
-      imgs[1]!.style.opacity = String(enter2 * (1 - ss(t2 - B, t2 + B, t)) * 0.48);
+      imgs[1]!.style.opacity = String(
+        enter2 * (1 - ss(t2 - B, t2 + B, t)) * 0.48
+      );
       imgs[1]!.style.transform = `translateX(-50%) scale(${sc2})`;
       // 3단계: t2에서 페이드인
       imgs[2]!.style.opacity = String(enter3 * 0.48);
       imgs[2]!.style.transform = `translateX(-50%) scale(${sc3})`;
 
-      // 안개: 1단계와 함께 등장 + 스케일
-      if (mistRef.current) {
-        const enterMist = ss(0.08, 0.20, t);
-        mistRef.current.style.opacity = String(enterMist * 0.35);
-        mistRef.current.style.transform = `translateX(-50%) scale(${0.82 + 0.18 * enterMist})`;
-      }
 
       rafId = null;
     };
@@ -568,76 +567,202 @@ function DeckOverlay({
       life: number;
       decay: number;
       size: number;
+      gravity: number;
+    };
+    type FlowParticle = {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      life: number;
+      decay: number;
+      size: number;
     };
     const particles: Particle[] = [];
+    const bowParticles: Particle[] = [];
+    const flowParticles: FlowParticle[] = [];
     let frameId: number;
     let lastTime = performance.now();
     let lastScrollY = window.scrollY;
 
-    const spawn = (side: -1 | 1) => {
-      // 선수 꼭짓점 — 이미지 정 중앙 하단 부근
-      const sx = canvas.width * 0.5 + (Math.random() - 0.5) * canvas.width * 0.02;
-      const isMobile = window.innerWidth < 640;
-      const sy = canvas.height * (isMobile ? 0.72 : 0.55) + (Math.random() - 0.5) * canvas.height * 0.04;
-      // 왼쪽: 145°~205°, 오른쪽: 335°~395°(=-25°~35°) — 좌우로 강하게
-      const base = side === -1 ? Math.PI * (175 / 180) : Math.PI * (5 / 180);
-      const spread = (Math.random() - 0.5) * (Math.PI / 1.6);
-      const angle = base + spread * side;
-      const speed = 2.5 + Math.random() * 4.0;
+    const getShipCoords = () => {
+      const shipEl = shipRef.current;
+      const shipRect = shipEl ? shipEl.getBoundingClientRect() : null;
+      const canvasRect = canvas.getBoundingClientRect();
+      const cx = shipRect ? shipRect.left + shipRect.width * 0.5 - canvasRect.left : canvas.width * 0.5;
+      const ty = shipRect ? shipRect.top - canvasRect.top : canvas.height * 0.7;
+      const lx = shipRect ? shipRect.left - canvasRect.left : cx - 400;
+      const rx = shipRect ? shipRect.right - canvasRect.left : cx + 400;
+      const by = shipRect ? shipRect.bottom - canvasRect.top : ty + 300;
+      return { cx, ty, lx, rx, by };
+    };
+
+    // 방향 벡터 기반 튀는 물보라 (파란색) — 빠른/느린 계층 분리
+    const spawn = (side: -1 | 1, e = 1.0) => {
+      const { cx, ty, lx, rx, by } = getShipCoords();
+      const t = Math.random();
+      const ex = side === -1 ? lx : rx;
+      const sx = cx + (ex - cx) * t + (Math.random() - 0.5) * 20;
+      const sy = ty + (by - ty) * t + (Math.random() - 0.5) * 10;
+
+      const dirX = side * (0.6 + Math.random() * 0.4);
+      const isFast = Math.random() < 0.3;
+      const speed = (isFast ? 12 + Math.random() * 10 : 3 + Math.random() * 5) * e;
       particles.push({
-        x: sx,
-        y: sy,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
+        x: sx, y: sy,
+        vx: dirX * speed,
+        vy: (speed * 0.15 + Math.random() * 0.1) * e,
         life: 1.0,
-        decay: 0.018 + Math.random() * 0.014,
+        decay: 0.006 + Math.random() * 0.006,
         size: 0.8 + Math.random() * 2.0,
+        gravity: 0.02 + Math.random() * 0.02,
       });
     };
 
-    const SHIP_SCROLL_END = 180; // 선박이 완전히 올라오는 스크롤 지점
+    // 거품 (흰색) — 선체에 붙어 흐르는 느낌
+    const spawnBow = (e = 1.0) => {
+      const { cx, ty, lx, rx, by } = getShipCoords();
+      const side = Math.random() < 0.5 ? -1 : 1;
+      const t = Math.random();
+      const ex = side === -1 ? lx : rx;
+      const sx = cx + (ex - cx) * t + (Math.random() - 0.5) * 20;
+      const sy = ty + (by - ty) * t + (Math.random() - 0.5) * 10;
+
+      const dirX = side * (0.6 + Math.random() * 0.4);
+      const isFast = Math.random() < 0.3;
+      const speed = (isFast ? 12 + Math.random() * 10 : 3 + Math.random() * 5) * e;
+      bowParticles.push({
+        x: sx, y: sy,
+        vx: dirX * speed,
+        vy: (speed * 0.15 + Math.random() * 0.1) * e,
+        life: 1.0,
+        decay: 0.006 + Math.random() * 0.006,
+        size: 0.6 + Math.random() * 1.8,
+        gravity: 0.02 + Math.random() * 0.02,
+      });
+    };
+
+    // 흐름 레이어 (느리고 오래 남는 안개층)
+    const spawnFlow = (side: -1 | 1, e = 1.0) => {
+      const { cx, ty, lx, rx, by } = getShipCoords();
+      const t = Math.random();
+      const ex = side === -1 ? lx : rx;
+      const sx = cx + (ex - cx) * t + (Math.random() - 0.5) * 20;
+      const sy = ty + (by - ty) * t + (Math.random() - 0.5) * 10;
+      flowParticles.push({
+        x: sx, y: sy,
+        vx: side * (2 + Math.random() * 2) * e,
+        vy: (0.5 + Math.random() * 0.3) * e,
+        life: 1.0,
+        decay: 0.003 + Math.random() * 0.003,
+        size: 2 + Math.random() * 3,
+      });
+    };
+
+    const SHIP_SCROLL_END = 180;
     const onScrollParticle = () => {
-      const delta = Math.abs(window.scrollY - lastScrollY);
+      const rawDelta = window.scrollY - lastScrollY;
+      const delta = Math.abs(rawDelta);
       lastScrollY = window.scrollY;
-      if (window.scrollY < SHIP_SCROLL_END) return; // 선박 미완성 시 파티클 생략
-      const count = Math.min(Math.ceil(delta * 0.35), 7);
-      for (let i = 0; i < count; i++) {
-        spawn(-1);
-        spawn(1);
-      }
+      if (window.scrollY < SHIP_SCROLL_END) return;
+
+      // 후진 시 에너지 0.3, 파티클 수 0.3배
+      const isForward = rawDelta > 0;
+      const factor = isForward ? 1.0 : 0.3;
+      const energy = isForward ? 1.0 : 0.3;
+
+      const count = Math.min(Math.ceil(delta * 0.55 * factor), 12);
+      const bowCount = Math.min(Math.ceil(delta * 1.0 * factor), 20);
+      const flowCount = Math.min(Math.ceil(delta * 1.2 * factor), 25);
+      for (let i = 0; i < count; i++) { spawn(-1, energy); spawn(1, energy); }
+      for (let i = 0; i < flowCount; i++) { spawnFlow(-1, energy); spawnFlow(1, energy); }
+      for (let i = 0; i < bowCount; i++) { spawnBow(energy); }
     };
     window.addEventListener("scroll", onScrollParticle, { passive: true });
 
     const animate = (time: number) => {
       const dt = Math.min((time - lastTime) / 16.67, 3);
       lastTime = time;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.globalCompositeOperation = "lighter";
 
+      // 튀는 물보라 (파란색)
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.life -= p.decay * dt;
-        if (p.life <= 0) {
-          particles.splice(i, 1);
-          continue;
-        }
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.vy += 0.05 * dt;
-        p.vx *= 1 - 0.014 * dt;
+        if (p.life <= 0) { particles.splice(i, 1); continue; }
+        // 2: flowBoost — 아래로 갈수록 빨라짐
+        const flowBoost = 1 + (p.y / canvas.height) * 0.8;
+        p.x += p.vx * flowBoost * dt;
+        p.y += p.vy * flowBoost * dt;
+        p.vy += p.gravity * dt;
+        p.vx *= Math.pow(0.92, dt);
+        p.vy *= Math.pow(0.95, dt);
 
-        const alpha = p.life * 0.45;
-        const r = p.size * (0.3 + p.life * 0.7);
+        const alpha = p.life * 0.5;
+        const r = p.size;
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 5);
         g.addColorStop(0, `rgba(220, 248, 255, ${alpha})`);
-        g.addColorStop(0.3, `rgba(0, 210, 255,   ${alpha * 0.7})`);
-        g.addColorStop(0.7, `rgba(60, 30, 210,   ${alpha * 0.28})`);
+        g.addColorStop(0.3, `rgba(0, 210, 255, ${alpha * 0.7})`);
+        g.addColorStop(0.7, `rgba(60, 30, 210, ${alpha * 0.28})`);
         g.addColorStop(1, "rgba(0,0,0,0)");
         ctx.beginPath();
         ctx.arc(p.x, p.y, r * 5, 0, Math.PI * 2);
         ctx.fillStyle = g;
         ctx.fill();
       }
+
+      // 거품 (흰색) — 선체에 붙어 흐르는 느낌
+      for (let i = bowParticles.length - 1; i >= 0; i--) {
+        const p = bowParticles[i];
+        p.life -= p.decay * dt;
+        if (p.life <= 0) { bowParticles.splice(i, 1); continue; }
+        // 2: flowBoost 적용
+        const flowBoost = 1 + (p.y / canvas.height) * 0.8;
+        p.x += p.vx * flowBoost * dt;
+        p.y += p.vy * flowBoost * dt;
+        p.vy += p.gravity * 0.6 * dt;
+        p.vx *= Math.pow(0.85, dt);
+        p.vy *= Math.pow(0.90, dt);
+
+        const bell = Math.sin(p.life * Math.PI);
+        const alpha = bell * 0.6;
+        const r = p.size * (0.5 + bell * 1.0);
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 4);
+        g.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+        g.addColorStop(0.35, `rgba(210, 235, 255, ${alpha * 0.55})`);
+        g.addColorStop(1, "rgba(255, 255, 255, 0)");
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r * 4, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.fill();
+      }
+
+      // 흐름 레이어 — 느리고 투명하게 오래 남음
+      for (let i = flowParticles.length - 1; i >= 0; i--) {
+        const p = flowParticles[i];
+        p.life -= p.decay * dt;
+        if (p.life <= 0) { flowParticles.splice(i, 1); continue; }
+        // 2: flowBoost 적용
+        const flowBoost = 1 + (p.y / canvas.height) * 0.8;
+        p.x += p.vx * flowBoost * dt;
+        p.y += p.vy * flowBoost * dt;
+        p.vx *= Math.pow(0.96, dt);
+
+        const bell = Math.sin(p.life * Math.PI);
+        const alpha = bell * 0.18;
+        const r = p.size * (0.6 + bell * 0.8);
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 6);
+        g.addColorStop(0, `rgba(180, 220, 255, ${alpha})`);
+        g.addColorStop(0.5, `rgba(100, 180, 255, ${alpha * 0.4})`);
+        g.addColorStop(1, "rgba(100, 180, 255, 0)");
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r * 6, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.fill();
+      }
+
       frameId = requestAnimationFrame(animate);
     };
     frameId = requestAnimationFrame(animate);
@@ -670,6 +795,7 @@ function DeckOverlay({
       <div
         ref={waveRef}
         style={{
+          display: "none",
           position: "absolute",
           bottom: 0,
           left: 0,
@@ -730,24 +856,6 @@ function DeckOverlay({
         />
       </div>
 
-      {/* 안개 — 파티클·선박 아래 레이어 */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        ref={mistRef}
-        src="/waterMist.webp"
-        alt=""
-        draggable={false}
-        style={{
-          position: "absolute",
-          bottom: "8%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "110%",
-          maxWidth: "1000px",
-          opacity: 0,
-          pointerEvents: "none",
-        }}
-      />
 
       {/* 파티클 캔버스 — 선박 아래 레이어 */}
       <canvas
@@ -804,7 +912,6 @@ function DeckOverlay({
           style={{ width: "100%", height: "100%", willChange: "transform" }}
         />
       </div>
-
     </div>
   );
 }
@@ -922,7 +1029,7 @@ function TerrainScene({
   const [hmapData, setHmapData] = useState<HMapData | null>(null);
   useEffect(() => {
     const img = new Image();
-    img.src = "/heightMap3.png";
+    img.src = "/heightMap.png";
 
     img.onload = () => {
       const canvas = document.createElement("canvas");
@@ -1084,6 +1191,7 @@ function TerrainScene({
     const targetZ = CAM_Z_BASE - cappedScroll * SCROLL_SPEED;
     camera.position.z += (targetZ - camera.position.z) * 0.1;
     recycleIfNeeded(camera.position.z);
+
   });
 
   return (
