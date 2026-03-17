@@ -639,11 +639,18 @@ function DeckOverlay({
 
     const SHIP_SCROLL_END = 180;
     const isMobileDevice = window.innerWidth < 768;
+    let shipCoordsReady = false;
     const onScrollParticle = () => {
       const rawDelta = window.scrollY - lastScrollY;
       const delta = Math.abs(rawDelta);
       lastScrollY = window.scrollY;
       if (window.scrollY < SHIP_SCROLL_END) return;
+
+      // 선박이 최종 위치에 도달한 후 처음 한 번만 좌표 갱신
+      if (!shipCoordsReady) {
+        updateShipCoords();
+        shipCoordsReady = true;
+      }
 
       // 후진 시 에너지 0.3, 파티클 수 0.3배
       const isForward = rawDelta > 0;
@@ -1049,6 +1056,12 @@ function TerrainScene({
     [hmapData]
   );
 
+  // 비콘 baseY 사전 계산 — heightAt은 노이즈 연산이라 매 프레임 호출 비용이 큼
+  const beaconBaseYs = useMemo(
+    () => TECH_NODES.map(node => heightAt(node.x, node.z) + (node.yOffset ?? 0)),
+    [heightAt]
+  );
+
   // 솔리드 flat-shaded 지형 (조명 반사 핵심)
   const solidMat = useMemo(
     () =>
@@ -1146,10 +1159,8 @@ function TerrainScene({
     for (let i = 0; i < TECH_NODES.length; i++) {
       const g = beaconGroupRefs[i].current;
       if (!g) continue;
-      const node = TECH_NODES[i];
-      const baseY = heightAt(node.x, node.z) + (node.yOffset ?? 0);
       const phase = (i * Math.PI * 2) / TECH_NODES.length;
-      g.position.y = baseY + Math.sin(elapsed * 1.6 + phase) * 0.4;
+      g.position.y = beaconBaseYs[i] + Math.sin(elapsed * 1.6 + phase) * 0.4;
     }
 
     // 테마 안정 + 카메라 수렴 시 material/light 업데이트 생략
