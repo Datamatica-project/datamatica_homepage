@@ -522,9 +522,27 @@ function DeckOverlay({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // 선박 좌표 캐시 — resize 시에만 갱신, scroll마다 getBoundingClientRect 호출 방지
+    let cachedCoords = { cx: 0, ty: 0, lx: 0, rx: 0, by: 0 };
+    const updateShipCoords = () => {
+      const shipEl = shipRef.current;
+      const shipRect = shipEl ? shipEl.getBoundingClientRect() : null;
+      const canvasRect = canvas.getBoundingClientRect();
+      const cx = shipRect ? shipRect.left + shipRect.width * 0.5 - canvasRect.left : canvas.width * 0.5;
+      const ty = shipRect ? shipRect.top - canvasRect.top : canvas.height * 0.7;
+      cachedCoords = {
+        cx,
+        ty,
+        lx: shipRect ? shipRect.left  - canvasRect.left  : cx - 400,
+        rx: shipRect ? shipRect.right - canvasRect.left  : cx + 400,
+        by: shipRect ? shipRect.bottom - canvasRect.top  : ty + 300,
+      };
+    };
+
     const resize = () => {
-      canvas.width = canvas.offsetWidth;
+      canvas.width  = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
+      updateShipCoords();
     };
     resize();
     const ro = new ResizeObserver(resize);
@@ -556,21 +574,10 @@ function DeckOverlay({
     let lastTime = performance.now();
     let lastScrollY = window.scrollY;
 
-    const getShipCoords = () => {
-      const shipEl = shipRef.current;
-      const shipRect = shipEl ? shipEl.getBoundingClientRect() : null;
-      const canvasRect = canvas.getBoundingClientRect();
-      const cx = shipRect ? shipRect.left + shipRect.width * 0.5 - canvasRect.left : canvas.width * 0.5;
-      const ty = shipRect ? shipRect.top - canvasRect.top : canvas.height * 0.7;
-      const lx = shipRect ? shipRect.left - canvasRect.left : cx - 400;
-      const rx = shipRect ? shipRect.right - canvasRect.left : cx + 400;
-      const by = shipRect ? shipRect.bottom - canvasRect.top : ty + 300;
-      return { cx, ty, lx, rx, by };
-    };
 
     // 방향 벡터 기반 튀는 물보라 (파란색) — 빠른/느린 계층 분리
     const spawn = (side: -1 | 1, e = 1.0) => {
-      const { cx, ty, lx, rx, by } = getShipCoords();
+      const { cx, ty, lx, rx, by } = cachedCoords;
       const t = Math.random();
       const ex = side === -1 ? lx : rx;
       const sx = cx + (ex - cx) * t + (Math.random() - 0.5) * 20;
@@ -592,7 +599,7 @@ function DeckOverlay({
 
     // 거품 (흰색) — 선체에 붙어 흐르는 느낌
     const spawnBow = (e = 1.0) => {
-      const { cx, ty, lx, rx, by } = getShipCoords();
+      const { cx, ty, lx, rx, by } = cachedCoords;
       const side = Math.random() < 0.5 ? -1 : 1;
       const t = Math.random();
       const ex = side === -1 ? lx : rx;
@@ -615,7 +622,7 @@ function DeckOverlay({
 
     // 흐름 레이어 (느리고 오래 남는 안개층)
     const spawnFlow = (side: -1 | 1, e = 1.0) => {
-      const { cx, ty, lx, rx, by } = getShipCoords();
+      const { cx, ty, lx, rx, by } = cachedCoords;
       const t = Math.random();
       const ex = side === -1 ? lx : rx;
       const sx = cx + (ex - cx) * t + (Math.random() - 0.5) * 20;
@@ -972,13 +979,20 @@ function Stars({ isDark }: { isDark: boolean }) {
 function TerrainScene({
   isDark,
   scrollEndVh,
+  isMobile,
 }: {
   isDark: boolean;
   scrollEndVh: number;
+  isMobile: boolean;
 }) {
   const { camera, scene } = useThree();
   const scrollY = useRef(0);
   const groupRefs = useRef<THREE.Group[]>([]);
+  // 비콘 그룹 refs — 단일 useFrame에서 일괄 애니메이션
+  const beaconGroupRefs = useMemo<React.MutableRefObject<THREE.Group | null>[]>(
+    () => TECH_NODES.map(() => ({ current: null })),
+    []
+  );
   const circleTex = useMemo(() => createCircleTexture(), []);
   const glowTex = useMemo(() => createGlowTexture(), []);
 
@@ -1111,7 +1125,7 @@ function TerrainScene({
     [tiles, heightAt]
   );
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     // 테마 진행값 lerp
     const target = isDark ? 0 : 1;
     const diff = target - progressRef.current;
@@ -1120,6 +1134,26 @@ function TerrainScene({
       progressRef.current += diff * 0.06;
     }
     const t = progressRef.current;
+
+    // 카메라 수렴 여부
+    const cappedScroll = Math.min(scrollY.current, scrollEndVh * window.innerHeight);
+    const targetZ = CAM_Z_BASE - cappedScroll * SCROLL_SPEED;
+    const camDiff = targetZ - camera.position.z;
+    const isCamStable = Math.abs(camDiff) < 0.01;
+
+    // 비콘 bob 애니메이션 (6개 → 단일 루프)
+    const elapsed = clock.elapsedTime;
+    for (let i = 0; i < TECH_NODES.length; i++) {
+      const g = beaconGroupRefs[i].current;
+      if (!g) continue;
+      const node = TECH_NODES[i];
+      const baseY = heightAt(node.x, node.z) + (node.yOffset ?? 0);
+      const phase = (i * Math.PI * 2) / TECH_NODES.length;
+      g.position.y = baseY + Math.sin(elapsed * 1.6 + phase) * 0.4;
+    }
+
+    // 테마 안정 + 카메라 수렴 시 material/light 업데이트 생략
+    if (isThemeStable && isCamStable) return;
 
     if (!isThemeStable) {
       // 머티리얼 색상 lerp
@@ -1170,15 +1204,8 @@ function TerrainScene({
       }
     }
 
-    // 짧은 문서 스크롤 안에서 카메라 이동을 더 빠르게 진행한다.
-    const cappedScroll = Math.min(
-      scrollY.current,
-      scrollEndVh * window.innerHeight
-    );
-    const targetZ = CAM_Z_BASE - cappedScroll * SCROLL_SPEED;
-    camera.position.z += (targetZ - camera.position.z) * 0.1;
+    camera.position.z += camDiff * 0.1;
     recycleIfNeeded(camera.position.z);
-
   });
 
   return (
@@ -1252,8 +1279,9 @@ function TerrainScene({
           code={node.code}
           heightAt={heightAt}
           yOffset={node.yOffset}
-          phase={(i * Math.PI * 2) / TECH_NODES.length}
           isDark={isDark}
+          isMobile={isMobile}
+          groupRef={beaconGroupRefs[i]}
         />
       ))}
     </>
@@ -1294,6 +1322,14 @@ export default function Terrain({
   const [themeProgress, setThemeProgress] = useState(0); // 0 = 다크, 1 = 라이트
   const tpRef = useRef(0);
   const rafRef = useRef<number | undefined>(undefined);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" && window.innerWidth < 768
+  );
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
+  }, []);
   // CSS/Vignette용 themeProgress RAF 애니메이션
   useEffect(() => {
     const target = isDark ? 0 : 1;
@@ -1343,15 +1379,18 @@ export default function Terrain({
         frameloop={overlayOpacity >= 1 ? "never" : "always"}
         style={{ background: "transparent", position: "relative", zIndex: 1 }}
       >
-        <TerrainScene isDark={isDark} scrollEndVh={scrollEndVh} />
+        <TerrainScene isDark={isDark} scrollEndVh={scrollEndVh} isMobile={isMobile} />
 
-        <EffectComposer>
-          <Vignette
-            eskil={false}
-            offset={vignetteOffset}
-            darkness={vignetteDarkness}
-          />
-        </EffectComposer>
+        {/* 모바일에서는 post-processing 생략 — GPU 패스 절감 */}
+        {!isMobile && (
+          <EffectComposer>
+            <Vignette
+              eskil={false}
+              offset={vignetteOffset}
+              darkness={vignetteDarkness}
+            />
+          </EffectComposer>
+        )}
       </Canvas>
 
       <div

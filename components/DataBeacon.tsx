@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useRef } from "react";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -16,8 +15,9 @@ export function DataBeacon({
   code,
   heightAt,
   yOffset = 0,
-  phase = 0,
   isDark = true,
+  isMobile = false,
+  groupRef,
 }: {
   x: number;
   z: number;
@@ -25,29 +25,26 @@ export function DataBeacon({
   code: string;
   heightAt: HeightFn;
   yOffset?: number;
-  phase?: number;
   isDark?: boolean;
+  isMobile?: boolean;
+  groupRef?: React.MutableRefObject<THREE.Group | null>;
 }) {
   const y = heightAt(x, z) + yOffset;
-  const groupRef = useRef<THREE.Group>(null);
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-
-  useFrame(({ clock }) => {
-    if (!groupRef.current) return;
-    const bob = Math.sin(clock.elapsedTime * 1.6 + phase) * 0.4;
-    groupRef.current.position.y = y + bob;
-  });
+  const localRef = useRef<THREE.Group>(null);
+  const ref = groupRef ?? localRef;
 
   return (
-    <group ref={groupRef} position={[x, y, z]}>
+    <group ref={ref} position={[x, y, z]}>
       <Html position={[0, FLOAT_H, 0]} center distanceFactor={80}>
-        <div className="flex pointer-events-none select-none" style={{ transform: isMobile ? `scale(0.5) perspective(400px) rotateY(${x > 0 ? -20 : 20}deg)` : `perspective(400px) rotateY(${x > 0 ? -20 : 20}deg)`, transformOrigin: "center center" }}>
+        <div
+          className="flex pointer-events-none select-none"
+          style={{
+            transform: isMobile
+              ? `scale(0.5) perspective(400px) rotateY(${x > 0 ? -20 : 20}deg)`
+              : `perspective(400px) rotateY(${x > 0 ? -20 : 20}deg)`,
+            transformOrigin: "center center",
+          }}
+        >
           <div
             style={{
               padding: "6px 12px",
