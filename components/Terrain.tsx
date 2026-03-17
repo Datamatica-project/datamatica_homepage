@@ -132,7 +132,6 @@ type Tile = {
   posAttr: THREE.BufferAttribute;
   lineGeo: THREE.BufferGeometry;
   ptGeo: THREE.BufferGeometry;
-  lineArray: Float32Array;
   rows: number;
   cols: number;
   worldZ: number;
@@ -142,22 +141,32 @@ function createTile(initialWorldZ: number): Tile {
   const planeGeo = new THREE.PlaneGeometry(WIDTH, SEG_LEN, GRID, GRID);
   planeGeo.rotateX(-Math.PI / 2);
   const posAttr = planeGeo.attributes.position as THREE.BufferAttribute;
-  const arr = posAttr.array as Float32Array;
   const rows = GRID + 1;
   const cols = GRID + 1;
-  const segCount = rows * (cols - 1) + cols * (rows - 1);
-  const lineArray = new Float32Array(segCount * 2 * 3);
+
+  // lineGeo: posAttr 공유 + 정적 인덱스 버퍼 (매 업데이트마다 복사 불필요)
+  const lineIndices: number[] = [];
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols - 1; c++) {
+      lineIndices.push(r * cols + c, r * cols + c + 1);
+    }
+  for (let c = 0; c < cols; c++)
+    for (let r = 0; r < rows - 1; r++) {
+      lineIndices.push(r * cols + c, (r + 1) * cols + c);
+    }
   const lineGeo = new THREE.BufferGeometry();
-  lineGeo.setAttribute("position", new THREE.BufferAttribute(lineArray, 3));
+  lineGeo.setAttribute("position", posAttr); // 공유
+  lineGeo.setIndex(new THREE.BufferAttribute(new Uint32Array(lineIndices), 1));
+
+  // ptGeo: posAttr 공유
   const ptGeo = new THREE.BufferGeometry();
-  const ptArray = new Float32Array(arr.length);
-  ptGeo.setAttribute("position", new THREE.BufferAttribute(ptArray, 3));
+  ptGeo.setAttribute("position", posAttr); // 공유
+
   return {
     planeGeo,
     posAttr,
     lineGeo,
     ptGeo,
-    lineArray,
     rows,
     cols,
     worldZ: initialWorldZ,
@@ -265,53 +274,15 @@ function makeHeightFn(hmap?: HMapData) {
 function updateTile(tile: Tile, newWorldZ: number, heightAt: HeightFn) {
   tile.worldZ = newWorldZ;
   const posAttr = tile.posAttr;
-  const planeArr = posAttr.array as Float32Array;
+  const arr = posAttr.array as Float32Array;
 
+  // 직접 배열 접근으로 getter/setter 오버헤드 제거
   for (let i = 0; i < posAttr.count; i++) {
-    const x = posAttr.getX(i);
-    const zWorld = posAttr.getZ(i) + newWorldZ;
-    posAttr.setY(i, heightAt(x, zWorld));
+    const base = i * 3;
+    arr[base + 1] = heightAt(arr[base], arr[base + 2] + newWorldZ);
   }
+  // posAttr 공유이므로 needsUpdate 한 번으로 lineGeo·ptGeo 모두 반영
   posAttr.needsUpdate = true;
-
-  // 조명 반사를 위해 법선 재계산 (flatShading 핵심)
-  tile.planeGeo.computeVertexNormals();
-
-  const ptPos = tile.ptGeo.getAttribute("position") as THREE.BufferAttribute;
-  (ptPos.array as Float32Array).set(planeArr);
-  ptPos.needsUpdate = true;
-
-  const { rows, cols, lineArray } = tile;
-  let w = 0;
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols - 1; c++) {
-      const a = (r * cols + c) * 3,
-        b = (r * cols + c + 1) * 3;
-      lineArray[w++] = planeArr[a];
-      lineArray[w++] = planeArr[a + 1];
-      lineArray[w++] = planeArr[a + 2];
-      lineArray[w++] = planeArr[b];
-      lineArray[w++] = planeArr[b + 1];
-      lineArray[w++] = planeArr[b + 2];
-    }
-  }
-  for (let c = 0; c < cols; c++) {
-    for (let r = 0; r < rows - 1; r++) {
-      const a = (r * cols + c) * 3,
-        b = ((r + 1) * cols + c) * 3;
-      lineArray[w++] = planeArr[a];
-      lineArray[w++] = planeArr[a + 1];
-      lineArray[w++] = planeArr[a + 2];
-      lineArray[w++] = planeArr[b];
-      lineArray[w++] = planeArr[b + 1];
-      lineArray[w++] = planeArr[b + 2];
-    }
-  }
-
-  const linePos = tile.lineGeo.getAttribute(
-    "position"
-  ) as THREE.BufferAttribute;
-  linePos.needsUpdate = true;
   tile.lineGeo.computeBoundingSphere();
   tile.ptGeo.computeBoundingSphere();
 }
