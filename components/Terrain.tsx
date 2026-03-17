@@ -657,12 +657,22 @@ function DeckOverlay({
         for (let i = 0; i < flowCount; i++) { spawnFlow(-1, energy); spawnFlow(1, energy); }
         for (let i = 0; i < bowCount;  i++) { spawnBow(energy); }
       }
+      // 파티클 생성 후 RAF가 멈춰있으면 재시작
+      if (frameId === 0) frameId = requestAnimationFrame(animate);
     };
     window.addEventListener("scroll", onScrollParticle, { passive: true });
 
     const animate = (time: number) => {
       const dt = Math.min((time - lastTime) / 16.67, 3);
       lastTime = time;
+
+      // 파티클이 없으면 캔버스 클리어 후 RAF 중단 — 다음 스크롤 때 재시작
+      const totalCount = particles.length + bowParticles.length + flowParticles.length;
+      if (totalCount === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        frameId = 0;
+        return;
+      }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.globalCompositeOperation = "lighter";
@@ -672,80 +682,77 @@ function DeckOverlay({
         const p = particles[i];
         p.life -= p.decay * dt;
         if (p.life <= 0) { particles.splice(i, 1); continue; }
-        // 2: flowBoost — 아래로 갈수록 빨라짐
         const flowBoost = 1 + (p.y / canvas.height) * 0.8;
         p.x += p.vx * flowBoost * dt;
         p.y += p.vy * flowBoost * dt;
         p.vy += p.gravity * dt;
-        p.vx *= Math.pow(0.92, dt);
-        p.vy *= Math.pow(0.95, dt);
+        p.vx *= 1 - 0.08 * dt;
+        p.vy *= 1 - 0.05 * dt;
 
         const alpha = p.life * 0.5;
-        const r = p.size;
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 5);
-        g.addColorStop(0, `rgba(220, 248, 255, ${alpha})`);
-        g.addColorStop(0.3, `rgba(0, 210, 255, ${alpha * 0.7})`);
-        g.addColorStop(0.7, `rgba(60, 30, 210, ${alpha * 0.28})`);
-        g.addColorStop(1, "rgba(0,0,0,0)");
+        const r = p.size * 5;
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+        g.addColorStop(0,   `rgba(220,248,255,${alpha.toFixed(2)})`);
+        g.addColorStop(0.3, `rgba(0,210,255,${(alpha * 0.7).toFixed(2)})`);
+        g.addColorStop(0.7, `rgba(60,30,210,${(alpha * 0.28).toFixed(2)})`);
+        g.addColorStop(1,   "rgba(0,0,0,0)");
         ctx.beginPath();
-        ctx.arc(p.x, p.y, r * 5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fillStyle = g;
         ctx.fill();
       }
 
-      // 거품 (흰색) — 선체에 붙어 흐르는 느낌
+      // 거품 (흰색)
       for (let i = bowParticles.length - 1; i >= 0; i--) {
         const p = bowParticles[i];
         p.life -= p.decay * dt;
         if (p.life <= 0) { bowParticles.splice(i, 1); continue; }
-        // 2: flowBoost 적용
         const flowBoost = 1 + (p.y / canvas.height) * 0.8;
         p.x += p.vx * flowBoost * dt;
         p.y += p.vy * flowBoost * dt;
         p.vy += p.gravity * 0.6 * dt;
-        p.vx *= Math.pow(0.85, dt);
-        p.vy *= Math.pow(0.90, dt);
+        p.vx *= 1 - 0.15 * dt;
+        p.vy *= 1 - 0.10 * dt;
 
         const bell = Math.sin(p.life * Math.PI);
         const alpha = bell * 0.6;
-        const r = p.size * (0.5 + bell * 1.0);
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 4);
-        g.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
-        g.addColorStop(0.35, `rgba(210, 235, 255, ${alpha * 0.55})`);
-        g.addColorStop(1, "rgba(255, 255, 255, 0)");
+        const r = p.size * (0.5 + bell) * 4;
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+        g.addColorStop(0,    `rgba(255,255,255,${alpha.toFixed(2)})`);
+        g.addColorStop(0.35, `rgba(210,235,255,${(alpha * 0.55).toFixed(2)})`);
+        g.addColorStop(1,    "rgba(255,255,255,0)");
         ctx.beginPath();
-        ctx.arc(p.x, p.y, r * 4, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fillStyle = g;
         ctx.fill();
       }
 
-      // 흐름 레이어 — 느리고 투명하게 오래 남음
+      // 흐름 레이어
       for (let i = flowParticles.length - 1; i >= 0; i--) {
         const p = flowParticles[i];
         p.life -= p.decay * dt;
         if (p.life <= 0) { flowParticles.splice(i, 1); continue; }
-        // 2: flowBoost 적용
         const flowBoost = 1 + (p.y / canvas.height) * 0.8;
         p.x += p.vx * flowBoost * dt;
         p.y += p.vy * flowBoost * dt;
-        p.vx *= Math.pow(0.96, dt);
+        p.vx *= 1 - 0.04 * dt;
 
         const bell = Math.sin(p.life * Math.PI);
         const alpha = bell * 0.18;
-        const r = p.size * (0.6 + bell * 0.8);
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 6);
-        g.addColorStop(0, `rgba(180, 220, 255, ${alpha})`);
-        g.addColorStop(0.5, `rgba(100, 180, 255, ${alpha * 0.4})`);
-        g.addColorStop(1, "rgba(100, 180, 255, 0)");
+        const r = p.size * (0.6 + bell * 0.8) * 6;
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+        g.addColorStop(0,   `rgba(180,220,255,${alpha.toFixed(2)})`);
+        g.addColorStop(0.5, `rgba(100,180,255,${(alpha * 0.4).toFixed(2)})`);
+        g.addColorStop(1,   "rgba(100,180,255,0)");
         ctx.beginPath();
-        ctx.arc(p.x, p.y, r * 6, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fillStyle = g;
         ctx.fill();
       }
 
       frameId = requestAnimationFrame(animate);
     };
-    frameId = requestAnimationFrame(animate);
+    frameId = 0;
 
     return () => {
       cancelAnimationFrame(frameId);
