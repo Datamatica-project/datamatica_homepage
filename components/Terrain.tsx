@@ -1385,7 +1385,7 @@ export default function Terrain({
       <Canvas
         camera={{ position: [0, CAM_Y, CAM_Z_BASE], fov: 70 }}
         gl={{ antialias: false, alpha: true }}
-        dpr={[1, 1.5]}
+        dpr={isMobile ? [1, 2] : [1, 1.5]}
         frameloop={overlayOpacity >= 1 ? "never" : "always"}
         style={{ background: "transparent", position: "relative", zIndex: 1 }}
       >
