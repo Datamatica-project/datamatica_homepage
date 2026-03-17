@@ -1398,16 +1398,20 @@ export default function Terrain({
         <TerrainScene isDark={isDark} scrollEndVh={scrollEndVh} isMobile={isMobile} />
 
         {/* 모바일: SMAA만 / 데스크탑: SMAA + Vignette */}
-        <EffectComposer>
-          <SMAA />
-          {!isMobile && (
+        {isMobile ? (
+          <EffectComposer>
+            <SMAA />
+          </EffectComposer>
+        ) : (
+          <EffectComposer>
+            <SMAA />
             <Vignette
               eskil={false}
               offset={vignetteOffset}
               darkness={vignetteDarkness}
             />
-          )}
-        </EffectComposer>
+          </EffectComposer>
+        )}
       </Canvas>
 
       <div
