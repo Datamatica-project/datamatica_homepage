@@ -1070,6 +1070,9 @@ function TerrainScene({
         flatShading: true,
         metalness: 0.1,
         roughness: 0.6,
+        polygonOffset: true,      // 라인과 z-fighting 방지
+        polygonOffsetFactor: 1,   // 메시를 깊이버퍼에서 카메라 반대쪽으로 밀어냄
+        polygonOffsetUnits: 1,
       }),
     []
   );
