@@ -500,7 +500,6 @@ function DeckOverlay({
       imgs[2]!.style.opacity = String(enter3 * 0.48);
       imgs[2]!.style.transform = `translateX(-50%) scale(${sc3})`;
 
-
       rafId = null;
     };
 
@@ -528,19 +527,21 @@ function DeckOverlay({
       const shipEl = shipRef.current;
       const shipRect = shipEl ? shipEl.getBoundingClientRect() : null;
       const canvasRect = canvas.getBoundingClientRect();
-      const cx = shipRect ? shipRect.left + shipRect.width * 0.5 - canvasRect.left : canvas.width * 0.5;
+      const cx = shipRect
+        ? shipRect.left + shipRect.width * 0.5 - canvasRect.left
+        : canvas.width * 0.5;
       const ty = shipRect ? shipRect.top - canvasRect.top : canvas.height * 0.7;
       cachedCoords = {
         cx,
         ty,
-        lx: shipRect ? shipRect.left  - canvasRect.left  : cx - 400,
-        rx: shipRect ? shipRect.right - canvasRect.left  : cx + 400,
-        by: shipRect ? shipRect.bottom - canvasRect.top  : ty + 300,
+        lx: shipRect ? shipRect.left - canvasRect.left : cx - 400,
+        rx: shipRect ? shipRect.right - canvasRect.left : cx + 400,
+        by: shipRect ? shipRect.bottom - canvasRect.top : ty + 300,
       };
     };
 
     const resize = () => {
-      canvas.width  = canvas.offsetWidth;
+      canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
       updateShipCoords();
     };
@@ -574,7 +575,6 @@ function DeckOverlay({
     let lastTime = performance.now();
     let lastScrollY = window.scrollY;
 
-
     // 방향 벡터 기반 튀는 물보라 (파란색) — 빠른/느린 계층 분리
     const spawn = (side: -1 | 1, e = 1.0) => {
       const { cx, ty, lx, rx, by } = cachedCoords;
@@ -585,9 +585,11 @@ function DeckOverlay({
 
       const dirX = side * (0.6 + Math.random() * 0.4);
       const isFast = Math.random() < 0.3;
-      const speed = (isFast ? 12 + Math.random() * 10 : 3 + Math.random() * 5) * e;
+      const speed =
+        (isFast ? 12 + Math.random() * 10 : 3 + Math.random() * 5) * e;
       particles.push({
-        x: sx, y: sy,
+        x: sx,
+        y: sy,
         vx: dirX * speed,
         vy: (speed * 0.15 + Math.random() * 0.1) * e,
         life: 1.0,
@@ -608,9 +610,11 @@ function DeckOverlay({
 
       const dirX = side * (0.6 + Math.random() * 0.4);
       const isFast = Math.random() < 0.3;
-      const speed = (isFast ? 12 + Math.random() * 10 : 3 + Math.random() * 5) * e;
+      const speed =
+        (isFast ? 12 + Math.random() * 10 : 3 + Math.random() * 5) * e;
       bowParticles.push({
-        x: sx, y: sy,
+        x: sx,
+        y: sy,
         vx: dirX * speed,
         vy: (speed * 0.15 + Math.random() * 0.1) * e,
         life: 1.0,
@@ -628,7 +632,8 @@ function DeckOverlay({
       const sx = cx + (ex - cx) * t + (Math.random() - 0.5) * 20;
       const sy = ty + (by - ty) * t + (Math.random() - 0.5) * 10;
       flowParticles.push({
-        x: sx, y: sy,
+        x: sx,
+        y: sy,
         vx: side * (2 + Math.random() * 2) * e,
         vy: (0.5 + Math.random() * 0.3) * e,
         life: 1.0,
@@ -637,36 +642,37 @@ function DeckOverlay({
       });
     };
 
-    const SHIP_SCROLL_END = 180;
     const isMobileDevice = window.innerWidth < 768;
-    let shipCoordsReady = false;
     const onScrollParticle = () => {
       const rawDelta = window.scrollY - lastScrollY;
       const delta = Math.abs(rawDelta);
       lastScrollY = window.scrollY;
       const sceneEnd = scrollEndVh * window.innerHeight;
-      if (window.scrollY < SHIP_SCROLL_END || window.scrollY > sceneEnd) return;
+      if (window.scrollY > sceneEnd) return;
 
-      // 선박이 최종 위치에 도달한 후 처음 한 번만 좌표 갱신
-      if (!shipCoordsReady) {
-        updateShipCoords();
-        shipCoordsReady = true;
-      }
+      // 스크롤 방향과 관계없이, 현재 선박 위치 기준으로 항상 좌표 갱신
+      updateShipCoords();
 
       // 후진 시 에너지 0.3, 파티클 수 0.3배
       const isForward = rawDelta > 0;
       const factor = isForward ? 1.0 : 0.3;
       const energy = isForward ? 1.0 : 0.3;
 
-      if (isMobileDevice) {
-        // 모바일: 파티클 비활성화
-      } else {
-        const count     = Math.min(Math.ceil(delta * 0.55 * factor), 12);
-        const bowCount  = Math.min(Math.ceil(delta * 1.0  * factor), 20);
-        const flowCount = Math.min(Math.ceil(delta * 1.2  * factor), 25);
-        for (let i = 0; i < count;     i++) { spawn(-1, energy); spawn(1, energy); }
-        for (let i = 0; i < flowCount; i++) { spawnFlow(-1, energy); spawnFlow(1, energy); }
-        for (let i = 0; i < bowCount;  i++) { spawnBow(energy); }
+      if (!isMobileDevice) {
+        const count = Math.min(Math.ceil(delta * 0.55 * factor), 12);
+        const bowCount = Math.min(Math.ceil(delta * 1.0 * factor), 20);
+        const flowCount = Math.min(Math.ceil(delta * 1.2 * factor), 25);
+        for (let i = 0; i < count; i++) {
+          spawn(-1, energy);
+          spawn(1, energy);
+        }
+        for (let i = 0; i < flowCount; i++) {
+          spawnFlow(-1, energy);
+          spawnFlow(1, energy);
+        }
+        for (let i = 0; i < bowCount; i++) {
+          spawnBow(energy);
+        }
       }
       // 파티클 생성 후 RAF가 멈춰있으면 재시작
       if (frameId === 0) frameId = requestAnimationFrame(animate);
@@ -678,7 +684,8 @@ function DeckOverlay({
       lastTime = time;
 
       // 파티클이 없으면 캔버스 클리어 후 RAF 중단 — 다음 스크롤 때 재시작
-      const totalCount = particles.length + bowParticles.length + flowParticles.length;
+      const totalCount =
+        particles.length + bowParticles.length + flowParticles.length;
       if (totalCount === 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         frameId = 0;
@@ -692,7 +699,10 @@ function DeckOverlay({
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.life -= p.decay * dt;
-        if (p.life <= 0) { particles.splice(i, 1); continue; }
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
         const flowBoost = 1 + (p.y / canvas.height) * 0.8;
         p.x += p.vx * flowBoost * dt;
         p.y += p.vy * flowBoost * dt;
@@ -703,10 +713,10 @@ function DeckOverlay({
         const alpha = p.life * 0.5;
         const r = p.size * 5;
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-        g.addColorStop(0,   `rgba(220,248,255,${alpha.toFixed(2)})`);
+        g.addColorStop(0, `rgba(220,248,255,${alpha.toFixed(2)})`);
         g.addColorStop(0.3, `rgba(0,210,255,${(alpha * 0.7).toFixed(2)})`);
         g.addColorStop(0.7, `rgba(60,30,210,${(alpha * 0.28).toFixed(2)})`);
-        g.addColorStop(1,   "rgba(0,0,0,0)");
+        g.addColorStop(1, "rgba(0,0,0,0)");
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fillStyle = g;
@@ -717,21 +727,24 @@ function DeckOverlay({
       for (let i = bowParticles.length - 1; i >= 0; i--) {
         const p = bowParticles[i];
         p.life -= p.decay * dt;
-        if (p.life <= 0) { bowParticles.splice(i, 1); continue; }
+        if (p.life <= 0) {
+          bowParticles.splice(i, 1);
+          continue;
+        }
         const flowBoost = 1 + (p.y / canvas.height) * 0.8;
         p.x += p.vx * flowBoost * dt;
         p.y += p.vy * flowBoost * dt;
         p.vy += p.gravity * 0.6 * dt;
         p.vx *= 1 - 0.15 * dt;
-        p.vy *= 1 - 0.10 * dt;
+        p.vy *= 1 - 0.1 * dt;
 
         const bell = Math.sin(p.life * Math.PI);
         const alpha = bell * 0.6;
         const r = p.size * (0.5 + bell) * 4;
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-        g.addColorStop(0,    `rgba(255,255,255,${alpha.toFixed(2)})`);
+        g.addColorStop(0, `rgba(255,255,255,${alpha.toFixed(2)})`);
         g.addColorStop(0.35, `rgba(210,235,255,${(alpha * 0.55).toFixed(2)})`);
-        g.addColorStop(1,    "rgba(255,255,255,0)");
+        g.addColorStop(1, "rgba(255,255,255,0)");
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fillStyle = g;
@@ -742,7 +755,10 @@ function DeckOverlay({
       for (let i = flowParticles.length - 1; i >= 0; i--) {
         const p = flowParticles[i];
         p.life -= p.decay * dt;
-        if (p.life <= 0) { flowParticles.splice(i, 1); continue; }
+        if (p.life <= 0) {
+          flowParticles.splice(i, 1);
+          continue;
+        }
         const flowBoost = 1 + (p.y / canvas.height) * 0.8;
         p.x += p.vx * flowBoost * dt;
         p.y += p.vy * flowBoost * dt;
@@ -752,9 +768,9 @@ function DeckOverlay({
         const alpha = bell * 0.18;
         const r = p.size * (0.6 + bell * 0.8) * 6;
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-        g.addColorStop(0,   `rgba(180,220,255,${alpha.toFixed(2)})`);
+        g.addColorStop(0, `rgba(180,220,255,${alpha.toFixed(2)})`);
         g.addColorStop(0.5, `rgba(100,180,255,${(alpha * 0.4).toFixed(2)})`);
-        g.addColorStop(1,   "rgba(100,180,255,0)");
+        g.addColorStop(1, "rgba(100,180,255,0)");
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fillStyle = g;
@@ -853,7 +869,6 @@ function DeckOverlay({
           }}
         />
       </div>
-
 
       {/* 파티클 캔버스 — 선박 아래 레이어 */}
       <canvas
@@ -1055,7 +1070,8 @@ function TerrainScene({
 
   // 비콘 baseY 사전 계산 — heightAt은 노이즈 연산이라 매 프레임 호출 비용이 큼
   const beaconBaseYs = useMemo(
-    () => TECH_NODES.map(node => heightAt(node.x, node.z) + (node.yOffset ?? 0)),
+    () =>
+      TECH_NODES.map((node) => heightAt(node.x, node.z) + (node.yOffset ?? 0)),
     [heightAt]
   );
 
@@ -1067,8 +1083,8 @@ function TerrainScene({
         flatShading: true,
         metalness: 0.1,
         roughness: 0.6,
-        polygonOffset: true,      // 라인과 z-fighting 방지
-        polygonOffsetFactor: 1,   // 메시를 깊이버퍼에서 카메라 반대쪽으로 밀어냄
+        polygonOffset: true, // 라인과 z-fighting 방지
+        polygonOffsetFactor: 1, // 메시를 깊이버퍼에서 카메라 반대쪽으로 밀어냄
         polygonOffsetUnits: 1,
       }),
     []
@@ -1149,7 +1165,10 @@ function TerrainScene({
     const t = progressRef.current;
 
     // 카메라 수렴 여부
-    const cappedScroll = Math.min(scrollY.current, scrollEndVh * window.innerHeight);
+    const cappedScroll = Math.min(
+      scrollY.current,
+      scrollEndVh * window.innerHeight
+    );
     const targetZ = CAM_Z_BASE - cappedScroll * SCROLL_SPEED;
     const camDiff = targetZ - camera.position.z;
     const isCamStable = Math.abs(camDiff) < 0.01;
@@ -1390,7 +1409,11 @@ export default function Terrain({
         frameloop={overlayOpacity >= 1 ? "never" : "always"}
         style={{ background: "transparent", position: "relative", zIndex: 1 }}
       >
-        <TerrainScene isDark={isDark} scrollEndVh={scrollEndVh} isMobile={isMobile} />
+        <TerrainScene
+          isDark={isDark}
+          scrollEndVh={scrollEndVh}
+          isMobile={isMobile}
+        />
 
         {/* 모바일: SMAA만 / 데스크탑: SMAA + Vignette */}
         {isMobile ? (
