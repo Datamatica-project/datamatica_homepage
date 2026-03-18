@@ -10,7 +10,7 @@ import { useTheme } from "@/components/ThemeProvider";
 const Terrain = dynamic(() => import("@/components/Terrain"), { ssr: false });
 
 const TERRAIN_MOTION_END_VH = 1.0;
-const TERRAIN_FADE_START_VH = 0.7;
+const TERRAIN_FADE_START_VH = 0.88;
 const TERRAIN_SECTION_HEIGHT_VH = TERRAIN_MOTION_END_VH + 1;
 
 export default function HomeClient() {
