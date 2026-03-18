@@ -895,7 +895,7 @@ function DeckOverlay({
           left: "50%",
           width: "100%",
           maxWidth: "860px",
-          opacity: 0.75,
+          opacity: 0.6,
           filter: "brightness(0.75) saturate(0.9)",
           willChange: "transform",
         }}
