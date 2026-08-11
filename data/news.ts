@@ -11,6 +11,49 @@ export interface NewsArticle {
 // 뉴스 기사 데이터
 export const newsArticles: NewsArticle[] = [
   {
+    id: "26081102",
+    date: "2026년 8월 11일",
+    year: 2026,
+    title:
+      "[공감신문] 데이터메티카, 스마트항만 AI 솔루션 개발…항만·물류 사업영역 확대",
+    description:
+      "AI 전문기업 데이터메티카가 컨테이너터미널의 운영 효율을 높이기 위한 스마트항만·물류 AI 솔루션 개발에 나서며 항만·물류 분야로 사업영역을 확장한다고 밝혔다. 선박 작업계획(Ship Planning), 야드 운영계획(Yard Planning), 장비 배차계획(Dispatch Planning) 등 항만 운영 전반에 AI 기술을 적용해 기존 Rule 기반 운영체계를 머신러닝 기반 지능형 체계로 고도화하고, 실제 터미널 환경 실증을 거쳐 향후 국내 항만 운영사로 적용 범위를 확대할 계획이다.",
+    source: "https://www.gokorea.kr/news/articleView.html?idxno=874717",
+    thumbnail: "/news/2026/26081102.avif",
+  },
+  {
+    id: "26081101",
+    date: "2026년 8월 11일",
+    year: 2026,
+    title:
+      "[이넷뉴스] 데이터메티카, 선박·항만 전문문서 기반 RAG LLM 구축···현장 질의응답 적용",
+    description:
+      "AI 전문기업 데이터메티카가 해양수산과학기술진흥원의 'AI 국책과제'에 참여해 SOLAS·MARPOL 등 선박·항만 전문문서를 구조화한 RAG(Retrieval-Augmented Generation) 기반 LLM 질의응답 서비스를 구축했다. 작업자가 질문하면 관련 전문문서를 검색해 실시간으로 안전 규정과 작업절차를 확인할 수 있으며, 향후 LNG 운반선 등 실제 현장 검증을 통해 적용 범위를 넓혀갈 계획이다.",
+    source: "https://www.enetnews.co.kr/news/articleView.html?idxno=53321",
+    thumbnail: "/news/2026/26081101.avif",
+  },
+  {
+    id: "26050701",
+    date: "2026년 5월 7일",
+    year: 2026,
+    title:
+      "[데일리경제] 데이터메티카, 국내 첫 재현데이터 공공 구축…국방 AI 상용화 추진",
+    description:
+      "데이터메티카가 한국지능정보사회진흥원(NIA)에 국내 최초로 AI 학습용 재현데이터를 구축·납품한 데 이어, 공군과의 기술 협력을 바탕으로 국방 AI 분야 사업 확대에 나선다. 오토라벨링과 재현데이터 생성 기능을 결합한 통합 솔루션 'MMustAI'는 CES 2026 라스베이거스 컨벤션센터에 전시되며 글로벌 시장에 기술력을 알렸고, 정보통신기획평가원(IITP)의 'AI 응용제품 신속 상용화' 과제 지원을 통해 공공·국방 현장 상용화를 추진할 계획이다.",
+    source: "https://www.kdpress.co.kr/news/articleView.html?idxno=205035",
+    thumbnail: "/news/2026/26050701.avif",
+  },
+  {
+    id: "26021001",
+    date: "2026년 2월 10일",
+    year: 2026,
+    title: "[데일리시큐] 데이터메티카, CES 2026 LVCC홀 참가",
+    description:
+      "국내 AI·데이터 기업 데이터메티카가 IT·가전 전시회 CES 2026에 메인 전시관인 LVCC홀에 단독 부스로 참가해 오토라벨링(Auto Annotation)과 재현데이터(Synthetic Data) 생성 기능을 갖춘 데이터 구축 플랫폼을 공개했다. 자율주행, 스마트시티, 디지털 트윈 등 고도화된 AI 서비스 개발에 필요한 학습 데이터를 보다 효율적으로 구축할 수 있는 통합 솔루션 'MMustAI'를 선보였으며, 이번 참가를 계기로 글로벌 파트너십을 확대해 산업 및 공공 분야로 데이터 구축 플랫폼의 적용 범위를 넓혀갈 계획이다.",
+    source: "https://www.dailysecu.com/news/articleView.html?idxno=205056",
+    thumbnail: "/news/2026/26021001.avif",
+  },
+  {
     id: "25011301",
     date: "2025년 1월 13일",
     year: 2025,
