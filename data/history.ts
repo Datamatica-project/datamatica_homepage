@@ -10,6 +10,35 @@ export interface HistoryTimelineYear {
 
 export const historyTimeline: HistoryTimelineYear[] = [
   {
+    year: 2025,
+    items: [
+      {
+        month: "03",
+        entries: ["경찰청_2025 치안현장 맞춤형 연구개발사업 사전연구 과제"],
+      },
+      {
+        month: "05",
+        entries: [
+          "중소기업벤처부_창업도약패키지(반복학습 기반 오토라벨링 플랫폼)",
+          "한국교통안전공단_자율주행 맞춤형 주행환경 수집 분석 사업",
+          "한국전자기술연구원_자율 농작업 3D 경로 생성 지원 서비스 용역",
+        ],
+      },
+      {
+        month: "07",
+        entries: [
+          "경찰청_지능형 교통사고 현장 데이터 처리 및 스마트 분석 시스템 연구개발과제\n(폴리스랩 3.0 본사업)",
+        ],
+      },
+      {
+        month: "09",
+        entries: [
+          "한국자동차연구원_Adaptive Autosar 어플리케이션 SILs 검증용 가상 신호 생성 SW 개발",
+        ],
+      },
+    ],
+  },
+  {
     year: 2024,
     items: [
       {
@@ -17,14 +46,16 @@ export const historyTimeline: HistoryTimelineYear[] = [
         entries: [
           "자율주행 관제시스템 개발 사업 수주",
           "전북대학교 RIS 미래수송기기 사업단- 인포뱅크(주) MoU 체결\n(AAM 안전비행 3차원 공간관리 시스템 개발 협업)",
-          "AAM 안전비행 3차원 공간관리 시스템 개발 과제 수주",
+          "전북테크노파크_AAM 안전비행을 위한 3차원 공간관리 시스템 개발 과제",
           "3차원 공간 데이터 모델링 및 렌더링",
           "3차원 공간 데이터 구축 품질 검증",
+          "ISO 37001 규범준수경영시스템 인증 획득",
+          "ISO 14001 환경경영시스템 인증 획득",
         ],
       },
       {
         month: "02",
-        entries: ["당진시 스마트 빌리지(스마트 경로당) 사업 수주"],
+        entries: ["당진시_스마트경로당 구축 사업"],
       },
       {
         month: "03",
@@ -42,6 +73,23 @@ export const historyTimeline: HistoryTimelineYear[] = [
           "모의 승객 데이터 취득 시험 지원 용역",
           "데이터 구축 설계 사업 수주",
         ],
+      },
+      {
+        month: "05",
+        entries: [
+          "전북테크노파크_농업환경 인지 및 비정형 공간정보 3D Map 기반\n 협업 자율작업제어 시스템 개발 과제",
+        ],
+      },
+      {
+        month: "07",
+        entries: [
+          "자율주행자동차 자동하역용 V2X 및 암호화·정보보안 설계 및 구성 사업",
+          "이동형 AI카메라 반도체의 HW 커스텀 및 Edge Device SW 개발 사업",
+        ],
+      },
+      {
+        month: "10",
+        entries: ["노지 스마트팜을 위한 정밀 공간정보 구축 사업"],
       },
     ],
   },
