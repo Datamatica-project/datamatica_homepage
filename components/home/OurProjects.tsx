@@ -7,14 +7,16 @@ import SectionTitle from "../common/SectionTitle";
 import { ChevronLeft, ChevronRight } from "../Icons";
 import { skillData } from "@/data";
 
-// 각 사업 분야의 가장 최근 프로젝트(첫 번째) 1개씩 추출 (프로젝트 없는 사업 제외)
+// 전체 사업 분야의 프로젝트를 모아 수행 날짜 최신순으로 정렬 (사업 분야 중복 허용)
 const PROJECTS = skillData
-  .filter((skill) => skill.projects.length > 0)
-  .map((skill) => ({
-    tab: skill.title,
-    skillId: skill.id,
-    project: skill.projects[0],
-  }));
+  .flatMap((skill) =>
+    skill.projects.map((project) => ({
+      tab: skill.title,
+      skillId: skill.id,
+      project,
+    }))
+  )
+  .sort((a, b) => (a.project.date < b.project.date ? 1 : -1));
 
 const VISIBLE_COUNT_MOBILE = 2;
 const VISIBLE_COUNT_DESKTOP = 3;
@@ -85,17 +87,18 @@ export default function OurProjects() {
           >
             {PROJECTS.map((p, i) => (
               <button
-                key={p.skillId}
+                key={p.project.id}
                 onClick={() => { setActiveIdx(i); setHovered(false); }}
                 className={
-                  "pb-[14px] text-[13px] md:text-[18px] transition-colors relative whitespace-nowrap " +
+                  "pb-[14px] px-[4px] text-[13px] md:text-[18px] transition-colors relative truncate " +
                   (activeIdx === i
                     ? "text-normal-text font-bold cursor-default"
                     : "text-description font-medium hover:text-normal-text cursor-pointer")
                 }
                 style={{ width: `${100 / PROJECTS.length}%` }}
+                title={p.project.title}
               >
-                {p.tab}
+                {p.project.title}
                 {activeIdx === i && (
                   <span className="absolute bottom-0 left-0 w-full h-[2px] bg-normal-text rounded-full origin-center animate-[expandX_0.3s_ease-out_forwards]" />
                 )}

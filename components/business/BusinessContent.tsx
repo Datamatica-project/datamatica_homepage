@@ -1,13 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { skillData } from "@/data";
-import { ArrowRightCircle } from "@/components/Icons";
+import {
+  ArrowRightCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "@/components/Icons";
 
 const FALLBACK_IMAGE = "/header/datamatica_logo.png";
+
+const VISIBLE_COUNT_MOBILE = 2;
+const VISIBLE_COUNT_DESKTOP = 4;
 
 function ProjectCard({
   title,
@@ -66,24 +73,90 @@ export default function BusinessContent() {
   const [activeId, setActiveId] = useState(initialId);
   const active = skillData.find((s) => s.id === activeId) ?? skillData[0];
 
+  const [tabOffset, setTabOffset] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(VISIBLE_COUNT_DESKTOP);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const handler = () =>
+      setVisibleCount(
+        mq.matches ? VISIBLE_COUNT_DESKTOP : VISIBLE_COUNT_MOBILE
+      );
+    handler();
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    setTabOffset((prev) =>
+      Math.min(prev, Math.max(0, skillData.length - visibleCount))
+    );
+  }, [visibleCount]);
+
+  const canScrollLeft = tabOffset > 0;
+  const canScrollRight = tabOffset + visibleCount < skillData.length;
+
+  const scrollTabs = (direction: "left" | "right") => {
+    // 1개는 겹쳐 보이게 두고 나머지(visibleCount - 1)개를 새로 노출
+    const step = Math.max(1, visibleCount - 1);
+    const max = Math.max(0, skillData.length - visibleCount);
+    setTabOffset((prev) =>
+      direction === "left"
+        ? Math.max(0, prev - step)
+        : Math.min(max, prev + step)
+    );
+  };
+
   return (
     <div className="max-w-[1000px] mx-auto px-[24px] pb-[80px] md:pb-[120px]">
       {/* 기술 카테고리 탭 */}
-      <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden border-b border-[#e0e0e0] dark:border-[#363638] mb-[48px] md:mb-[60px]">
-        {skillData.map((skill) => (
+      <div className="flex items-center gap-[4px] mb-[48px] md:mb-[60px]">
+        {canScrollLeft && (
           <button
-            key={skill.id}
-            onClick={() => setActiveId(skill.id)}
-            className={`shrink-0 px-[16px] py-[14px] text-[14px] md:text-[15px] font-medium transition-all whitespace-nowrap cursor-pointer
-              ${
-                activeId === skill.id
-                  ? "border-b-[3px] border-main text-normal-text font-semibold -mb-px"
-                  : "border-b-[3px] border-transparent text-description hover:text-normal-text"
-              }`}
+            onClick={() => scrollTabs("left")}
+            className="shrink-0 text-black dark:text-white cursor-pointer"
+            aria-label="이전 탭"
           >
-            {skill.title}
+            <ChevronLeft size={20} />
           </button>
-        ))}
+        )}
+
+        <div className="flex-1 overflow-hidden border-b border-[#e0e0e0] dark:border-[#363638] min-w-0">
+          <div
+            className="flex transition-transform duration-400 ease-out"
+            style={{
+              width: `${(skillData.length / visibleCount) * 100}%`,
+              transform: `translateX(-${(tabOffset / skillData.length) * 100}%)`,
+            }}
+          >
+            {skillData.map((skill) => (
+              <button
+                key={skill.id}
+                onClick={() => setActiveId(skill.id)}
+                className={`px-[16px] py-[14px] text-[14px] md:text-[15px] font-medium transition-all truncate text-center cursor-pointer
+                  ${
+                    activeId === skill.id
+                      ? "border-b-[3px] border-main text-normal-text font-semibold -mb-px"
+                      : "border-b-[3px] border-transparent text-description hover:text-normal-text"
+                  }`}
+                style={{ width: `${100 / skillData.length}%` }}
+                title={skill.title}
+              >
+                {skill.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {canScrollRight && (
+          <button
+            onClick={() => scrollTabs("right")}
+            className="shrink-0 text-black dark:text-white cursor-pointer"
+            aria-label="다음 탭"
+          >
+            <ChevronRight size={20} />
+          </button>
+        )}
       </div>
 
       {/* 기술 설명 영역 */}

@@ -3,6 +3,7 @@ export interface ProjectItem {
   title: string;
   description: string; // 카드용 짧은 설명
   overview: string; // 상세 페이지 개요
+  date: string; // 수행 시점, "YYYY-MM" 형식 (홈 Our Projects 최신순 정렬 기준)
   image: string; // 대표 이미지
   images: string[]; // 상세 갤러리 이미지
   technologies: string[];
@@ -23,6 +24,63 @@ export interface SkillDataItem {
 // 기술 데이터
 export const skillData: SkillDataItem[] = [
   {
+    id: "smart-port",
+    title: "스마트 항만 시스템",
+    titleEn: "Smart Port System",
+    description: "항만 운영 효율화를 위한<br /> 지능형 통합 관리 솔루션.",
+    overview:
+      "항만 내 차량·장비·작업자의 운영 데이터를 통합 관리하고, AI 기반 현장 시스템을 통해 작업 효율성과 안전성을 향상시키는 스마트 항만 솔루션을 구축합니다.",
+    imageSrc: "/business/smartPort/thumbnail_home.png",
+    imageSrcDetail: "/business/smartPort/thumbnail_business.png",
+    projects: [
+      {
+        id: "port-fms",
+        title: "항만 FMS 시스템",
+        description:
+          "항만 차량 및 장비의 운행·작업 정보를 통합 관리하는 FMS 플랫폼",
+        date: "2026-08",
+        overview:
+          "항만 내에서 운영되는 차량과 주요 장비의 위치, 운행 상태, 작업 정보를 실시간으로 수집하고 관리하는 FMS(Fleet Management System)입니다. 차량 및 장비의 운영 현황을 통합 모니터링하고 작업 이력과 상태 정보를 체계적으로 관리하여 항만 운영의 효율성과 관리 편의성을 향상시킵니다. 웹 기반 통합 관리 화면을 통해 주요 운영 정보를 시각화하고 현장 상황을 신속하게 파악할 수 있도록 지원합니다.",
+        image: "/business/project/smartPort/fms1.png",
+        images: [],
+        technologies: [
+          "FMS",
+          "Real-time Monitoring",
+          "GPS",
+          "Data Visualization",
+          "Dashboard",
+        ],
+        results: [
+          "항만 차량 및 장비 통합 운영 관리 시스템 구축",
+          "차량·장비 위치 및 운행 상태 모니터링 기능 개발",
+          "작업 현황 및 운영 데이터 시각화 대시보드 구축",
+        ],
+      },
+      {
+        id: "ai-glass",
+        title: "AI Glass 현장 지원 시스템",
+        description: "AI Glass 기반 항만 작업자용 실시간 현장 정보 지원 시스템",
+        date: "2026-08",
+        overview:
+          "항만 작업자가 착용하는 AI Glass와 연계하여 현장에서 필요한 작업 정보와 시스템 데이터를 실시간으로 제공하는 지능형 작업 지원 시스템입니다. 작업자는 별도의 단말기 조작 없이 현장에서 필요한 정보를 확인할 수 있으며, 중앙 시스템과 연계하여 작업 상태 및 관련 데이터를 효율적으로 공유할 수 있습니다. 이를 통해 작업자의 정보 접근성을 높이고 현장 업무의 효율성과 안전성을 향상시킵니다.",
+        image: "/business/project/smartPort/aiGlass1.png",
+        images: [],
+        technologies: [
+          "AI Glass",
+          "Wearable Device",
+          "Real-time Data",
+          "API Integration",
+          "Industrial UX",
+        ],
+        results: [
+          "AI Glass 연동 현장 작업 지원 시스템 개발",
+          "작업자용 실시간 정보 제공 인터페이스 구축",
+          "항만 운영 시스템과 현장 단말 간 데이터 연계 기능 구현",
+        ],
+      },
+    ],
+  },
+  {
     id: "ai-data",
     title: "인공지능 데이터 구축",
     titleEn: "AI Data Construction",
@@ -36,6 +94,7 @@ export const skillData: SkillDataItem[] = [
         id: "mmustai-auto-labeling",
         title: "MMustAI 오토 라벨링 플랫폼",
         description: "AI 기반 자동 객체 라벨링 및 합성 데이터 생성 플랫폼",
+        date: "2025-12",
         overview:
           "이미지 데이터를 업로드하면 AI 모델을 활용해 객체를 자동으로 탐지하고 라벨을 생성하는 오토 라벨링 플랫폼입니다. SAM 기반 세그멘테이션을 통해 객체 Cut-out을 생성하고, 다양한 배경과 데이터 증강을 결합하여 대량의 Synthetic 데이터셋을 자동 생성할 수 있습니다. 웹 기반 인터페이스를 통해 라벨 검수, 수정, 데이터셋 관리 및 AI 학습용 포맷(YOLO/COCO)으로 데이터 내보내기를 지원합니다.",
         image: "/business/project/AI_data/1.png",
@@ -76,6 +135,7 @@ export const skillData: SkillDataItem[] = [
         title: "자율 농작업 3D 경로 생성 지원 서비스",
         description:
           "농지 포인트클라우드 기반 정밀 지도 생성 및 농작업 경로 생성/검증 서비스",
+        date: "2025-10",
         overview:
           "드론·LiDAR 기반으로 수집한 농지 포인트클라우드 데이터를 처리하여 cm급 정밀도의 농업 HD Map을 구축하고, 농기계 자율 작업을 위한 경로 생성 및 검증 기능을 제공하는 서비스입니다. 포인트클라우드 전처리, 3D 타일 변환, 웹 기반 시각화 및 작업 경로 편집 기능을 통해 농작업 자동화를 지원합니다.",
         image: "/business/project/hdmap/1.png",
@@ -150,6 +210,7 @@ export const skillData: SkillDataItem[] = [
           "Adaptive AUTOSAR SIL 검증용 가상 신호 생성기 및 Android IVI 앱 개발",
         description:
           "가상 주행 신호 생성기와 Android IVI 앱을 연동한 E2E 자율주행 SIL 검증 솔루션",
+        date: "2025-09",
         overview:
           "한국자동차연구원(KATECH)의 Service Creator 환경과 연동하여 Adaptive AUTOSAR 기반 어플리케이션의 SIL(Software-in-the-Loop) 검증에 필요한 차량 신호를 생성합니다. TCP/IP 소켓 통신과 멀티스레딩 기술을 활용해 10ms 단위의 고빈도 데이터를 실시간 송수신하며, GUI에서 JSON 스키마를 동적으로 편집해 주행 시나리오를 즉시 시뮬레이션할 수 있습니다. 생성된 신호는 Android IVI 앱으로 수신되어 차량 상태 모니터링 및 운전 패턴 분석 환경을 구성합니다.",
         image: "/business/project/ecoDrive/2.png",
@@ -182,6 +243,7 @@ export const skillData: SkillDataItem[] = [
         id: "ivi-connected-app",
         title: "IVI-Connected-App",
         description: "체감형 영상 연동 차량 액추에이터 제어 애플리케이션",
+        date: "2025-08",
         overview:
           "차량 내 IVI 환경에서 사용자가 체감형 영상을 손쉽게 검색, 다운로드, 재생, 제어할 수 있는 안드로이드 기반 앱 및 영상 관리 클라우드 서버 구축.",
         image: "/business/project/IVIConnected/main.png",
