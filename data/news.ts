@@ -11,6 +11,17 @@ export interface NewsArticle {
 // 뉴스 기사 데이터
 export const newsArticles: NewsArticle[] = [
   {
+    id: "26082001",
+    date: "2026년 8월 19일",
+    year: 2026,
+    title:
+      "[더밸류뉴스] 버넥트·데이터메티카, 해양 특화 AI 스마트 글라스 개발…선박 안전·항만 운영 확대",
+    description:
+      "피지컬 AI 기업 버넥트와 AI 전문기업 데이터메티카가 해양수산부의 '해양수산 AI 응용제품 신속 상용화 지원사업'을 통해 선박 밀폐공간 작업자의 안전사고 예방과 현장 대응을 지원하는 AI·AR 스마트 글라스를 개발한다고 밝혔다. 버넥트는 자체 AI-AR 글라스 '비전엑스(VisionX)'를 해양 환경에 맞게 개발하고, 데이터메티카는 정비 매뉴얼·안전 규정 등을 음성으로 질의응답하는 RAG 기반 AI 서비스를 개발하며, 향후 선박·야드·배차 계획 등 스마트항만 운영 분야로도 적용을 확대할 계획이다.",
+    source: "https://www.thevaluenews.co.kr/news/view.php?idx=200865",
+    thumbnail: "/news/2026/26082001.avif",
+  },
+  {
     id: "26081102",
     date: "2026년 8월 11일",
     year: 2026,
