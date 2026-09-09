@@ -20,8 +20,8 @@ export default function Footer() {
                 style={{ filter: "brightness(0) invert(1)" }}
               />
               <p className="text-[13px] text-[#888888] leading-[1.8]">
-                본사 / 연구소 : 경기 성남시 분당구 판교로255번길 9-22 우림 WCITY
-                809-1호
+                본사 / 연구소 : 경기 성남시 분당구 판교로255번길 9-22 우림
+                W-CITY 809-1호
                 <br />
                 전북 지사 : 전북특별자치도 전주시 덕진구 반룡로 111, 509호
                 (한국전자기술연구원 전북지역본부)
