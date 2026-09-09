@@ -4,30 +4,50 @@ import Image from "next/image";
 export default function Footer() {
   return (
     <footer className="w-full bg-[#121212] text-white">
-      <div className="max-w-[1000px] mx-auto px-[24px] pt-[64px] pb-[40px]">
+      <div className="max-w-[1200px] mx-auto px-[24px] pt-[64px] pb-[40px]">
         {/* 상단: 회사명 + 정보 */}
-        <div className="flex flex-col md:flex-row md:justify-between gap-[40px]">
-          {/* 좌측: 브랜드 + 주소 */}
-          <div className="flex flex-col gap-[16px]">
-            <Image
-              src="/header/headerlogo.png"
-              alt="Datamatica"
-              width={120}
-              height={29}
-              className="object-contain"
-              style={{ filter: "brightness(0) invert(1)" }}
-            />
-            <p className="text-[14px] text-[#888888] leading-[1.8]">
-              809-1, Urim W City, 9-22, Pangyo-ro 255beon-gil,
-              <br />
-              Bundang-gu, Seongnam-si, Gyeonggi-do,
-              <br />
-              Republic of Korea
-            </p>
+        <div className="flex flex-col md:flex-row md:justify-between gap-[40px] md:gap-[24px]">
+          {/* 좌측: 브랜드 블록 (DataMatica + JBX) */}
+          <div className="flex flex-col md:flex-row gap-[32px] md:gap-[24px]">
+            {/* DataMatica */}
+            <div className="flex flex-col gap-[16px]">
+              <Image
+                src="/header/headerlogo.png"
+                alt="Datamatica"
+                width={152}
+                height={37}
+                className="object-contain"
+                style={{ filter: "brightness(0) invert(1)" }}
+              />
+              <p className="text-[13px] text-[#888888] leading-[1.8]">
+                본사 / 연구소 : 경기 성남시 분당구 판교로255번길 9-22 우림 WCITY
+                809-1호
+                <br />
+                전북 지사 : 전북특별자치도 전주시 덕진구 반룡로 111, 509호
+                (한국전자기술연구원 전북지역본부)
+              </p>
+            </div>
+
+            {/* 구분선 (가로 배치일 때만 표시) */}
+            <div className="hidden md:block w-px bg-[#323234]" />
+
+            {/* JBX */}
+            <div className="flex flex-col items-start gap-[16px]">
+              <Image
+                src="/header/jbx_white.png"
+                alt="JBX"
+                width={826}
+                height={443}
+                className="object-contain h-[36px] w-auto"
+              />
+              <p className="text-[13px] text-[#888888] leading-[1.8] ">
+                전북 자회사 : 전북특별자치도 전주시 완산구 전주객사5길 47
+              </p>
+            </div>
           </div>
 
           {/* 우측: 연락처 */}
-          <div className="flex flex-col gap-[10px] text-[14px] md:text-right">
+          <div className="flex flex-col gap-[10px] text-[14px] md:text-right md:self-center">
             <div className="flex md:justify-end gap-[8px]">
               <span className="text-[#555555]">Tel</span>
               <span className="text-[#cccccc]">(+82) 031-628-8360</span>
@@ -44,10 +64,6 @@ export default function Footer() {
               >
                 support@datamatica.kr
               </a>
-            </div>
-            <div className="flex md:justify-end gap-[8px]">
-              <span className="text-[#555555]">Hours</span>
-              <span className="text-[#cccccc]">Weekdays 9am – 6pm</span>
             </div>
           </div>
         </div>
