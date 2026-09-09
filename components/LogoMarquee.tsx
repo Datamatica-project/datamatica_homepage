@@ -7,7 +7,7 @@ import Image from "next/image";
 const ROW1_LOGO_FILES = [
   "BASICAI 로고.png",
   "Databaker 로고.png",
-  "KETI_CI국문---어두운배경1.png",
+  "KETI.png",
   "NIA 로고.png",
   "SD시스템 로고.png",
   "가천대 로고.png",
