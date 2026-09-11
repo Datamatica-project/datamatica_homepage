@@ -11,6 +11,17 @@ export interface NewsArticle {
 // 뉴스 기사 데이터
 export const newsArticles: NewsArticle[] = [
   {
+    id: "26091101",
+    date: "2026년 9월 11일",
+    year: 2026,
+    title:
+      "[이넷뉴스] 데이터메티카, 전북 사업장·자회사 설립 추진 이어 지역 사업 확대",
+    description:
+      "AI 전문기업 데이터메티카가 올해 초 전북특별자치도에 전북 사업장과 자회사 ㈜제이비엑스(JBX)를 설립하며 지역 사업 수행 기반을 마련했다. 그동안 수행해 온 AI 학습용 데이터 구축·라벨링, AI·소프트웨어 개발, 디지털트윈 사업 경험을 바탕으로 실제 산업 현장과 연계된 AI 분야로 사업 범위를 확대하고, 전북의 주력산업과 연결한 신규 사업을 단계적으로 구체화해 나갈 계획이다.",
+    source: "https://www.enetnews.co.kr/news/articleView.html?idxno=54302",
+    thumbnail: "/news/2026/26091101.avif",
+  },
+  {
     id: "26082001",
     date: "2026년 8월 19일",
     year: 2026,
